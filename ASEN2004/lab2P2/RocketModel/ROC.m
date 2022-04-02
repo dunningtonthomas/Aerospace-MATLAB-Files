@@ -62,9 +62,9 @@ else
     fGrav = [0; 0; -mf * g];
     fDrag = -((1/2)*rhoAirAmb*(norm(vVec))^2*Cd*areaBottle) * vHeading;
     fFric = [0;0;0];
-    vVec(1) = vVec(1) - wind(1);
-    vVec(2) = vVec(2) - wind(2);
-    vVec(3) = vVec(3) - wind(3);
+    vVec(1) = vVec(1);
+    vVec(2) = vVec(2);
+    vVec(3) = vVec(3);
 end
 
 %Calculating the net force by summing all forces

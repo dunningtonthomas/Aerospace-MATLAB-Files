@@ -28,7 +28,8 @@ mu = 0.3;
 constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
 
-wind = [0;1;0];
+wind = [(4 * rand(1)) - 2; (4 * rand(1)) - 2; 0];  %rand between -2 and 2
+
 finalMat = impactCalc(constVec, wind, Isp);
 
 % %Extracting integrated values from the ode45 output
@@ -62,16 +63,16 @@ for j = 1:500
     randRhoAirAmb = (2 * rand(1) - 1) * stdRhoAirAmb;
     randMu = (2 * rand(1) - 1) * stdMu;
     randIsp = (2 * rand(1) - 1) * stdIsp;
-    randWindx = (6 * rand(1)) - 3; %rand between -3 and 3
-    randWindy = (6 * rand(1)) - 3;
+    randWindx = (4 * rand(1)) - 2; %rand between -3 and 3
+    randWindy = (4 * rand(1)) - 2;
     
     %Constant Values
     m0 = 0.15 + (VolWaterInit * rhoWater) + randWater;
     mf = 0.15;
     Cd = 0.5 + randCd;
     rhoAirAmb = 0.961 + randRhoAirAmb;
-    startAngle = 45 + randAngle;
-    mu = 0.3 + randMu;
+    startAngle = 45;% + randAngle;
+    mu = 0.3;% + randMu;
 
     constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
     

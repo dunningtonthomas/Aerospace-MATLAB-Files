@@ -28,7 +28,8 @@ mu = 0.3;
 constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
 
-wind = [0;1;0];
+wind = [(4 * rand(1)) - 2; (4 * rand(1)) - 2; 0];  %rand between -2 and 2
+
 finalMat = impactCalc(constVec, wind, Isp);
 
 % %Extracting integrated values from the ode45 output
@@ -76,11 +77,12 @@ for j = 1:500
     constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
     
     %Wind and Isp
-    wind = [randWindx, randWindy, 0];
+    windMonte = [randWindx; randWindy; 0];
     IspMonte = Isp + randIsp;
     
+    
     %Performing integration
-    finalMat = impactCalc(constVec, wind, IspMonte);
+    finalMat = impactCalc(constVec, windMonte, IspMonte);
     monteCell{j} = finalMat;
     
     %Getting the impact location
