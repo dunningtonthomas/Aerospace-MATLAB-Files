@@ -52,6 +52,7 @@ stdWind = 2;
 
 %Performing 500 simulations
 monteCell = cell(1,500);
+impactMat = zeros(500, 2);
 
 for j = 1:500
     %Calculating random variation for the uncertain values
@@ -61,8 +62,8 @@ for j = 1:500
     randRhoAirAmb = (2 * rand(1) - 1) * stdRhoAirAmb;
     randMu = (2 * rand(1) - 1) * stdMu;
     randIsp = (2 * rand(1) - 1) * stdIsp;
-    randWindx = (6 * rand(1)) - 3; %rand between -3 and 3
-    randWindy = (6 * rand(1)) - 3;
+    randWindx = (4 * rand(1)) - 2; %rand between -3 and 3
+    randWindy = (4 * rand(1)) - 2;
     
     %Constant Values
     m0 = 0.15 + (VolWaterInit * rhoWater) + randWater;
@@ -80,10 +81,14 @@ for j = 1:500
     
     %Performing integration
     finalMat = impactCalc(constVec, wind, IspMonte);
-    monteCell{j} = finalMat;   
+    monteCell{j} = finalMat;
     
+    %Getting the impact location
+    impactMat(j,:) = finalMat(end, 1:2);    
 end
 
+% Impact Extrapolation
+writematrix(impactMat, 'impacts.csv');
 
 %% Plotting
 figure(1)
@@ -94,7 +99,7 @@ set(h,'defaultaxesfontname','cambria math');
 h.LineWidth = 2;
 grid on
 hold on
-for j = 1:100
+for j = 1:500
    mat = monteCell{j};
    xPos = mat(:,1);
    yPos = mat(:,2);

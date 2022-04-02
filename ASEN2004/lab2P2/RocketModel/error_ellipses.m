@@ -1,10 +1,9 @@
 clc; clear all; close all; 
  
 %% Replace this section of code with your real data
-% Simulate and plot 100 data points, (YOU SHOULD USE REAL DATA HERE!)
-N = 100; % Number of points to simulate
-x = randn(N,1)*30+0; % Randomly create some x data, meters
-y = x*(-0.5) + randn(N,1)*20; % Randomly create some y data, meters
+impacts = readmatrix('impacts.csv');
+x = impacts(:,1); % Randomly create some x data, meters
+y = impacts(:,2); % Randomly create some y data, meters
 %%
 
 figure; plot(x,y,'k.','markersize',6)
