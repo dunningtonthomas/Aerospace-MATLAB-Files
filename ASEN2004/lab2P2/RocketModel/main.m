@@ -1,0 +1,112 @@
+%% Header
+%Author: Thomas Dunnington
+%Student ID Number: 109802853
+%Date Created: 11/06/2021
+%Date Modified: 3/30/2022
+
+%% Main Code
+%Clean up
+close all; clear; clc;
+
+%Reading in data
+IspMat = readmatrix("Specific_Impulses.csv");
+Isp = mean(IspMat);
+
+%Provided constants and initial values
+rhoWater = 1000;                            %kg/m^3
+VolWaterInit = 0.001;                       %m^3
+
+g = 9.81;
+m0 = 0.15 + (VolWaterInit * rhoWater);
+mf = 0.15;
+Cd = 0.5;
+DBottle = 0.105;
+rhoAirAmb = 0.961;
+startAngle = 45;
+mu = 0.3;
+
+constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
+
+
+wind = [0;1;0];
+finalMat = impactCalc(constVec, wind, Isp);
+
+% %Extracting integrated values from the ode45 output
+xPosition = finalMat(:,1);
+yPosition = finalMat(:,2);
+zPosition = finalMat(:,3);
+xVelocity = finalMat(:,4);
+yVelocity = finalMat(:,5);
+zVelocity = finalMat(:,6);
+
+%Monte Carlo Simulation
+%Variables to vary
+
+stdAngle = 1;
+stdWater = 0.5 / 1000;
+stdCd = 0.05;
+stdRhoAirAmb = 0.05;
+stdMu = 0.05;
+stdIsp = 0.013;
+stdWind = 2;
+
+%Performing 500 simulations
+monteCell = cell(1,500);
+
+for j = 1:500
+    %Calculating random variation for the uncertain values
+    randAngle = (2 * rand(1) - 1) * stdAngle;
+    randWater = (2 * rand(1) - 1) * stdWater;
+    randCd = (2 * rand(1) - 1) * stdCd;
+    randRhoAirAmb = (2 * rand(1) - 1) * stdRhoAirAmb;
+    randMu = (2 * rand(1) - 1) * stdMu;
+    randIsp = (2 * rand(1) - 1) * stdIsp;
+    randWindx = (6 * rand(1)) - 3; %rand between -3 and 3
+    randWindy = (6 * rand(1)) - 3;
+    
+    %Constant Values
+    m0 = 0.15 + (VolWaterInit * rhoWater) + randWater;
+    mf = 0.15;
+    Cd = 0.5 + randCd;
+    rhoAirAmb = 0.961 + randRhoAirAmb;
+    startAngle = 45 + randAngle;
+    mu = 0.3 + randMu;
+
+    constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
+    
+    %Wind and Isp
+    wind = [randWindx, randWindy, 0];
+    IspMonte = Isp + randIsp;
+    
+    %Performing integration
+    finalMat = impactCalc(constVec, wind, IspMonte);
+    monteCell{j} = finalMat;   
+    
+end
+
+
+%% Plotting
+figure(1)
+set(0, 'defaultTextInterpreter', 'latex');
+set(gca, 'FontSize', 12);
+h = plot3(xPosition, yPosition, zPosition, 'r');
+set(h,'defaultaxesfontname','cambria math');
+h.LineWidth = 2;
+grid on
+hold on
+for j = 1:100
+   mat = monteCell{j};
+   xPos = mat(:,1);
+   yPos = mat(:,2);
+   zPos = mat(:,3);
+   plot3(xPos, yPos, zPos);
+end
+xlim([0 90]);
+ylim([-10 10]);
+zlim([0 30]);
+title('Trajectory');
+xlabel('x Position ($m$)');
+ylabel('y Position ($m$)');
+zlabel('z position ($m$)');
+
+

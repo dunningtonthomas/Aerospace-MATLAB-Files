@@ -11,7 +11,7 @@ figure; plot(x,y,'k.','markersize',6)
 axis equal; grid on; xlabel('x [m]'); ylabel('y [m]'); hold on;
  
 % Calculate covariance matrix
-P = cov(x,y)
+P = cov(x,y);
 mean_x = mean(x);
 mean_y = mean(y);
  
