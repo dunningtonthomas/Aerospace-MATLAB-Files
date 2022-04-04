@@ -63,7 +63,7 @@ if z < (0.25 + 0.5*cosd(45)) && t < 1
     fThrust = thrust * vHeading;
     
     %Adding friction on the rails
-    FricMag = mu * m * g * cosd(startAngle);
+    FricMag = mu * m * cosd(startAngle);
     fFric = -FricMag * vHeading;
     
 elseif z <= 0 %Condition for rocket hitting the ground
@@ -72,7 +72,10 @@ elseif z <= 0 %Condition for rocket hitting the ground
     fDrag = [0; 0; 0];
     fFric = [0; 0; 0];
     fThrust = [0; 0; 0];
-    vVec = [0;0;0];    
+    vVec(1) = 0;
+    vVec(2) = 0;
+    vVec(3) = 0;
+    
 else
     vHeading = (vVec - wind) ./ norm((vVec - wind));
     fGrav = [0; 0; -m * g];

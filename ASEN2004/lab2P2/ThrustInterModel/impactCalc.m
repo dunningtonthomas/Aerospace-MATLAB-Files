@@ -1,4 +1,4 @@
-function [finalMat] = impactCalc(const,wind,thrustFunc)
+function [finalMat] = impactCalc(const,wind,thrustFunc,timeThrust)
 %IMPACTCALC This function will call ode45 using the ROC function
 %handle and output the integrated values for the x y and z position and the
 %vx vy and vz velocities

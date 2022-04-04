@@ -70,15 +70,9 @@ timeVec = [0:1:length(summedT)-1]*tStep;
     timeVec = timeVec(indexCut);
     summedT = summedT(indexCut)*4.44822; % Convert the lbf to N
     
-    coef = polyfit(timeVec, summedT, 6); %Degree 7 provides the best fit
+    coef = polyfit(timeVec, summedT, 7); %Degree 7 provides the best fit
     func = @(x)(polyval(coef, x));
     fit = func(timeVec);
-    
-    figure();
-    plot(timeVec, fit);
-    hold on
-    grid on
-    plot(timeVec, summedT);
 
 %% Analysis
 
@@ -98,9 +92,9 @@ mu = 0.3;
 constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
 
-timeThrust = [timeVec(1); timeVec(end)];
-%wind = [(4 * rand(1)) - 2; (4 * rand(1)) - 2; 0];  %rand between -2 and 2
-wind = [0;0;0];
+thrustTime = (timeVec - timeVec(1))'; %Delta t
+thrustVec = summedT;
+wind = [(4 * rand(1)) - 2; (4 * rand(1)) - 2; 0];  %rand between -2 and 2
 
 %Getting initial parameters
 x0 = 0;
@@ -112,11 +106,11 @@ vz0 = 0;
 
 %Initial State Vector
 initStateODE = [x0;y0;z0;vx0;vy0;vz0;m0];
-tspan = [0 5];
+tspan = [0 10];
 
 %Creating the function handle, constVec is passed into the function, t and
 %state are variable to the handle
-ROCfunc = @(t,state) ROC(t,state,constVec,wind,func,timeThrust);
+ROCfunc = @(t,state) ROC(t,state,constVec,wind,thrustVec,thrustTime);
 
 %Creating ode options to have a more accurate calculation
 options = odeset('RelTol', 1e-8, 'AbsTol',1e-10);
@@ -135,9 +129,9 @@ zVelocity = finalMat(:,6);
 figure
 plot3(xPosition, yPosition, zPosition);
 grid on
-xlim([0 70]);
-ylim([-5 5]);
-zlim([0 20]);
+xlim([0 125]);
+ylim([-10 10]);
+zlim([0 60]);
 title('Trajectory');
 xlabel('x Position ($m$)');
 ylabel('y Position ($m$)');
