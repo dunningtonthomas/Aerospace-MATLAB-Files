@@ -141,7 +141,6 @@ stdWater = 0.5 / 1000;
 stdCd = 0.05;
 stdRhoAirAmb = 0.05;
 stdMu = 0.05;
-stdIsp = 0.013;
 stdWind = 2;
 
 %Performing 500 simulations
@@ -155,7 +154,6 @@ for j = 1:500
     randCd = (2 * rand(1) - 1) * stdCd;
     randRhoAirAmb = (2 * rand(1) - 1) * stdRhoAirAmb;
     randMu = (2 * rand(1) - 1) * stdMu;
-    randIsp = (2 * rand(1) - 1) * stdIsp;
     randWindx = (4 * rand(1)) - 2; %rand between -3 and 3
     randWindy = (4 * rand(1)) - 2;
     
@@ -171,7 +169,6 @@ for j = 1:500
     
     %Wind and Isp
     windMonte = [randWindx; randWindy; 0];
-    IspMonte = Isp + randIsp;
     
     
     %Performing integration
@@ -201,9 +198,9 @@ for j = 1:500
    zPos = mat(:,3);
    plot3(xPos, yPos, zPos);
 end
-xlim([0 90]);
+xlim([0 80]);
 ylim([-10 10]);
-zlim([0 30]);
+zlim([0 20]);
 title('Trajectory');
 xlabel('x Position ($m$)');
 ylabel('y Position ($m$)');

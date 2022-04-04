@@ -45,7 +45,7 @@ if z < (0.25 + 0.5*cosd(45)) && t < 1
     fDrag = -((1/2)*rhoAirAmb*(norm(vVec))^2*Cd*areaBottle) * vHeading;
     
     %Adding friction on the rails
-    FricMag = mu * mf * cosd(startAngle);
+    FricMag = mu * mf * g * cosd(startAngle);
     fFric = -FricMag * vHeading;
     
 elseif z <= 0 %Condition for rocket hitting the ground

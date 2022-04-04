@@ -29,6 +29,7 @@ constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
 
 wind = [(4 * rand(1)) - 2; (4 * rand(1)) - 2; 0];  %rand between -2 and 2
+wind = [0;0;0];
 
 finalMat = impactCalc(constVec, wind, Isp);
 
@@ -40,20 +41,19 @@ xVelocity = finalMat(:,4);
 yVelocity = finalMat(:,5);
 zVelocity = finalMat(:,6);
 
-%Monte Carlo Simulation
+%% Monte Carlo Simulation
 %Variables to vary
-
 stdAngle = 1;
 stdWater = 0.5 / 1000;
 stdCd = 0.05;
 stdRhoAirAmb = 0.05;
 stdMu = 0.05;
 stdIsp = 0.013;
-stdWind = 2;
 
 %Performing 500 simulations
 monteCell = cell(1,500);
 impactMat = zeros(500, 2);
+
 
 for j = 1:500
     %Calculating random variation for the uncertain values
@@ -101,6 +101,8 @@ set(h,'defaultaxesfontname','cambria math');
 h.LineWidth = 2;
 grid on
 hold on
+
+%% Monte Plot
 for j = 1:500
    mat = monteCell{j};
    xPos = mat(:,1);
