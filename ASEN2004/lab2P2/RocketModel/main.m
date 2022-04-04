@@ -48,7 +48,7 @@ stdWater = 0.5 / 1000;
 stdCd = 0.05;
 stdRhoAirAmb = 0.05;
 stdMu = 0.05;
-stdIsp = 0.013;
+stdIsp = 0.13;
 
 %Performing 500 simulations
 monteCell = cell(1,500);

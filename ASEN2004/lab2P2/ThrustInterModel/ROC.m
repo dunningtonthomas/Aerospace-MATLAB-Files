@@ -47,7 +47,7 @@ vHeading = vVec / norm(vVec);
 if(t > (timeThrust(2) - timeThrust(1))) %Base case, thrust is zero    
     thrust = 0;   
 else
-    thrust = thrustFunc(t + timeThrust(1)); %Thrust from polynomial fit    
+    thrust = thrustFunc(t + timeThrust(1));%Thrust from polynomial fit    
 end
 
 %Calculating mass flow rate
