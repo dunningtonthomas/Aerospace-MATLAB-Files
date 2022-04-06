@@ -2,12 +2,16 @@ clc; clear all; close all;
  
 %% Replace this section of code with your real data
 impacts = readmatrix('impacts.csv');
+baseImpact = readmatrix('baseImpact.csv');
+xBase = baseImpact(1);
+yBase = baseImpact(2);
 x = impacts(:,1); % Randomly create some x data, meters
 y = impacts(:,2); % Randomly create some y data, meters
 %%
 
 figure; plot(x,y,'k.','markersize',6)
 axis equal; grid on; xlabel('x [m]'); ylabel('y [m]'); hold on;
+plot(xBase,yBase,'-*');
  
 % Calculate covariance matrix
 P = cov(x,y);

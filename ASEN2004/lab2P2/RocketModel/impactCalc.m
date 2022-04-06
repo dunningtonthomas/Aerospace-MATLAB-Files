@@ -26,7 +26,7 @@ vz0 = delV * sind(startAngle);
 
 %Initial State Vector
 initStateODE = [x0;y0;z0;vx0;vy0;vz0];
-tspan = [0 10];
+tspan = [0 5];
 
 %Creating the function handle, constVec is passed into the function, t and
 %state are variable to the handle

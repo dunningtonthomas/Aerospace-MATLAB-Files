@@ -27,8 +27,7 @@ mu = 0.3;
 
 constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
-
-wind = (7 / 2.237) * [cosd(195);sind(195);0]; %Zero wind baseline, 7 mph SSW from 30 NE
+wind = 7[0;0;0]; %Zero wind baseline
 
 finalMat = impactCalc(constVec, wind, Isp);
 
@@ -37,9 +36,6 @@ xPosition = finalMat(:,1);
 yPosition = finalMat(:,2);
 zPosition = finalMat(:,3);
 
-baseLineImpact = [xPosition(end), yPosition(end)];
-writematrix(baseLineImpact, 'baseImpact.csv');
-
 %% Monte Carlo Simulation
 %Variables to vary
 stdAngle = 1;
@@ -47,7 +43,7 @@ stdWater = 0.5 / 1000;
 stdCd = 0.05;
 stdRhoAirAmb = 0.05;
 stdMu = 0.05;
-stdIsp = 0.1;
+stdIsp = 0.13;
 
 %Performing 500 simulations
 monteCell = cell(1,500);
