@@ -1,4 +1,4 @@
-function [dX] = ROC(t,state,const,wind,thrustFunc,timeThrust)
+function [dX] = ROC(t,state,const,wind,thrustVec,timeThrust)
 % Purpose: To calculate the rate of change of various parameters along 
 % the flight trajector of a water rocket
 %
@@ -44,10 +44,23 @@ vHeading = vVec / norm(vVec);
 
 
 %Calculating thrust
-if(t > (timeThrust(2) - timeThrust(1))) %Base case, thrust is zero    
-    thrust = 0;   
+if(t < timeThrust(end)) %Base case, thrust is zero    
+    [time, ind] = min((abs(t - timeThrust)));
+    if(t < time && (ind - 1) > 0) %Interpolate with previous
+        deltaTh = thrustVec(ind) - thrustVec(ind - 1);
+        deltaT = timeThrust(ind) - timeThrust(ind - 1);
+        slope = deltaTh / deltaT;
+        thrust = thrustVec(ind - 1) + slope*(t - timeThrust(ind - 1));
+    elseif(t > time && (ind + 1) < length(timeThrust)) %interpolate with next
+        deltaTh = thrustVec(ind + 1) - thrustVec(ind);
+        deltaT = timeThrust(ind + 1) - timeThrust(ind );
+        slope = deltaTh / deltaT;
+        thrust = thrustVec(ind) + slope*(t - timeThrust(ind));        
+    else %No interpolation
+        thrust = thrustVec(ind);
+    end
 else
-    thrust = thrustFunc(t + timeThrust(1));%Thrust from polynomial fit    
+    thrust = 0;   
 end
 
 %Calculating mass flow rate

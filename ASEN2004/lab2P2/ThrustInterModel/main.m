@@ -1,20 +1,15 @@
-%% Header
-%Author: Thomas Dunnington
-%Student ID Number: 109802853
-%Date Created: 11/06/2021
-%Date Modified: 3/30/2022
-
-%% Main Code
+%% Thrust Interpolation Model
 %Clean up
 close all; clear; clc;
 
 %% Reading in data
 thrustMat = readmatrix('trial5');
 thrustMat = thrustMat(4:end, :);
-
-                
+              
 
 %% Creating thrust function
+%Code for truncation provided by static test stand data
+%Credit for this section to Nolan Stevenson
 
 freq = 1.652*1000; % fixed
 tStep = 1/freq;
@@ -70,36 +65,28 @@ timeVec = [0:1:length(summedT)-1]*tStep;
     timeVec = timeVec(indexCut);
     summedT = summedT(indexCut)*4.44822; % Convert the lbf to N
     
-    coef = polyfit(timeVec, summedT, 6); %Degree 7 provides the best fit
-    func = @(x)(polyval(coef, x));
-    fit = func(timeVec);
     
     figure();
-    plot(timeVec, fit);
-    hold on
-    grid on
     plot(timeVec, summedT);
+    grid on;
 
-%% Analysis
+%% Integration
 
 %Provided constants and initial values
 rhoWater = 1000;                            %kg/m^3
 VolWaterInit = 0.001;                       %m^3
 
 g = 9.81;
-m0 = 0.15 + (VolWaterInit * rhoWater);
-mf = 0.15;
-Cd = 0.5;
+m0 = 0.125 + 1;
+mf = 0.125;
+Cd = 0.2;
 DBottle = 0.105;
 rhoAirAmb = 0.961;
 startAngle = 45;
-mu = 0.3;
+mu = 0.2;
 
 constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
-
-timeThrust = [timeVec(1); timeVec(end)];
-%wind = [(4 * rand(1)) - 2; (4 * rand(1)) - 2; 0];  %rand between -2 and 2
 wind = [0;0;0];
 
 %Getting initial parameters
@@ -114,9 +101,11 @@ vz0 = 0;
 initStateODE = [x0;y0;z0;vx0;vy0;vz0;m0];
 tspan = [0 5];
 
-%Creating the function handle, constVec is passed into the function, t and
+%Creating the time vector starting at zero
+timeThrust = timeVec - timeVec(1);
+
 %state are variable to the handle
-ROCfunc = @(t,state) ROC(t,state,constVec,wind,func,timeThrust);
+ROCfunc = @(t,state) ROC(t,state,constVec,wind,summedT,timeThrust);
 
 %Creating ode options to have a more accurate calculation
 options = odeset('RelTol', 1e-8, 'AbsTol',1e-10);
@@ -128,20 +117,6 @@ options = odeset('RelTol', 1e-8, 'AbsTol',1e-10);
 xPosition = finalMat(:,1);
 yPosition = finalMat(:,2);
 zPosition = finalMat(:,3);
-xVelocity = finalMat(:,4);
-yVelocity = finalMat(:,5);
-zVelocity = finalMat(:,6);
-
-figure
-plot3(xPosition, yPosition, zPosition);
-grid on
-xlim([0 70]);
-ylim([-5 5]);
-zlim([0 20]);
-title('Trajectory');
-xlabel('x Position ($m$)');
-ylabel('y Position ($m$)');
-zlabel('z position ($m$)');
 
 %% Monte Carlo Simulation
 %Variables to vary
@@ -157,7 +132,7 @@ stdWind = 2;
 monteCell = cell(1,500);
 impactMat = zeros(500, 2);
 
-for j = 1:500
+for j = 1:2
     %Calculating random variation for the uncertain values
     randAngle = (2 * rand(1) - 1) * stdAngle;
     randWater = (2 * rand(1) - 1) * stdWater;
@@ -168,21 +143,20 @@ for j = 1:500
     randWindy = (4 * rand(1)) - 2;
     
     %Constant Values
-    m0 = 0.15 + (VolWaterInit * rhoWater) + randWater;
-    mf = 0.15;
-    Cd = 0.5 + randCd;
+    m0 = 0.125 + 1 + randWater;
+    mf = 0.125;
+    Cd = 0.2 + randCd;
     rhoAirAmb = 0.961 + randRhoAirAmb;
     startAngle = 45 + randAngle;
-    mu = 0.3 + randMu;
+    mu = 0.2 + randMu;
 
     constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
     
     %Wind and Isp
     windMonte = [randWindx; randWindy; 0];
     
-    
     %Performing integration
-    finalMat = impactCalc(constVec, windMonte, IspMonte);
+    finalMat = impactCalc(constVec, windMonte, summedT, timeThrust);
     monteCell{j} = finalMat;
     
     %Getting the impact location
@@ -194,6 +168,17 @@ writematrix(impactMat, 'impacts.csv');
 
 %% Plotting
 figure(1)
+plot3(xPosition, yPosition, zPosition);
+grid on
+xlim([0 70]);
+ylim([-5 5]);
+zlim([0 20]);
+title('Trajectory');
+xlabel('x Position ($m$)');
+ylabel('y Position ($m$)');
+zlabel('z position ($m$)');
+
+figure(2)
 set(0, 'defaultTextInterpreter', 'latex');
 set(gca, 'FontSize', 12);
 h = plot3(xPosition, yPosition, zPosition, 'r');
@@ -201,7 +186,7 @@ set(h,'defaultaxesfontname','cambria math');
 h.LineWidth = 2;
 grid on
 hold on
-for j = 1:500
+for j = 1:2
    mat = monteCell{j};
    xPos = mat(:,1);
    yPos = mat(:,2);

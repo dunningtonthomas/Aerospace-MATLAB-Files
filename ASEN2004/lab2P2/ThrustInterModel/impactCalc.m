@@ -1,4 +1,4 @@
-function [finalMat] = impactCalc(const,wind,thrustFunc,timeThrust)
+function [finalMat] = impactCalc(const,wind,thrustVec,timeThrust)
 %IMPACTCALC This function will call ode45 using the ROC function
 %handle and output the integrated values for the x y and z position and the
 %vx vy and vz velocities
@@ -13,24 +13,21 @@ rhoAirAmb = const(6);
 startAngle = const(7);
 mu = const(8);
 
-%Calculating change in velocity
-delV = Isp * g * log(m0 / mf);
-
 %Getting initial parameters
 x0 = 0;
 y0 = 0;
 z0 = 0.25;
-vx0 = delV * cosd(startAngle);
+vx0 = 0;
 vy0 = 0;
-vz0 = delV * sind(startAngle);
+vz0 = 0;
 
 %Initial State Vector
-initStateODE = [x0;y0;z0;vx0;vy0;vz0];
-tspan = [0 10];
+initStateODE = [x0;y0;z0;vx0;vy0;vz0;m0];
+tspan = [0 5];
 
 %Creating the function handle, constVec is passed into the function, t and
 %state are variable to the handle
-ROCfunc = @(t,state) ROC(t,state,const,wind);
+ROCfunc = @(t,state) ROC(t,state,const,wind,thrustVec,timeThrust);
 
 %Creating ode options to have a more accurate calculation
 options = odeset('RelTol', 1e-8, 'AbsTol',1e-10);
