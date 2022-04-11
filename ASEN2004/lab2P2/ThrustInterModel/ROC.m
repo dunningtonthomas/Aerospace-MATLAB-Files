@@ -89,7 +89,8 @@ elseif z <= 0 %Condition for rocket hitting the ground
     fThrust = [0; 0; 0];
     vVec = [0;0;0];    
 else
-    vHeading = (vVec - wind) ./ norm((vVec - wind));
+    vRel = [vx - wind(1); vy - wind(2); vz - wind(3)];
+    vHeading = vRel / norm(vRel);
     fGrav = [0; 0; -m * g];
     fDrag = -((1/2)*rhoAirAmb*(norm(vVec))^2*Cd*areaBottle) * vHeading;
     fThrust = thrust * vHeading;

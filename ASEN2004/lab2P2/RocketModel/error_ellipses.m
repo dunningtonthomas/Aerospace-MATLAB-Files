@@ -11,7 +11,7 @@ y = impacts(:,2); % Randomly create some y data, meters
 
 figure; plot(x,y,'k.','markersize',6)
 axis equal; grid on; xlabel('x [m]'); ylabel('y [m]'); hold on;
-plot(xBase,yBase,'-*', 'LineStyle', 'none');
+plot(xBase,yBase,'-h', 'LineStyle', 'none', 'color', 'r', 'MarkerSize',12, 'MarkerFaceColor', 'r');
  
 % Calculate covariance matrix
 P = cov(x,y);

@@ -1,8 +1,8 @@
-%% Header
+%% Thomas Dunnington Rocket Equation Model
 %Author: Thomas Dunnington
 %Student ID Number: 109802853
 %Date Created: 11/06/2021
-%Date Modified: 3/30/2022
+%Date Modified: 4/11/2022
 
 %% Main Code
 %Clean up
@@ -23,15 +23,37 @@ Cd = 0.2;
 DBottle = 0.105;
 rhoAirAmb = 0.961;
 startAngle = 45;
-mu = 0.4;
+mu = 0.5;
 
 constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
 
-wind = (7 / 2.237) * [cosd(195);sind(195);0]; %Zero wind baseline, 7 mph SSW from 30 NE
+wind = (10 / 2.237) * [cosd(270);sind(270);0]; %Zero wind baseline, 7 mph SSW from 30 NE
 
-%Initial Parameters for LA rocket
-finalMat = impactCalc(constVec, wind, Isp);
+%Calculating change in velocity
+delV = Isp * g * log(m0 / mf);
+
+%Getting initial parameters
+x0 = 0;
+y0 = 0;
+z0 = 0.25;
+vx0 = delV * cosd(startAngle);
+vy0 = 0;
+vz0 = delV * sind(startAngle);
+
+%Initial State Vector
+initStateODE = [x0;y0;z0;vx0;vy0;vz0];
+tspan = [0 5];
+
+%Creating the function handle, constVec is passed into the function, t and
+%state are variable to the handle
+ROCfunc = @(t,state) ROC(t,state,constVec,wind);
+
+%Creating ode options to have a more accurate calculation
+options = odeset('RelTol', 1e-8, 'AbsTol',1e-10);
+
+%Calling ode45
+[timeVec, finalMat] = ode45(ROCfunc, tspan, initStateODE, options);
 
 % %Extracting integrated values from the ode45 output
 xPosition = finalMat(:,1);
@@ -49,6 +71,7 @@ stdCd = 0.05;
 stdRhoAirAmb = 0.05;
 stdMu = 0.05;
 stdIsp = 0.1;
+stdWind = (5 / 2.237);
 
 %Performing 500 simulations
 monteCell = cell(1,500);
@@ -62,8 +85,8 @@ for j = 1:500
     randRhoAirAmb = (2 * rand(1) - 1) * stdRhoAirAmb;
     randMu = (2 * rand(1) - 1) * stdMu;
     randIsp = (2 * rand(1) - 1) * stdIsp;
-    randWindx = (4 * rand(1)) - 2; %rand between -3 and 3
-    randWindy = (4 * rand(1)) - 2;
+    randWindx = (2 * rand(1) - 1) * stdWind;
+    randWindy = (2 * rand(1) - 1) * stdWind;
     
     %Constant Values
     m0 = 0.125 + 1 + randWater;
@@ -71,7 +94,7 @@ for j = 1:500
     Cd = 0.2 + randCd;
     rhoAirAmb = 0.961 + randRhoAirAmb;
     startAngle = 45 + randAngle;
-    mu = 0.4 + randMu;
+    mu = 0.5 + randMu;
 
     constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
     
@@ -80,7 +103,30 @@ for j = 1:500
     IspMonte = Isp + randIsp;    
     
     %Performing integration
-    finalMat = impactCalc(constVec, windMonte, IspMonte);
+    %Calculating change in velocity
+    delV = IspMonte * g * log(m0 / mf);
+
+    %Getting initial parameters
+    x0 = 0;
+    y0 = 0;
+    z0 = 0.25;
+    vx0 = delV * cosd(startAngle);
+    vy0 = 0;
+    vz0 = delV * sind(startAngle);
+
+    %Initial State Vector
+    initStateODE = [x0;y0;z0;vx0;vy0;vz0];
+    tspan = [0 5];
+
+    %Creating the function handle, constVec is passed into the function, t and
+    %state are variable to the handle
+    ROCfunc = @(t,state) ROC(t,state,constVec,windMonte);
+
+    %Creating ode options to have a more accurate calculation
+    options = odeset('RelTol', 1e-8, 'AbsTol',1e-10);
+
+    %Calling ode45
+    [timeVec, finalMat] = ode45(ROCfunc, tspan, initStateODE, options);
     monteCell{j} = finalMat;
     
     %Getting the impact location
@@ -99,9 +145,26 @@ set(h,'defaultaxesfontname','cambria math');
 h.LineWidth = 2;
 grid on
 hold on
+xlim([0 90]);
+ylim([-7 1]);
+zlim([0 35]);
+axis equal;
+title('Trajectory');
+xlabel('x Position ($m$)');
+ylabel('y Position ($m$)');
+zlabel('z position ($m$)');
 
 %% Monte Plot
-for j = 1:500
+figure(2)
+mat = monteCell{2};
+xPos = mat(:,1);
+yPos = mat(:,2);
+zPos = mat(:,3);
+plot3(xPos, yPos, zPos);
+grid on
+hold on
+
+for j = 2:500
    mat = monteCell{j};
    xPos = mat(:,1);
    yPos = mat(:,2);

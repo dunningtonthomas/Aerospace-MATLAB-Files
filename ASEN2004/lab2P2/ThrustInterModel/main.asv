@@ -85,6 +85,7 @@ constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
 wind = (10 / 2.237) * [cosd(270);sind(270);0]; %Zero wind baseline, 7 mph SSW from 30 NE
 %wind = [0;0;0];
+wind = [0;-1;0];
 
 %Getting initial parameters
 x0 = 0;

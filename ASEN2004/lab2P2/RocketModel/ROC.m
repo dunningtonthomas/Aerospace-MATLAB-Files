@@ -46,7 +46,7 @@ if z < (0.25 + 0.5*cosd(45)) && t < 1
     
     %Adding friction on the rails
     FricMag = mu * mf * g * cosd(startAngle);
-    fFric = -FricMag * vHeading;
+    fFric = -1 * abs(FricMag * vHeading);
     
 elseif z <= 0 %Condition for rocket hitting the ground
     %All rates of change go to zero
