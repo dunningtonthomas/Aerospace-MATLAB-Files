@@ -2,12 +2,16 @@ clc; clear all; close all;
  
 %% Replace this section of code with your real data
 impacts = readmatrix('impacts.csv');
+baseImpact = readmatrix('baseImpact.csv');
+xBase = baseImpact(1);
+yBase = baseImpact(2);
 x = impacts(:,1); % Randomly create some x data, meters
 y = impacts(:,2); % Randomly create some y data, meters
 %%
 
 figure; plot(x,y,'k.','markersize',6)
 axis equal; grid on; xlabel('x [m]'); ylabel('y [m]'); hold on;
+plot(xBase,yBase,'-*', 'LineStyle', 'none');
  
 % Calculate covariance matrix
 P = cov(x,y);
@@ -27,3 +31,6 @@ y_vect = xy_vect(:,2);
 plot(1*x_vect+mean_x, 1*y_vect+mean_y, 'b')
 plot(2*x_vect+mean_x, 2*y_vect+mean_y, 'g')
 plot(3*x_vect+mean_x, 3*y_vect+mean_y, 'r')
+
+title('Monte Carlo Simulation');
+legend('Impact Points', 'Predicted Impact', '1 $\sigma$', '2 $\sigma$', '3 $\sigma$', 'Interpreter','latex');

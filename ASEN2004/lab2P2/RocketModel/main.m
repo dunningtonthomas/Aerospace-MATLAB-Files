@@ -23,13 +23,14 @@ Cd = 0.2;
 DBottle = 0.105;
 rhoAirAmb = 0.961;
 startAngle = 45;
-mu = 0.3;
+mu = 0.4;
 
 constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
 
 wind = (7 / 2.237) * [cosd(195);sind(195);0]; %Zero wind baseline, 7 mph SSW from 30 NE
 
+%Initial Parameters for LA rocket
 finalMat = impactCalc(constVec, wind, Isp);
 
 % %Extracting integrated values from the ode45 output
@@ -61,8 +62,8 @@ for j = 1:500
     randRhoAirAmb = (2 * rand(1) - 1) * stdRhoAirAmb;
     randMu = (2 * rand(1) - 1) * stdMu;
     randIsp = (2 * rand(1) - 1) * stdIsp;
-    randWindx = (6 * rand(1)) - 3; %rand between -3 and 3
-    randWindy = (6 * rand(1)) - 3;
+    randWindx = (4 * rand(1)) - 2; %rand between -3 and 3
+    randWindy = (4 * rand(1)) - 2;
     
     %Constant Values
     m0 = 0.125 + 1 + randWater;
@@ -70,12 +71,12 @@ for j = 1:500
     Cd = 0.2 + randCd;
     rhoAirAmb = 0.961 + randRhoAirAmb;
     startAngle = 45 + randAngle;
-    mu = 0.2 + randMu;
+    mu = 0.4 + randMu;
 
     constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
     
     %Wind and Isp
-    windMonte = [randWindx; randWindy; 0];
+    windMonte = wind + [randWindx; randWindy; 0];
     IspMonte = Isp + randIsp;    
     
     %Performing integration

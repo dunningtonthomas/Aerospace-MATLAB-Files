@@ -4,8 +4,7 @@ close all; clear; clc;
 
 %% Reading in data
 thrustMat = readmatrix('trial5');
-thrustMat = thrustMat(4:end, :);
-              
+thrustMat = thrustMat(4:end, :);              
 
 %% Creating thrust function
 %Code for truncation provided by static test stand data
@@ -63,12 +62,9 @@ timeVec = [0:1:length(summedT)-1]*tStep;
     indexCut = timeVec > cutOff(1) & timeVec < cutOff(2);
     
     timeVec = timeVec(indexCut);
-    summedT = summedT(indexCut)*4.44822; % Convert the lbf to N
+    thrustVec = summedT(indexCut)*4.44822; % Convert the lbf to N
     
-    
-    figure();
-    plot(timeVec, summedT);
-    grid on;
+    timeVec = timeVec - timeVec(1); %starting at the beginning t=0
 
 %% Integration
 
@@ -83,11 +79,11 @@ Cd = 0.2;
 DBottle = 0.105;
 rhoAirAmb = 0.961;
 startAngle = 45;
-mu = 0.2;
+mu = 0.4;
 
 constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
 
-wind = [0;0;0];
+wind = (7 / 2.237) * [cosd(195);sind(195);0]; %Zero wind baseline, 7 mph SSW from 30 NE
 
 %Getting initial parameters
 x0 = 0;
@@ -99,13 +95,11 @@ vz0 = 0;
 
 %Initial State Vector
 initStateODE = [x0;y0;z0;vx0;vy0;vz0;m0];
-tspan = [0 5];
+tspan = [0 6];
 
-%Creating the time vector starting at zero
-timeThrust = timeVec - timeVec(1);
 
 %state are variable to the handle
-ROCfunc = @(t,state) ROC(t,state,constVec,wind,summedT,timeThrust);
+ROCfunc = @(t,state) ROC(t,state,constVec,wind,thrustVec,timeVec);
 
 %Creating ode options to have a more accurate calculation
 options = odeset('RelTol', 1e-8, 'AbsTol',1e-10);
@@ -118,6 +112,13 @@ xPosition = finalMat(:,1);
 yPosition = finalMat(:,2);
 zPosition = finalMat(:,3);
 
+plot3(xPosition, yPosition, zPosition);
+xlim([0 80]);
+ylim([-10 10]);
+zlim([0 25]);
+
+baseLineImpact = [xPosition(end), yPosition(end)];
+writematrix(baseLineImpact, 'baseImpact.csv');
 %% Monte Carlo Simulation
 %Variables to vary
 
@@ -126,13 +127,12 @@ stdWater = 0.5 / 1000;
 stdCd = 0.05;
 stdRhoAirAmb = 0.05;
 stdMu = 0.05;
-stdWind = 2;
 
-%Performing 500 simulations
-monteCell = cell(1,500);
-impactMat = zeros(500, 2);
+%Performing 100 simulations
+monteCell = cell(1,100);
+impactMat = zeros(100, 2);
 
-for j = 1:2
+for j = 1:100
     %Calculating random variation for the uncertain values
     randAngle = (2 * rand(1) - 1) * stdAngle;
     randWater = (2 * rand(1) - 1) * stdWater;
@@ -148,15 +148,27 @@ for j = 1:2
     Cd = 0.2 + randCd;
     rhoAirAmb = 0.961 + randRhoAirAmb;
     startAngle = 45 + randAngle;
-    mu = 0.2 + randMu;
+    mu = 0.4 + randMu;
 
     constVec = [g;m0;mf;Cd;DBottle;rhoAirAmb;startAngle;mu];
     
     %Wind and Isp
-    windMonte = [randWindx; randWindy; 0];
+    windMonte = wind + [randWindx; randWindy; 0];   
     
     %Performing integration
-    finalMat = impactCalc(constVec, windMonte, summedT, timeThrust);
+    %Initial State Vector
+    initStateODE = [x0;y0;z0;vx0;vy0;vz0;m0];
+    tspan = [0 6];
+
+    %state are variable to the handle
+    ROCfunc = @(t,state) ROC(t,state,constVec,windMonte,thrustVec,timeVec);
+
+    %Creating ode options to have a more accurate calculation
+    options = odeset('RelTol', 1e-8, 'AbsTol',1e-10);
+
+    %Calling ode45
+    [finalTime, finalMat] = ode45(ROCfunc, tspan, initStateODE, options);
+    
     monteCell{j} = finalMat;
     
     %Getting the impact location
@@ -186,7 +198,7 @@ set(h,'defaultaxesfontname','cambria math');
 h.LineWidth = 2;
 grid on
 hold on
-for j = 1:2
+for j = 1:100
    mat = monteCell{j};
    xPos = mat(:,1);
    yPos = mat(:,2);

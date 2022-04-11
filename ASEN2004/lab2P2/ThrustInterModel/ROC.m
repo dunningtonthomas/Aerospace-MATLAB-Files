@@ -45,13 +45,15 @@ vHeading = vVec / norm(vVec);
 
 %Calculating thrust
 if(t < timeThrust(end)) %Base case, thrust is zero    
-    [time, ind] = min((abs(t - timeThrust)));
-    if(t < time && (ind - 1) > 0) %Interpolate with previous
+    [~, ind] = min((abs(t - timeThrust))); %Finding time that is closest to t for ode45
+    if(t <= timeThrust(1)) %First Case
+        thrust = thrustVec(1);        
+    elseif(t < timeThrust(ind) && (ind - 1) > 0) %Interpolate with previous
         deltaTh = thrustVec(ind) - thrustVec(ind - 1);
         deltaT = timeThrust(ind) - timeThrust(ind - 1);
         slope = deltaTh / deltaT;
         thrust = thrustVec(ind - 1) + slope*(t - timeThrust(ind - 1));
-    elseif(t > time && (ind + 1) < length(timeThrust)) %interpolate with next
+    elseif(t > timeThrust(ind) && (ind + 1) < length(timeThrust)) %interpolate with next
         deltaTh = thrustVec(ind + 1) - thrustVec(ind);
         deltaT = timeThrust(ind + 1) - timeThrust(ind );
         slope = deltaTh / deltaT;
