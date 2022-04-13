@@ -46,7 +46,7 @@ out2 = menu('Instructions: When you see the crosshair, you may click once to beg
 
 
 %% Import image
-C = imread(file);
+C = imread('image.jpg');
 C = flipud(C);
 
 %% Draw outline
