@@ -57,7 +57,8 @@ if(t < timeThrust(end)) %Base case, thrust is zero
         deltaTh = thrustVec(ind + 1) - thrustVec(ind);
         deltaT = timeThrust(ind + 1) - timeThrust(ind );
         slope = deltaTh / deltaT;
-        thrust = thrustVec(ind) + slope*(t - timeThrust(ind));        
+        thrust = thrustVec(ind) + slope*(t - timeThrust(ind));
+        check = thrustVec(ind + 1) - thrustVec(ind);
     else %No interpolation
         thrust = thrustVec(ind);
     end
