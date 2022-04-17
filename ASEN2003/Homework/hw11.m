@@ -7,6 +7,7 @@ x(t) = 1 - 1.061*exp(-t)*sin(2.828*t + 1.23);
 xss = 1;
 nineXss = 1 * 0.9;
 oneXss = 1 * 0.1;
+settleLim = 0.05 * xss;
 
 time = linspace(0,10,1000);
 xFunc = x(time);
@@ -19,6 +20,8 @@ plot(time, xFunc, 'lineWidth', 2);
 hold on
 xline(0.1602);
 xline(0.6170);
+yline(1 - settleLim);
+yline(1 + settleLim);
 xlabel('Time (s)');
 ylabel('Response (x(t))');
 title('Response Plot');
@@ -29,3 +32,19 @@ G = tf([9], [1 2 9]);
 figure(2)
 S = stepinfo(G, 'SettlingTimeThreshold', 0.05);
 step(G)
+
+
+
+%% Second Question
+
+syms x2(t);
+x2(t) = exp(-3.25*t)*(cos(5.044*t) + 0.644*sin(5.044*t));
+
+time2 = linspace(0,3,1000);
+
+figure(2)
+plot(time2, x2(time2), 'linewidth', 2);
+xlabel('Time (s)');
+ylabel('Response (x(t))');
+title('Response Plot');
+grid on
