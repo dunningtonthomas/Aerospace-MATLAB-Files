@@ -39,8 +39,17 @@ step(G)
 
 syms x2(t);
 x2(t) = exp(-3.25*t)*(cos(5.044*t) + 0.644*sin(5.044*t));
+G2 = tf([1 6.5], [1 6.5 36]);
+step2 = step(G2);
+figure(1)
+[y2,t2] = impulse(G2);
+info = lsiminfo(y2, t2);
 
-time2 = linspace(0,3,1000);
+figure(1)
+plot(t2, y2);
+grid on
+
+time2 = linspace(0,2,1000);
 
 figure(2)
 plot(time2, x2(time2), 'linewidth', 2);
@@ -48,3 +57,21 @@ xlabel('Time (s)');
 ylabel('Response (x(t))');
 title('Response Plot');
 grid on
+
+%% Third Question
+
+syms x3(t);
+x3(t) = 0.5 - 0.167*exp(-4*t) - 0.667*exp(-t);
+time3 = linspace(0,8,1000);
+
+figure(4)
+G3 = tf([2], [1 5 4]);
+step(G3)
+info3 = stepinfo(G3, 'SettlingTimeThreshold', 0.05);
+
+figure(3)
+plot(time3, x3(time3), 'linewidth', 2);
+grid on
+xlabel('Time (s)');
+ylabel('Response (x(t))');
+title('Response Plot');
