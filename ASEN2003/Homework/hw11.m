@@ -61,7 +61,7 @@ grid on
 %% Third Question
 
 syms x3(t);
-x3(t) = 0.5 - 0.167*exp(-4*t) - 0.667*exp(-t);
+x3(t) = 0.5 + 0.167*exp(-4*t) - 0.667*exp(-t);
 time3 = linspace(0,8,1000);
 
 figure(4)
