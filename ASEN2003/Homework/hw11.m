@@ -61,7 +61,7 @@ grid on
 %% Third Question
 
 syms x3(t);
-x3(t) = 0.5 - 0.167*exp(-4*t) - 0.667*exp(-t);
+x3(t) = 0.5 + 0.167*exp(-4*t) - 0.667*exp(-t);
 time3 = linspace(0,8,1000);
 
 figure(4)
@@ -75,3 +75,17 @@ grid on
 xlabel('Time (s)');
 ylabel('Response (x(t))');
 title('Response Plot');
+
+%% Fourth Plot
+syms x(t);
+x(t) = 4.41*exp(-1.57*t)*sin(2.721*t);
+
+time = linspace(0,10,1000);
+
+figure;
+plot(time, x(time));
+grid on;
+
+figure;
+G3 = tf([12], [1 pi pi^2]);
+impulse(G3);
