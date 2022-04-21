@@ -3,11 +3,11 @@ close all; clear; clc;
 
 %Creating equation
 syms x(t);
-x(t) = 1 - 1.061*exp(-t)*sin(2.828*t + 1.23);   %Input Value Here
+x(t) = 2 - 3.463*exp(-2*t)*sin(1.414*t + 0.615);   %Input Value Here
 time = linspace(0,10,1000);
 
 %Solving using MATLAB
-G = tf([9], [1 2 9]);                           %Input Value Here
+G = tf([12], [1 4 6]);                           %Input Value Here
 [xC,tC] = step(G);
 [xCi, tCi] = impulse(G);
 
@@ -24,6 +24,7 @@ grid on
 title('Time Evolution');
 xlabel('Time (s)');
 ylabel('x(t)');
+xlim([0 4]);
 
 %Using MATLAB
 figure(2);
