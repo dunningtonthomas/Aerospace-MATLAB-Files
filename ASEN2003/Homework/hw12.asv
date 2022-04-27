@@ -1,0 +1,43 @@
+close all; clear; clc
+
+%% Close loop transfer functions
+
+kp = 10;
+kd = 0.5;
+ki = 0;
+
+sys = tf([kp], [1 (kp+0.5)]);
+
+[x,t] = step(sys);
+S = stepinfo(sys, 'SettlingTimeThreshold', 0.05);
+
+ut = -kp*(x - 1);
+
+figure();
+plot(t, ut, 'linewidth', 2);
+grid on
+xlabel('Time (s)');
+ylabel('u(t) (rad/s)');
+title('Control Over Time');
+
+%% Next Question
+clear; close all; clc
+
+kp = 5;
+kd = 0.5;
+ki = 3;
+
+sys = tf([kp, ki], [1, (kp+0.5), ]);
+
+step(sys);
+S = stepinfo(sys, 'SettlingTimeThreshold', 0.05);
+
+
+% ut = -kp*(x - 1);
+% 
+% figure();
+% plot(t, ut, 'linewidth', 2);
+% grid on
+% xlabel('Time (s)');
+% ylabel('u(t) (rad/s)');
+% title('Control Over Time');
