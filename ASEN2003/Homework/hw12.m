@@ -23,20 +23,21 @@ ut = -kp*(x - 1);
 %% Next Question
 clear; close all; clc
 
-kp = 5;
+kp = 10;
 kd = 0.5;
-ki = 3;
+ki = 30;
 
 sys = tf([kp, ki], [1, (kp+0.5), ki]);
 
 [x,t] = step(sys);
 S = stepinfo(sys, 'SettlingTimeThreshold', 0.05);
 
-ut = zeros(1,length(t));
-delT = t(2) - t(1);
-for j = 1:length(t)
-    ut(j) = -kp*(x(j) - 1) - ki*trapz(x(1:j) - t(1:j), t(1:j), 1);
-end
+% ut = zeros(1,length(t));
+% delT = t(2) - t(1);
+% for j = 1:length(t)
+%     ut(j) = -kp*(x(j) - 1) - ki*trapz(x(1:j) - t(1:j), t(1:j), 1);
+% end
+ut = -kp * (x - 1) - ki*t.*(x - 1);
 
 
 figure();

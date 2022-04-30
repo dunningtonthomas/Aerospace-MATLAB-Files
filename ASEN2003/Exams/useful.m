@@ -7,9 +7,12 @@ x(t) = 2 - 3.463*exp(-2*t)*sin(1.414*t + 0.615);   %Input Value Here
 time = linspace(0,10,1000);
 
 %Solving using MATLAB
-G = tf([12], [1 4 6]);                           %Input Value Here
+G = tf([140], [1 3.5 144]);                           %Input Value Here
 [xC,tC] = step(G);
 [xCi, tCi] = impulse(G);
+t = linspace(0,10,1000);
+ut = sin(2*pi*t);
+[xCc, tCc] = lsim(G, ut, t);
 
 stepInf = stepinfo(G, 'SettlingTimeThreshold', 0.05);
 natInf = lsiminfo(tCi, xCi);
@@ -28,7 +31,7 @@ xlim([0 4]);
 
 %Using MATLAB
 figure(2);
-plot(tC, xC);                                   %Change depending on impulse (natural) or step
+plot(tCc, xCc);                                   %Change depending on impulse (natural) or step
 grid on
 title('MATLAB CALC');
 xlabel('Time (s)');
