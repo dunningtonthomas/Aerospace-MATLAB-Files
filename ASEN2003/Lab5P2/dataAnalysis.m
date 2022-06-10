@@ -1,6 +1,7 @@
 close all; clear; clc
 
 %% Reading in Data
+%changed file
 % 8 proportional 1.3 derivative
 exp1 = readmatrix('data2/8_1pt3');
 time1 = (exp1(:,1) / 1000);
