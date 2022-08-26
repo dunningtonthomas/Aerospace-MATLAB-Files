@@ -11,7 +11,7 @@ mass = 30 / 1000; %kg
 area = ((3 / 100) / 2)^2 * pi; %Cross sectional area in meters
 g = 9.81;
 wind = [0;0;0];
-rho = 1.125;
+rho = 1.225;
 
 initialState = [0; 0; 0; 0; 20; -20];
 
