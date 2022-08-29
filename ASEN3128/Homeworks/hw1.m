@@ -41,6 +41,10 @@ syms phi;
 syms theta;
 syms psi;
 
+phi = 90;
+theta = 90;
+psi = 90;
+
 test = phi + theta + psi;
 
 rotZaxis = [cos(psi), sin(psi), 0; -sin(psi), cos(psi), 0; 0, 0, 1];
