@@ -123,30 +123,35 @@ title('Problem 2c: Sensitivity to Wind');
 
 %% Mass Variation
 %Limiting from the Kinetic Energy
-altitude = 0;
-velocity_total = sqrt(2*20^2); %Calculating the total Velocity of the two components
+mass = 30 / 1000;
 % E = KE + PE
-totalEnergy = .5 * mass * velocity_total^2 + mass * g * altitude;
+totalEnergy = .5 * mass * (20^2 + 20^2);
 
-mass = .01:.001:1; % From .01 kg (10 g) to 1 kg (1000 g)
+massVec = linspace(0.01,0.25,1000); % From .01 kg (10 g) to 1 kg (1000 g)
 %Variable for the deflection in the x direction
-xDeflection = zeros(991, 1);
+xDeflection = zeros(1000, 1);
 
-for i = 1:1:991
+for i = 1:length(massVec)
     % Calculating new velocity based on energy
-    velocity = sqrt((2*totalEnergy)/mass(i));
-    velocity_component = sqrt(velocity^2/2); 
+    velocity = sqrt((2*totalEnergy)/massVec(i));
+    
+    %Getting the component with 45 degree angle
+    velocity_component = velocity * cos(pi / 4); 
     initialState = [0; 0; 0; 0; velocity_component; -velocity_component];
-    funcHandle = @(t, x)objectEOM(t, x, rho, Cd, area, mass(i), g, wind);
-    [time, final] = ode45(funcHandle, [0 10], initialState);  
+    funcHandle = @(t, x)objectEOM(t, x, rho, Cd, area, massVec(i), g, wind);
+    [time, final] = ode45(funcHandle, [0 10], initialState, opts);  
     xDeflection(i) = final(end, 2); %The landing spot in x coordinates
 end
+
+%Finding the optimal mass for the farthest distance
+[value, index] = max(xDeflection);
+optimalMass = massVec(index);
 
 %% Plotting Problem 2d
 figure();
 hold on
 grid on
-plot(mass, xDeflection', 'linewidth', 2);
+plot(massVec, xDeflection', 'linewidth', 2);
 xlabel('Mass of the Golf Ball $$(kg)$$')
 ylabel('Distance the Ball Travelled $$(m)$$')
 title('Problem 2d: Sensitivity of the Mass of the Golf Ball')
