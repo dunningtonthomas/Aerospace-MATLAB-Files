@@ -56,15 +56,15 @@ rot2 = rotXaxis * rotZaxis * rotYaxis;
 
 
 %% Problem 3
-phi = 9 * pi/180;
-theta = -2 * pi/180; 
-psi = 23 * pi/180;
+phi = -30 * pi/180;
+theta = 0 * pi/180; 
+psi = 123 * pi/180;
 
 RotEB = [cos(theta)*cos(psi), cos(theta)*sin(psi), -sin(theta); sin(phi)*sin(theta)*cos(psi) - cos(phi)*sin(psi), sin(phi)*sin(theta)*sin(psi) + cos(phi)*cos(psi), sin(phi)*cos(theta); cos(phi)*sin(theta)*cos(psi) + sin(phi)*sin(psi), cos(phi)*sin(theta)*sin(psi) - sin(phi)*cos(psi), cos(phi)*cos(theta)];
 trans = RotEB';
 inv = RotEB^-1;
 
-velBody = [18; 0; -5];
+velBody = [25; 0; -4];
 
 velInert = trans*velBody;
 
