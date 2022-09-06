@@ -5,9 +5,9 @@ clear; close all; clc;
 
 delta = linspace(0,1000,1000) / 1000; %displacement in meters
 
-smallFunc = 32*delta; %kN
+smallFunc = 40*delta; %kN
 
-bigFunc = 40*sqrt(delta.^2 + 8*delta + 25) - 200; %kN
+bigFunc = 50*sqrt(delta.^2 + 8*delta + 25) - 250; %kN
 
 %Calculating error
 error = (bigFunc - smallFunc) ./ bigFunc;  
