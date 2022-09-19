@@ -18,17 +18,17 @@ nu = 1e-3;
 drag = nu*25;
 
 %Phi angle 
-phi = atan2(drag , (mass * g));
+theta = atan2(drag , (mass * g));
 
 initPos = [0;0;0];
-initAngle = [phi;0;0];
-initVel = [0;5*cos(phi);-5*sin(phi)];
+initAngle = [0;-theta;pi/2];
+initVel = [5*cos(theta);0;-5*sin(theta)];
 initAngleVel = [0;0;0];
 
 x0_steady_hover = [initPos; initAngle; initVel; initAngleVel];
 
 %Control Thrust vector
-Zc_trim = drag / sin(phi);
+Zc_trim = drag / sin(theta);
 forces_steady_hover = -1*(Zc_trim / 4) * ones(4,1);
 
 %Control Moment Vector

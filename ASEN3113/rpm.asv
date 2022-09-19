@@ -83,9 +83,9 @@ totalVol_d12 = volCalcCAD(displacement_d12);
 %must have the same sampling rate, and they must include one cycle
 
 
-[finalPressure_d8, finalVolume_d8, finalTime_d8, finalSolidTime_d8] = syncData(switch_d8, pressure_d8, time_d8, rpm_d8, solidTime_d8, totalVol_d8);
-[finalPressure_d10, finalVolume_d10, finalTime_d10, finalSolidTime_d10] = syncData(switch_d10, pressure_d10, time_d10, rpm_d10, solidTime_d10, totalVol_d10);
-[finalPressure_d12, finalVolume_d12, finalTime_d12, finalSolidTime_d12] = syncData(switch_d12, pressure_d12, time_d12, rpm_d12, solidTime_d12, totalVol_d12);
+[finalPressure_d8, finalVolume_d8, finalTime_d8] = syncData(switch_d8, pressure_d8, time_d8, rpm_d8, solidTime_d8, totalVol_d8);
+[finalPressure_d10, finalVolume_d10, finalTime_d10] = syncData(switch_d10, pressure_d10, time_d10, rpm_d10, solidTime_d10, totalVol_d10);
+[finalPressure_d12, finalVolume_d12, finalTime_d12] = syncData(switch_d12, pressure_d12, time_d12, rpm_d12, solidTime_d12, totalVol_d12);
 
 
 %% Plotting
@@ -119,8 +119,8 @@ function [avgRpm_dx] = avgRpm(switch_dx, time_dx)
 
     timeDiff_dx = diff(timeSwitch_dx);
 
-    %Convert to rpm
-    timeDiff_dx = (1 ./ (timeDiff_dx ./ 60));
+    %Convert to minutes
+    timeDiff_dx = timeDiff_dx * 60;
 
     %RPM Average
     avgRpm_dx = mean(timeDiff_dx);
@@ -149,7 +149,7 @@ function [totalVol_dx] = volCalcCAD(displacement_dx)
     volChange_dx = volChange_dx / (1000^3);
 
     %Finding the total volume
-    totalVol_dx = volChange_dx;
+    totalVol_dx = volChange_dx + displacerPistonVol;
 
 end
 
@@ -186,7 +186,7 @@ function [finalPressure_dx, finalVolume_dx, finalTime_dx, finalSolidTime_dx] = s
     finalTime_dx = finalTime_dx - finalTime_dx(1);
 
     %Finding seconds per revolution so we can look at one cycle
-    secondsPerRev_dx = (1 / rpm_dx) * 60;
+    secondsPerRev_dx= (1 / rpm_dx) * 60;
 
     %Getting the pressure data for the first cycle
     oneCycleLog = finalTime_dx <= secondsPerRev_dx; %Logical vector of time less than one cycle
