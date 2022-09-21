@@ -141,3 +141,4 @@ function dvar_dt = AircraftEOM(t,var,g,m,nu,mu,Fc,Gc) %keep function name
         
         dvar_dt(10:12,1) = angularVelMoment + controlMoment + aeroMoment; 
 end
+

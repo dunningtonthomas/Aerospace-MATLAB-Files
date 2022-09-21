@@ -1,0 +1,137 @@
+function PlotAircraftSim(time, aircraft_state_array, control_input_array, fig, col) 
+%This function is used to plot the results of a simulation
+%Inputs: time, the 12 by n aircraft state array, the 4 by n array of
+%control inputs [Z,L,M,N], the 6 by 1 vector of figure numbers to plot
+%over, and the string col to indicate the plotting option for every plot
+
+%Plotting the inertial positions over time
+set(0, 'defaulttextinterpreter', 'latex');
+figure(fig(1));
+subplot(3,1,1)
+plot(time, aircraft_state_array(:,1), col);
+hold on;
+ylabel('X position (m)');
+title('Aircraft Positions');
+
+subplot(3,1,2)
+plot(time, aircraft_state_array(:,2), col);
+hold on;
+ylabel('Y position (m)');
+
+subplot(3,1,3)
+plot(time, aircraft_state_array(:,3), col);
+hold on;
+ylabel('Z position (m)');
+
+
+xlabel('Time (s)');
+
+
+%Plotting the euler angles over time
+figure(fig(2));
+subplot(3,1,1)
+plot(time, aircraft_state_array(:,4), col);
+hold on;
+ylabel('$$\phi$$ (rad)');
+title('Euler Angles');
+
+subplot(3,1,2)
+plot(time, aircraft_state_array(:,5), col);
+hold on;
+ylabel('$$\theta$$ (rad)');
+
+subplot(3,1,3)
+plot(time, aircraft_state_array(:,6), col);
+hold on;
+ylabel('$$\psi$$ (rad)');
+
+
+xlabel('Time (s)');
+
+
+
+%Plotting the inertial velocity in the body frame
+figure(fig(3));
+subplot(3,1,1)
+plot(time, aircraft_state_array(:,7), col);
+hold on;
+ylabel('$$u^{E}$$ (m/s)');
+title('Inertial Velocities');
+
+subplot(3,1,2)
+plot(time, aircraft_state_array(:,8), col);
+hold on;
+ylabel('$$v^{E}$$ (m/s)');
+
+subplot(3,1,3)
+plot(time, aircraft_state_array(:,9), col);
+hold on;
+ylabel('$$w^{E}$$ (m/s)');
+
+
+xlabel('Time (s)');
+
+
+%Plotting the angular velocity
+figure(fig(4));
+subplot(3,1,1)
+plot(time, aircraft_state_array(:,10), col);
+hold on;
+ylabel('$$p$$ (rad/s)');
+title('Angular Velocities');
+
+subplot(3,1,2)
+plot(time, aircraft_state_array(:,11), col);
+hold on;
+ylabel('$$q$$ (rad/s)');
+
+subplot(3,1,3)
+plot(time, aircraft_state_array(:,12), col);
+hold on;
+ylabel('$$r$$ (rad/s)');
+
+
+xlabel('Time (s)');
+
+
+
+%Plotting each control input variable
+figure(fig(5));
+subplot(4,1,1)
+plot(time, control_input_array(:,1), col);
+hold on;
+ylabel('$$Z_{c}$$ (N)');
+title('Control Inputs');
+
+subplot(4,1,2)
+plot(time, control_input_array(:,2), col);
+hold on;
+ylabel('$$L_{c}$$ (Nm)');
+
+subplot(4,1,3)
+plot(time, control_input_array(:,3), col);
+hold on;
+ylabel('$$M_{c}$$ (Nm)');
+
+subplot(4,1,4)
+plot(time, control_input_array(:,4), col);
+hold on;
+ylabel('$$N_{c}$$ (Nm)');
+
+xlabel('Time (s)');
+
+
+%Plotting the 3 Dimensional Path of the drone
+figure(fig(6));
+plot3(aircraft_state_array(:,1), aircraft_state_array(:,2), -1*aircraft_state_array(:,3), col);
+hold on
+
+title('Aircraft Path');
+xlabel('X Position (m)');
+ylabel('Y Position (m)');
+zlabel('Z Position (m)');
+
+
+
+end
+
