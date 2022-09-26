@@ -1,0 +1,14 @@
+function forces = motorForces(controlVec)
+%MOTORFORCES This function inverts the matrix relating the control moments
+%and forces to the 4 control forces on the motors. Use this function to
+%solve for the motor forces if you know the control force and moments (Zc
+%Lc Mc and Nc)
+%Inputs: Vector of the control force and moments in the form [Zc; Lc; Mc;
+%Nc], d the radial distance to the arms where the motors are, and km the a
+%Outputs: Vector of the motor forces in the form [f1; f2; f3; f4]
+
+
+outputArg1 = inputArg1;
+outputArg2 = inputArg2;
+end
+
