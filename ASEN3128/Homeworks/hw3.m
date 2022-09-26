@@ -62,5 +62,43 @@ forceTotal = newDrag + gravB + fCont;
 %Acceleration
 accelFinal = forceTotal / mass;
 
+%% Problem 4
+Ix = 5.8e-5;
+Iy = 7.2e-5;
+Iz = 1e-4;
+k1 = 0.01;
+k2 = 0.05;
+k3 = 0.01;
+k4 = 1;
+
+A = [0, 1, 0, 0; 0, 0, 9.81, 0; 0, 0, 0, 1; -k3*k4/Ix, -k3/Ix, -k2/Ix, -k1/Ix];
+
+eigenValues = eig(A);
+
+imaginaryPart = imag(eigenValues(3));
+realPart = real(eigenValues(3));
+
+naturalFreq = sqrt(realPart^2 + imaginaryPart^2);
+
+dampingRatio = realPart/ naturalFreq;
+
+
+k1 = 1.6e-4;
+k2 = 4e-4;
+k3 = 0;
+k4 = 0.01;
+
+Iy = 1e-4;
+
+
+Amatrix = [0,1,0,0;0,0,-9.81,0; 0,0,0,1; -k3*k4/Iy, -k3/Iy, -k2/Iy, -k1/Iy];
+
+eigenValues2 = eig(Amatrix);
+
+
+
+
+
+
 
 
