@@ -262,7 +262,7 @@ function [Win, Wout] = workCalc(volume, pressure)
     %integration all the way until the next maximum volume pressure
 
     %Add 400 pascals to the pressure for all pressures
-    pressure = pressure + 400;   
+    pressure = pressure   
 
 
     [minVol, indMin] = min(volume); %These are the limits of integration
