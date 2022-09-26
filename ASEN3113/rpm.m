@@ -98,6 +98,11 @@ totalVol_d12 = volCalcCAD(displacement_d12);
 [Win_d12, Wout_d12] = workCalc(finalVolume_d12, finalPressure_d12);
 
 
+%Calculating the heat in Qin
+% The heater is at 48 volts
+
+
+
 
 %% Plotting
 figure();
@@ -261,7 +266,8 @@ function [Win, Wout] = workCalc(volume, pressure)
     %with the minimum volume and this will be the first pressure point to begin
     %integration all the way until the next maximum volume pressure
 
-    %Add 400 pascals to the pressure for all pressures
+    %Add 400 pascals to the pressure for all pressures, will subtract this
+    %out later
     pressure = pressure + 400;   
 
 
@@ -284,7 +290,7 @@ function [Win, Wout] = workCalc(volume, pressure)
     %Calculate the works
 
     Wout = trapz(volumeExpand, pressureExpand);
-    Win = trapz(volumeContract, pressureContract);
+    Win = 1;
 
 
 end
