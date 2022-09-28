@@ -74,6 +74,7 @@ k4 = 1;
 A = [0, 1, 0, 0; 0, 0, 9.81, 0; 0, 0, 0, 1; -k3*k4/Ix, -k3/Ix, -k2/Ix, -k1/Ix];
 
 eigenValues = eig(A);
+damp(A)
 
 imaginaryPart = imag(eigenValues(3));
 realPart = real(eigenValues(3));
@@ -86,14 +87,16 @@ dampingRatio = realPart/ naturalFreq;
 k1 = 1.6e-4;
 k2 = 4e-4;
 k3 = 0;
-k4 = 0.01;
+k4 = 0;
 
 Iy = 1e-4;
 
 
 Amatrix = [0,1,0,0;0,0,-9.81,0; 0,0,0,1; -k3*k4/Iy, -k3/Iy, -k2/Iy, -k1/Iy];
+Amatrix2 = [0,1;-k2/Iy, -k1/Iy];
 
-eigenValues2 = eig(Amatrix);
+eigenValues2 = eig(Amatrix2);
+damp(Amatrix2)
 
 
 
