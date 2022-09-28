@@ -1,0 +1,30 @@
+function [Fc, Gc] = RotationDerivativeFeedback(var, m, g) 
+%ROTATIONDERIVATIVEFEEDBACK This function calculates the control vectors Fc
+%and Gc which are the control force vector and the control moment vector
+%Inputs: var = 12by1 state vector, m = mass, g = gravity
+%Outputs: Fc = control force vector, Gc = control moment vector
+%USE A GAIN of 0.004
+
+%Controller gain
+gain = 0.004;
+
+%Getting the angular rates
+p = var(10);
+q = var(11);
+r = var(12);
+
+Zc = m * g;
+
+Lc = -0.00 * p;
+
+Mc = -0.004 * q;
+
+Nc = -0.
+
+
+
+Fc = [0;0;-Zc];
+Gc = [Lc; Mc; Nc];
+
+end
+

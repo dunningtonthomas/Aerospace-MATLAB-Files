@@ -100,34 +100,9 @@ tspan = [0 10];
 
 %% Plotting
 
-%Roll variation
-controlTemp = zeros(length(timeRoll), 4);
-PlotAircraftSim(timeRoll, finalStateRoll, controlTemp, 1:6, '--');
+control = zeros(length(time),4); %[delZc; delLc; delMc; delNc]
+PlotAircraftSim(time, finalState, control, [1,2,3,4,5,6], '--');
 
-
-%Pitch variation
-controlTemp = zeros(length(timePitch), 4);
-PlotAircraftSim(timePitch, finalStatePitch, controlTemp, 7:12, '--');
-
-
-%Yaw variation
-controlTemp = zeros(length(timeYaw), 4);
-PlotAircraftSim(timeYaw, finalStateYaw, controlTemp, 13:18, '--');
-
-
-%Roll rate variation
-controlTemp = zeros(length(timeRollRate), 4);
-PlotAircraftSim(timeRollRate, finalStateRollRate, controlTemp, 19:24, '--');
-
-
-%Pitch rate variation
-controlTemp = zeros(length(timePitchRate), 4);
-PlotAircraftSim(timePitchRate, finalStatePitchRate, controlTemp, 25:30, '--');
-
-
-%Yaw rate variation
-controlTemp = zeros(length(timeYawRate), 4);
-PlotAircraftSim(timeYawRate, finalStateYawRate, controlTemp, 31:36, '--');
 
 %% Functions
 
