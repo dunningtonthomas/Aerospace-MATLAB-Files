@@ -7,93 +7,138 @@ data20 = readmatrix('20inlbf_005.txt');
 data400 = readmatrix('400inlbf_04.txt');
 
 time20 = data20(:,1);
-angle20 = data20(:,2);
-shear20 = data20(:,3)* pi/180;
+angle20 = data20(:,2) * pi/180;
+shear20_ext = data20(:,3)* pi/180;
 torque20 = data20(:,4);
 axial20 = data20(:,5);
 
 
 time400 = data400(:,1);
-angle400 = data400(:,2);
-shear400 = data400(:,3) * pi/180;
+angle400 = data400(:,2) * pi/180;
+shear400_ext = data400(:,3) * pi/180;
 torque400 = data400(:,4);
 axial400 = data400(:,5);
 
 
-%% Analysis Open Wall
 %Constants
-radius = 0.5; %in
+radius = (3/8 + (3/8 - 1/16)) / 2; %in, the average radius
 length = 10; %in
-thickness = 0.0625; %in
+length_ext = 1;
+thickness = 1/16; %in
 G = 3.75e6; %psi
 
-%Finding shear strain from the twist angle
-gamma20 = (thickness * (angle20 * pi/180)) / length;
+%% Analysis Open Wall
+%Finding the strain from the machine
+angle20Norm = angle20 - angle20(1); %So the angle starts at zero
+shear20_machine = angle20Norm * thickness / length;
 
-%Performing the least squares linear regression on the calculated shear
-%strain
-coeff1 = polyfit(gamma20, torque20, 1);
+%Calculating dphi dx using the shear strain
+%Machine
+dPhi_dx20_machine = angle20Norm / length; %This is dPhi dX
 
-gammaFit20 = linspace(5.04e-3,5.24e-3,100);
-torqueGammaFit20 = polyval(coeff1, gammaFit20);
+%Extensometer
+dPhi_ext = shear20_ext * length_ext / thickness;
+dPhi_dx20_ext = dPhi_ext / length_ext; %dPhi dx for extensometer
 
 
-%Performing least squares linear regression on the raw data
-dphiDx = shear20;
-coeff2 = polyfit(dphiDx, torque20, 1);
+%Performing a linear regression
+%Machine
+coeff20_machine = polyfit(dPhi_dx20_machine, torque20, 1); %The slope is GJ
 
-torsionEpsilonFit20 = linspace(-2.5e-3,0.5e-3,100);
-torqueFit20 = polyval(coeff2, torsionEpsilonFit20);
+%Extensometer
+coeff20_ext = polyfit(dPhi_dx20_ext, torque20, 1); %The slope is GJ
 
-%Finding the torsional rigidity
-torsionalRigidity20_1 = coeff1(1);
-torsionalRigidity20_2 = coeff2(1);
+Gj_otw_ext = coeff20_ext(1);
+Gj_otw_machine = coeff20_machine(1);
 
-%Calculated J values
-J20_1 = torsionalRigidity20_1 / G;
-J20_2 = torsionalRigidity20_2 / G;
 
 %% Analysis Closed Wall
+%Finding the machine shear strain using the equation
+angle400Norm = angle400 - angle400(1); %So the angle starts at zero
+shear400_machine = angle400Norm * radius / length;
 
-%Finding shear strain from the twist angle
-gamma400 = (thickness * (angle400 * pi/180)) / length;
+%Calculating dphi dx using the shear strain
+%Machine
+dPhi_dx400_machine = angle400Norm / length; %This is dPhi dX
 
-%Performing the least squares linear regression on the calculated shear
-%strain
-coeff1 = polyfit(gamma400, torque400, 1);
-
-gammaFit400 = linspace(5.04e-3,5.24e-3,100);
-torqueGammaFit400 = polyval(coeff1, gammaFit400);
-
-
-%Performing least squares linear regression on the raw data
-dphiDx = shear400;
-coeff2 = polyfit(dphiDx, torque400, 1);
-
-torsionEpsilonFit400 = linspace(-2.5e-3,0.5e-3,100);
-torqueFit400 = polyval(coeff2, torsionEpsilonFit400);
-
-%Finding the torsional rigidity
-torsionalRigidity400_1 = coeff1(1);
-torsionalRigidity400_2 = coeff2(1);
-
-%Calculated J values
-J400_1 = torsionalRigidity400_1 / G;
-J400_2 = torsionalRigidity400_2 / G;
+%Extensometer
+dPhi_ext = shear400_ext * length_ext / radius;
+dPhi_dx400_ext = dPhi_ext / length_ext; %dPhi dx for extensometer
 
 
-%% Plotting
-%Plotting torque over the deformation, the slope is the torsional rigidity
+%Performing a linear regression
+%Machine
+coeff400_machine = polyfit(dPhi_dx400_machine, torque400, 1); %The slope is GJ
+
+%Extensometer
+coeff400_ext = polyfit(dPhi_dx400_ext, torque400, 1); %The slope is GJ
+
+Gj_ctw_ext = coeff400_ext(1);
+Gj_ctw_machine = coeff400_machine(1);
+
+%% Plotting Closed Thin Wall
+%Plotting torque over the shear strain for the extensometer
+set(0, 'defaulttextinterpreter', 'latex');
 figure();
-plot(shear20, torque20);
+plot(shear400_ext, torque400);
 hold on
-%plot(torsionEpsilonFit20, torqueFit20);
+plot(shear400_machine, torque400);
 
-%Plotting torque over the deformation by calculating the 
+title('Torque vs Shear Strain CTW');
+legend('Extensometer', 'Machine', 'location', 'nw');
+
+
+%Plotting torque vs dPhi dx, the slope will be equal to Gj
 figure();
-plot(gamma20, torque20);
+plot(dPhi_dx400_ext, torque400, 'linewidth', 2); %extensometer
 hold on
-%plot(gammaFit20, torqueGammaFit20);
+plot(dPhi_dx400_machine, torque400, 'linewidth', 2); %Machine
+
+%Also plotting the linear fits for each set
+x400_machine = linspace(-9e-3, 1e-3);
+y400_machine = polyval(coeff400_machine, x400_machine);
+x400_ext = linspace(-9e-3, 1e-3);
+y400_ext = polyval(coeff400_ext, x400_ext);
+plot(x400_ext, y400_ext, '--', 'color', 'b');
+plot(x400_machine,y400_machine, '--', 'color', 'r'); %The linear regression
+
+
+title('Torque vs $$\frac{d\phi}{dx}$$ CTW');
+xlabel('$$\frac{d\phi}{dx}$$  $$(\frac{rad}{m})$$');
+ylabel('Torque $$in*lbf$$');
+legend('Extensometer', 'Machine', 'Linear Fit', 'Linear Fit', 'location', 'nw');
+
+
+%% Plotting Open Thin Wall
+figure();
+plot(shear20_ext, torque20);
+hold on
+plot(shear20_machine, torque20);
+
+title('Torque vs Shear Strain OTW');
+legend('Extensometer', 'Machine', 'location', 'nw');
+
+
+%Plotting torque vs dPhi dx, the slope will be equal to Gj
+figure();
+plot(dPhi_dx20_ext, torque20); %extensometer
+hold on
+plot(dPhi_dx20_machine, torque20); %Machine
+
+%Also plotting the linear fits for each set
+x20_machine = linspace(-0.004, 0.0005);
+y20_machine = polyval(coeff20_machine, x20_machine);
+x20_ext = linspace(-0.04, 0.005);
+y20_ext = polyval(coeff20_ext, x20_ext);
+plot(x20_ext, y20_ext, '--', 'color', 'b');
+plot(x20_machine,y20_machine, '--', 'color', 'r'); %The linear regression
+
+
+title('Torque vs $$\frac{d\phi}{dx}$$ OTW');
+xlabel('$$\frac{d\phi}{dx}$$  $$(\frac{rad}{m})$$');
+ylabel('Torque $$in*lbf$$');
+legend('Extensometer', 'Machine', 'Linear Fit', 'Linear Fit', 'location', 'nw');
+
 
 
 
