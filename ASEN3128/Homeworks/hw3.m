@@ -95,7 +95,7 @@ Iy = 1e-4;
 Amatrix = [0,1,0,0;0,0,-9.81,0; 0,0,0,1; -k3*k4/Iy, -k3/Iy, -k2/Iy, -k1/Iy];
 Amatrix2 = [0,1;-k2/Iy, -k1/Iy];
 
-eigenValues2 = eig(Amatrix2);
+[eigenValues2, eigenVectors] = eig(Amatrix2);
 damp(Amatrix2)
 
 
