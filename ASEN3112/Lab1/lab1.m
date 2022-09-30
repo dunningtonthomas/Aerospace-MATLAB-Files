@@ -201,8 +201,9 @@ percentDiffCTW_machine = residualCTW_machine ./ torque400;
 percentMeanCTW_machine = mean(percentDiffCTW_machine);
 stdCTW_machine = std(residualCTW_machine);
 
-
-
+%Finding difference in extensometer and the machine for both
+percentDiffCTW = abs(Gj_ctw_ext - Gj_ctw_machine) / ((Gj_ctw_ext + Gj_ctw_machine)/2);
+percentDiffOTW = abs(Gj_otw_ext - Gj_otw_machine) / ((Gj_otw_ext + Gj_otw_machine)/2);
 
 
 
