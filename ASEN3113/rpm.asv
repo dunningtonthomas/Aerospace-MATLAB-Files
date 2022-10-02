@@ -151,12 +151,19 @@ pressureAdd_d12 = finalPressure_d12 + 400;
 [vMin_d8, indMin_d8] = min(finalVolume_d8);
 
 Wout_d8 = trapz(finalVolume_d8(indMin_d8:indMax_d8), pressureAdd_d8(indMin_d8:indMax_d8));
-WoutTestNorm_d8 = trapz(finalVolume_d8(indMin_d8:indMax_d8), finalPressure_d8(indMin_d8:indMax_d8));
 WoutTest_d8 = Wout_d8 - 400*(finalVolume_d8(indMax_d8) - finalVolume_d8(indMin_d8));
 
 Win_d8 = trapz([finalVolume_d8(indMax_d8:end); finalVolume_d8(1:indMin_d8)], [pressureAdd_d8(indMax_d8:end); pressureAdd_d8(1:indMin_d8)]);
-WinTestNorm = trapz([finalVolume_d8(indMax_d8:end); finalVolume_d8(1:indMin_d8)], [finalPressure_d8(indMax_d8:end); finalPressure_d8(1:indMin_d8)]);
 WinTest_d8 = Win_d8 + 400*(finalVolume_d8(indMax_d8) - finalVolume_d8(indMin_d8));
+
+WnetOut_d8 = Wout_d8 + Win_d8;
+WnetOutTest_d8 = WoutTest_d8 + WinTest_d8;
+
+%Testing work with not adding 400
+Wout_d8 = trapz(finalVolume_d8(indMin_d8:indMax_d8), pressureAdd_d8(indMin_d8:indMax_d8));
+
+Win_d8 = trapz([finalVolume_d8(indMax_d8:end); finalVolume_d8(1:indMin_d8)], [pressureAdd_d8(indMax_d8:end); pressureAdd_d8(1:indMin_d8)]);
+
 
 WnetOut_d8 = Wout_d8 + Win_d8;
 WnetOutTest_d8 = WoutTest_d8 + WinTest_d8;
