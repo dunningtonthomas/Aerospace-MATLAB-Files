@@ -151,15 +151,18 @@ pressureAdd_d12 = finalPressure_d12 + 400;
 [vMin_d8, indMin_d8] = min(finalVolume_d8);
 
 Wout_d8 = trapz(finalVolume_d8(indMin_d8:indMax_d8), pressureAdd_d8(indMin_d8:indMax_d8));
-WoutTestNorm_d8 = trapz(finalVolume_d8(indMin_d8:indMax_d8), finalPressure_d8(indMin_d8:indMax_d8));
-WoutTest_d8 = Wout_d8 - 400*(finalVolume_d8(indMax_d8) - finalVolume_d8(indMin_d8));
+WoutReal_d8 = trapz(finalVolume_d8(indMin_d8:indMax_d8), finalPressure_d8(indMin_d8:indMax_d8));
 
 Win_d8 = trapz([finalVolume_d8(indMax_d8:end); finalVolume_d8(1:indMin_d8)], [pressureAdd_d8(indMax_d8:end); pressureAdd_d8(1:indMin_d8)]);
-WinTestNorm = trapz([finalVolume_d8(indMax_d8:end); finalVolume_d8(1:indMin_d8)], [finalPressure_d8(indMax_d8:end); finalPressure_d8(1:indMin_d8)]);
-WinTest_d8 = Win_d8 + 400*(finalVolume_d8(indMax_d8) - finalVolume_d8(indMin_d8));
+WinReal_d8 = trapz([finalVolume_d8(indMax_d8:end); finalVolume_d8(1:indMin_d8)], [finalPressure_d8(indMax_d8:end); finalPressure_d8(1:indMin_d8)]);
 
 WnetOut_d8 = Wout_d8 + Win_d8;
-WnetOutTest_d8 = WoutTest_d8 + WinTest_d8;
+
+%Trying to integrate the whole ellipse
+WoutNet_d8 = trapz(finalVolume_d8, finalPressure_d8);
+
+%Absolute Value for the Wout
+WoutABS_d8 = trapz(finalVolume_d8(indMin_d8:indMax_d8), abs(finalPressure_d8(indMin_d8:indMax_d8)));
 
 
 
@@ -171,10 +174,15 @@ Wout_d10 = trapz(finalVolume_d10(indMin_d10:indMax_d10), pressureAdd_d10(indMin_
 %Wout_d8 = Wout_d8 - 400*(finalVolume_d8(indMax_d8) - finalVolume_d8(indMin_d8));
 
 Win_d10 = trapz([finalVolume_d10(indMax_d10:end); finalVolume_d10(1:indMin_d10)], [pressureAdd_d10(indMax_d10:end); pressureAdd_d10(1:indMin_d10)]);
+WinReal_d10 = trapz([finalVolume_d10(indMax_d10:end); finalVolume_d10(1:indMin_d10)], [finalPressure_d10(indMax_d10:end); finalPressure_d10(1:indMin_d10)]);
 
 WnetOut_d10 = Wout_d10 + Win_d10;
 
+%Absolute Value for the Wout
+WoutABS_d10 = trapz(finalVolume_d10(indMin_d10:indMax_d10), abs(finalPressure_d10(indMin_d10:indMax_d10)));
 
+%Trying to integrate the whole ellipse
+WoutNet_d10 = trapz(finalVolume_d10, finalPressure_d10);
 
 
 %Work for d12
@@ -185,8 +193,17 @@ Wout_d12 = trapz(finalVolume_d12(indMin_d12:indMax_d12), pressureAdd_d12(indMin_
 %Wout_d8 = Wout_d8 - 400*(finalVolume_d8(indMax_d8) - finalVolume_d8(indMin_d8));
 
 Win_d12 = trapz([finalVolume_d12(indMax_d12:end); finalVolume_d12(1:indMin_d12)], [pressureAdd_d12(indMax_d12:end); pressureAdd_d12(1:indMin_d12)]);
+WinReal_d12 = trapz([finalVolume_d12(indMax_d12:end); finalVolume_d12(1:indMin_d12)], [finalPressure_d12(indMax_d12:end); finalPressure_d12(1:indMin_d12)]);
 
 WnetOut_d12 = Wout_d12 + Win_d12;
+
+%Absolute Value for the Wout
+WoutABS_d12 = trapz(finalVolume_d12(indMin_d12:indMax_d12), abs(finalPressure_d12(indMin_d12:indMax_d12)));
+
+
+%Trying to integrate the whole ellipse
+WoutNet_d12 = trapz(finalVolume_d12, finalPressure_d12);
+
 
 
 %% Caclulating the Qin from the current
