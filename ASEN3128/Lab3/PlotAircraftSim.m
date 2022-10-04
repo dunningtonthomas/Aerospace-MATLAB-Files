@@ -143,6 +143,12 @@ plot3(aircraft_state_array(:,1), aircraft_state_array(:,2), -1*aircraft_state_ar
 hold on;
 grid on;
 
+%Starting point
+plot3(aircraft_state_array(1,1), aircraft_state_array(1,2), -1*aircraft_state_array(1,3), 'p', 'markersize', 10, 'markerFaceColor', 'green', 'markerEdgeColor', 'green');
+
+%Ending point
+plot3(aircraft_state_array(end,1), aircraft_state_array(end,2), -1*aircraft_state_array(end,3), 'p', 'markersize', 10, 'markerFaceColor', 'red', 'markerEdgeColor', 'red');
+
 title('Aircraft Path');
 xlabel('X Position (m)');
 ylabel('Y Position (m)');

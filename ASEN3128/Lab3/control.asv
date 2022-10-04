@@ -62,7 +62,7 @@ motorForcesRollRate = zeros(length(timeRollRate),4);
 for i = 1:length(timeRollRate)
     %Finding the controls
     [Fc, Gc] = RotationDerivativeFeedback(finalStateRollRate(i,:), mass, g);
-    controlRollRate(i,:) = [-1*Fc(3), Gc(1), Gc(2), Gc(3)];
+    controlRollRate(i,:) = [Fc(3), Gc(1), Gc(2), Gc(3)];
     
     %Finding the motor forces
     motorForcesRollRate(i,:) = ComputeMotorForces(Fc, Gc, radialDist, km)';
@@ -74,12 +74,11 @@ end
 controlPitchRate = zeros(length(timePitchRate), 4);
 motorForcesPitchRate = zeros(length(timePitchRate),4);
 for i = 1:length(timePitchRate)
-    %Finding the controls
     [Fc, Gc] = RotationDerivativeFeedback(finalStatePitchRate(i,:), mass, g);
-    controlPitchRate(i,:) = [-1*Fc(3), Gc(1), Gc(2), Gc(3)];
+    controlPitchRate(i,:) = [Fc(3), Gc(1), Gc(2), Gc(3)];
     
     %Finding the motor forces
-    motorForcesPitchRate(i,:) = ComputeMotorForces(Fc, Gc, radialDist, km)';
+    motorForcesRollRate(i,:) = ComputeMotorForces(Fc, Gc, radialDist, km)';
 end
 
 
@@ -88,12 +87,11 @@ end
 controlYawRate = zeros(length(timeYawRate), 4);
 motorForcesYawRate = zeros(length(timeYawRate),4);
 for i = 1:length(timeYawRate)
-    %Finding the controls
     [Fc, Gc] = RotationDerivativeFeedback(finalStateYawRate(i,:), mass, g);
-    controlYawRate(i,:) = [-1*Fc(3), Gc(1), Gc(2), Gc(3)];
+    controlYawRate(i,:) = [Fc(3), Gc(1), Gc(2), Gc(3)];
     
     %Finding the motor forces
-    motorForcesYawRate(i,:) = ComputeMotorForces(Fc, Gc, radialDist, km)';
+    motorForcesRollRate(i,:) = ComputeMotorForces(Fc, Gc, radialDist, km)';
 end
 
 
@@ -109,10 +107,6 @@ PlotAircraftSim(timePitchRate, finalStatePitchRate, controlPitchRate, 25:30, '--
 
 %Yaw rate variation
 PlotAircraftSim(timeYawRate, finalStateYawRate, controlYawRate, 31:36, '--');
-
-
-%Plotting the control forces
-
 
 
 %% Functions

@@ -127,27 +127,33 @@ steadyHoverControlYawRate(:,1) = Zc_trim*ones(length(timeYawRate),1);
 
 %% Plotting
 %Roll variation
-PlotAircraftSim(timeRoll, finalStateRoll, steadyHoverControlRoll, 1:6, '-');
+controlTemp = zeros(length(timeRoll), 4);
+PlotAircraftSim(timeRoll, finalStateRoll, controlTemp, 1:6, '-');
 
 
 %Pitch variation
-PlotAircraftSim(timePitch, finalStatePitch, steadyHoverControlPitch, 7:12, '-');
+controlTemp = zeros(length(timePitch), 4);
+PlotAircraftSim(timePitch, finalStatePitch, controlTemp, 7:12, '-');
 
 
 %Yaw variation
-PlotAircraftSim(timeYaw, finalStateYaw, steadyHoverControlYaw, 13:18, '-');
+controlTemp = zeros(length(timeYaw), 4);
+PlotAircraftSim(timeYaw, finalStateYaw, controlTemp, 13:18, '-');
 
 
 %Roll rate variation
-PlotAircraftSim(timeRollRate, finalStateRollRate, steadyHoverControlRollRate, 19:24, '-');
+controlTemp = zeros(length(timeRollRate), 4);
+PlotAircraftSim(timeRollRate, finalStateRollRate, controlTemp, 19:24, '-');
 
 
 %Pitch rate variation
-PlotAircraftSim(timePitchRate, finalStatePitchRate, steadyHoverControlPitchRate, 25:30, '-');
+controlTemp = zeros(length(timePitchRate), 4);
+PlotAircraftSim(timePitchRate, finalStatePitchRate, controlTemp, 25:30, '-');
 
 
 %Yaw rate variation
-PlotAircraftSim(timeYawRate, finalStateYawRate, steadyHoverControlYawRate, 31:36, '-');
+controlTemp = zeros(length(timeYawRate), 4);
+PlotAircraftSim(timeYawRate, finalStateYawRate, controlTemp, 31:36, '-');
 
 
 %% Saving Figures to a directory
