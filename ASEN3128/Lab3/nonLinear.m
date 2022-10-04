@@ -150,8 +150,7 @@ PlotAircraftSim(timePitchRate, finalStatePitchRate, steadyHoverControlPitchRate,
 PlotAircraftSim(timeYawRate, finalStateYawRate, steadyHoverControlYawRate, 31:36, '-');
 
 
-%% Saving Figures to a directory
-FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
+
 
 
 %% Functions

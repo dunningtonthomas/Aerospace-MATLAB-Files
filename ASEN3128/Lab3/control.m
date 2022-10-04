@@ -111,8 +111,15 @@ PlotAircraftSim(timePitchRate, finalStatePitchRate, controlPitchRate, 25:30, '--
 PlotAircraftSim(timeYawRate, finalStateYawRate, controlYawRate, 31:36, '--');
 
 
-%Plotting the control forces
+%Plotting the motor forces
+%Roll Rate Variation
+plotMotorForces(timeRollRate, motorForcesRollRate,100,'-');
 
+%Pitch Rate Variation
+plotMotorForces(timePitchRate, motorForcesPitchRate,101,'-');
+
+%Yaw Rate Variation
+plotMotorForces(timeYawRate, motorForcesYawRate,102,'-');
 
 
 %% Functions
