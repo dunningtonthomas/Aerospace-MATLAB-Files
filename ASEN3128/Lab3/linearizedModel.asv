@@ -115,7 +115,7 @@ steadyHoverControlPitchRate = zeros(length(timePitchRate),4);
 steadyHoverControlPitchRate(:,1) = -1*Zc_trim*ones(length(timePitchRate),1);
 
 steadyHoverControlYawRate = zeros(length(timeYawRate),4);
-steadyHoverControlYawRate(:,1) = -1*Zc_trim*ones(length(timeYawRate),1);
+steadyHoverControlYawRate(:,1) = Zc_trim*ones(length(timeYawRate),1);
 
 
 %% Plotting

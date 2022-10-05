@@ -125,6 +125,16 @@ steadyHoverControlYawRate = zeros(length(timeYawRate),4);
 steadyHoverControlYawRate(:,1) = Zc_trim*ones(length(timeYawRate),1);
 
 
+%% Calculating the motor forces
+force = Zc_trim / 4;
+motorForcesRollRate = force*ones(length(timeRollRate),4);
+
+motorForcesPitchRate = force*ones(length(timeRollRate),4);
+
+motorForcesYawRate = force*ones(length(timeRollRate),4);
+
+
+
 %% Plotting
 %Roll variation
 PlotAircraftSim(timeRoll, finalStateRoll, steadyHoverControlRoll, 1:6, '-');
@@ -151,6 +161,15 @@ PlotAircraftSim(timeYawRate, finalStateYawRate, steadyHoverControlYawRate, 31:36
 
 
 
+%Plotting the motor forces
+%Roll Rate Variation
+plotMotorForces(timeRollRate, motorForcesRollRate,100,'-');
+
+%Pitch Rate Variation
+plotMotorForces(timePitchRate, motorForcesPitchRate,101,'-');
+
+%Yaw Rate Variation
+plotMotorForces(timeYawRate, motorForcesYawRate,102,'-');
 
 
 %% Functions

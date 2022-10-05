@@ -15,12 +15,20 @@ stringsProb2 = {'P2rollPos'; 'P2rollAngles'; 'P2rollVel'; 'P2rollAngVel'; 'P2rol
     'P2pitchRatePos'; 'P2pitchRateAngles'; 'P2pitchRateVel'; 'P2pitchRateAngVel'; 'P2pitchRateControl'; 'P2pitchRatePath';
     'P2yawRatePos'; 'P2yawRateAngles'; 'P2yawRateVel'; 'P2yawRateAngVel'; 'P2yawRateControl'; 'P2yawRatePath'};
 stringsProb2 = flip(stringsProb2);
-     
+
+
+%Next images to create: Problem 6 
+stringsProb6 = {'P6rollRatePos'; 'P6rollRateAngles'; 'P6rollRateVel'; 'P6rollRateAngVel'; 'P6rollRateControl'; 'P6rollRatePath';
+    'P6pitchRatePos'; 'P6pitchRateAngles'; 'P6pitchRateVel'; 'P6pitchRateAngVel'; 'P6pitchRateControl'; 'P6pitchRatePath';
+    'P6yawRatePos'; 'P6yawRateAngles'; 'P6yawRateVel'; 'P6yawRateAngVel'; 'P6yawRateControl'; 'P6yawRatePath'};
+stringsProb6 = flip(stringsProb6);    
+
+
 for i = 1:length(FigList)
     currFig = FigList(i);
     figName = num2str(get(currFig, 'Number'));
     set(0, 'CurrentFigure', currFig);
-    saveas(currFig, strcat(stringsProb2{i}, '.png'));   
+    saveas(currFig, strcat(stringsProb6{i}, '.png'));   
 end
 
 
