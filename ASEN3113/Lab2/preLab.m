@@ -1,0 +1,44 @@
+%% Clean up
+clear; close all; clc;
+
+
+%% Import Data
+%Temp in celsius
+temperatures = [17.6, 21.61, 25.13, 29.22, 34.92, 38.10, 45.21, 47.01];
+x1 = 1 + 3/8; %in
+%Distances that correspond to the temperatures
+linDist = [x1, x1 + 0.5, x1 + 1, x1 + 1.5, x1 + 2, x1 + 2.5, x1 + 3, x1 + 3.5];
+
+
+%% Analysis
+%Finding a linear regression
+coeff = polyfit(linDist, temperatures, 1);
+xFit = linspace(1, x1 + 4);
+yFit = polyval(coeff, xFit); 
+
+%Calculating the T0 which occurs when the x distance is 0
+tempInitial = polyval(coeff, 0);
+
+
+
+%Finding the mean of the residuals
+resid = temperatures - polyval(coeff, linDist);
+standardD = std(resid);
+
+
+%% Plotting
+figure();
+set(0,'defaulttextinterpreter', 'latex');
+scatter(linDist, temperatures, 'filled');
+hold on
+plot(xFit, yFit, 'linewidth', 2);
+
+xlabel('Distance $$(in)$$');
+ylabel('Temperature $$(^{\circ}C)$$');
+title('Temperature Distribution');
+
+legend('Experimental Data', 'Linear Fit', 'location', 'Nw');
+
+
+
+
