@@ -32,38 +32,41 @@ dphi = var(4);
 dtheta = var(5);
 
 
+
+%Calculating the reference velocity based on the time
+vRef = 0.5; %Move 0.5 m/s for 2 seconds for a displacement of 1m
+uRef = 0.5;
+
 if(t < 2) %Condition for applying the reference velocity
     %Finding the control forces and moments with a reference velocity
-        %Calculating the reference velocity based on the time
-        if(latOrLong == "lat")
-            
-             vRef = 0.5; %Move 0.5 m/s for 2 seconds for a displacement of 1m
-             uRef = 0;
-            
-        elseif(latOrLong == "long")
-            
-             vRef = 0; %Move 0.5 m/s for 2 seconds for a displacement of 1m
-             uRef = 0.5;      
-             
-        else
-            fprintf('ERROR VelocityReferenceFeedback\n');   
-        end
-
-else %Stop velocity command after 2 seconds
-    vRef = 0;
-    uRef = 0;
+    
+    
 end
+    
+    
+    if(latOrLong == "lat") 
+        %Lateral
+        Zc = -m * g;
 
+        Lc = -k1_lat*dp - k2_lat*dphi + k3_lat*(vRef - dv);
 
-%Calculating the control forces and moments
-Zc = -m * g;
+        Mc = -k1_long*dq - k2_long*dtheta;
 
-Lc = -k1_lat*dp - k2_lat*dphi + k3_lat*(vRef - dv);
+        Nc = -gainSpin * dr;
+        
+    elseif(latOrLong == "long")
+        %Longitudinal  
+        Zc = -m * g;
 
-Mc = -k1_long*dq - k2_long*dtheta + k3_long*(uRef - du);
+        Lc = -k1_lat*dp - k2_lat*dphi;
 
-Nc = -gainSpin * dr;
-       
+        Mc = -k1_long*dq - k2_long*dtheta;
+
+        Nc = -gainSpin * dr;       
+    else
+        fprintf('ERROR VelocityReferenceFeedback\n');       
+    end   
+
 
 %Outputting the force and moment control vectors
 Fc = [0; 0; Zc];
