@@ -39,18 +39,18 @@ x = 4 * 0.0254; %Position of the last thermocouple
 %Calculating the temperature over time using the fourier series
 t = 1:1000;
 
-u = zeros(10,1); %Temperature values
+u = zeros(length(t), 10); %Temperature values
 
 %Calculating the sum for n = 1 to 10
-sum = 0;
-for n = 1:10
-    bn = (8*H*L*(-1)^n) / ((2*n-1)^2 * pi^2);
-    lambdaN = ((2*n-1)*pi) / (2*L);
-    sum = sum + bn*sin(lambdaN*x)*exp(-(lambdaN^2) * alpha * t);
+for i = 1:10
+    sum = 0;
+    for n = 0:i
+        bn = (8*H*L*(-1)^n) / ((2*n-1)^2 * pi^2);
+        lambdaN = ((2*n-1)*pi) / (2*L);
+        sum = sum + bn*sin(lambdaN*x)*exp(-(lambdaN^2) * alpha * t);
+    end
+u(:,i) = T0 + H*x + sum;
 end
-
-u1 = T0 + H*x + sum;
-
 
 
 
