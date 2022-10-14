@@ -39,18 +39,49 @@ x = 4 * 0.0254; %Position of the last thermocouple
 %Calculating the temperature over time using the fourier series
 t = 1:1000;
 
-u = zeros(length(t), 10); %Temperature values
+u1 = zeros(11,1); %Temperature values
 
+%Calculating without the sum
+u1(1) = T0 + H*x;
+
+%Setting t equal to 1 second
+t = 1;
 %Calculating the sum for n = 1 to 10
 for i = 1:10
     sum = 0;
-    for n = 0:i
+    for n = 1:i
         bn = (8*H*L*(-1)^n) / ((2*n-1)^2 * pi^2);
         lambdaN = ((2*n-1)*pi) / (2*L);
         sum = sum + bn*sin(lambdaN*x)*exp(-(lambdaN^2) * alpha * t);
     end
-u(:,i) = T0 + H*x + sum;
+u1(i + 1) = T0 + H*x + sum;
 end
+
+
+%Temperature at t=1000
+u2 = zeros(11,1); %Temperature values
+
+%Calculating without the sum
+u2(1) = T0 + H*x;
+
+%Setting t equal to 1 second
+t = 1000;
+%Calculating the sum for n = 1 to 10
+for i = 1:10
+    sum = 0;
+    for n = 1:i
+        bn = (8*H*L*(-1)^n) / ((2*n-1)^2 * pi^2);
+        lambdaN = ((2*n-1)*pi) / (2*L);
+        sum = sum + bn*sin(lambdaN*x)*exp(-(lambdaN^2) * alpha * t);
+    end
+u2(i + 1) = T0 + H*x + sum;
+end
+
+
+
+
+%% Problem 6
+
 
 
 
@@ -69,9 +100,17 @@ legend('Experimental Data', 'Linear Fit', 'location', 'Nw');
 
 
 
-%Plotting the analytical solution over time
+%Plotting the temperatures versus the n values of the sum for t=1 second
 figure();
-plot(t, u1);
+plot(0:10, u1, 'linewidth', 2);
+hold on
+plot(0:10, u2, 'linewidth', 2);
+
+legend('Time = 1 s', 'Time = 1000 s');
+xlabel('Number of Fourier Terms (n)');
+ylabel('Temperature (K)');
+
+
 
 
 
