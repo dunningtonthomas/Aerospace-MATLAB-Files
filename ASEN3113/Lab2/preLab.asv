@@ -79,6 +79,63 @@ end
 
 
 
+
+
+%% Problem 5 part 2, find the Fourier number
+
+%Use one term and calculate the time it takes to get to 98% of the steady
+%state value and this is the time to use in the equation
+
+% %One term fourier, allow to run for a while so we can get accurate 98%
+% t = 1:10000;
+% n = 1;
+% bn = (8*H*L*(-1)^n) / ((2*n-1)^2 * pi^2);
+% lambdaN = ((2*n-1)*pi) / (2*L);
+% sum = bn*sin(lambdaN*x)*exp(-(lambdaN^2) * alpha * t);
+% 
+% uOneTerm = T0 + H*x + sum;
+% 
+% %Fining at what time it is within 98% of the steady state solution
+
+
+%I think maybe it just requires the "characteristic time duration" to be
+%the amount of time of the simulation so since we analyzed 1000s I'm going
+%to use that
+
+F0 = alpha * 1000 / L^2;
+
+
+%% Problem 6
+%Use one Fourier term and plot the temperature over time for the last
+%thermocouple
+
+%One term fourier
+t = 1:1000;
+n = 1;
+bn = (8*H*L*(-1)^n) / ((2*n-1)^2 * pi^2);
+lambdaN = ((2*n-1)*pi) / (2*L);
+sum = bn*sin(lambdaN*x)*exp(-(lambdaN^2) * alpha * t);
+
+uOneTerm = T0 + H*x + sum;
+
+
+%Now account for variations in the thermal diffusivity
+uAlpha = zeros(length(t), 10); %Will test 10 different values of alpha
+lowerLim = alpha * 0.35;
+upperLim = alpha * 1.85;
+alphaVar = linspace(lowerLim, upperLim, 10); %Varying alphas
+
+for i = 1:length(alphaVar)
+    n = 1;
+    bn = (8*H*L*(-1)^n) / ((2*n-1)^2 * pi^2);
+    lambdaN = ((2*n-1)*pi) / (2*L);
+    sum = bn*sin(lambdaN*x)*exp(-(lambdaN^2) * alphaVar(i) * t);
+
+    uAlpha(:,i) = T0 + H*x + sum;  
+end
+
+
+
 %% Plotting
 figure();
 set(0,'defaulttextinterpreter', 'latex');
@@ -101,7 +158,38 @@ hold on
 plot(0:10, u2, 'linewidth', 2);
 
 legend('Time = 1 s', 'Time = 1000 s');
-xlabel('
+xlabel('Number of Fourier Terms (n)');
+ylabel('Temperature (K)');
+
+
+
+%Plotting the last thermocouple over time
+figure();
+plot(t, uOneTerm, 'linewidth', 2, 'color', 'r');
+
+xlabel('Time (s)');
+ylabel('Temperature $$(^{\circ}K)$$');
+title('Temperature of the Last Thermocouple Over Time');
+
+
+%Plotting different alpha values over time
+%Create a color gradient of blue
+colors = zeros(length(alphaVar),3);
+colors(:,2) = linspace(1,0.5,length(alphaVar));
+colors(:,3) = linspace(0.75,1,length(alphaVar));
+
+figure();
+for i = 1:length(alphaVar)
+   h(i) = plot(t, uAlpha(:,i), 'color', colors(i,:), 'linewidth', 2);
+   hold on
+    
+end
+
+xlabel('Time $$(s)$$');
+ylabel('Temperature $$(^{\circ}K)$$');
+title('Variation in Thermal Diffusivity');
+
+ legend(h([1,10], 'test', 'test');
 
 
 
