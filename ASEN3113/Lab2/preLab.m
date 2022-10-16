@@ -31,8 +31,8 @@ standardD = std(resid);
 H = coeff(1) / 0.0254; %Converting to Celsius / m
 T0 = coeff(2) + 273.15;
 alpha = 4.82e-5;
-L = 5 * 0.0254; %Length in meters
-x = 4 * 0.0254; %Position of the last thermocouple
+L = 5.875 * 0.0254; %Length in meters
+x = 4.875 * 0.0254; %Position of the last thermocouple
 
 
 
