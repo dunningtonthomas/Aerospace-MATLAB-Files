@@ -86,24 +86,13 @@ end
 %Use one term and calculate the time it takes to get to 98% of the steady
 %state value and this is the time to use in the equation
 
-% %One term fourier, allow to run for a while so we can get accurate 98%
-% t = 1:10000;
-% n = 1;
-% bn = (8*H*L*(-1)^n) / ((2*n-1)^2 * pi^2);
-% lambdaN = ((2*n-1)*pi) / (2*L);
-% sum = bn*sin(lambdaN*x)*exp(-(lambdaN^2) * alpha * t);
-% 
-% uOneTerm = T0 + H*x + sum;
-% 
-% %Fining at what time it is within 98% of the steady state solution
+%Calculate the fourier number for 1 through 1000 values
+times = 1:1000;
 
+F0 = alpha * times / L^2;
 
-%I think maybe it just requires the "characteristic time duration" to be
-%the amount of time of the simulation so since we analyzed 1000s I'm going
-%to use that
-
-F0 = alpha * 1000 / L^2;
-
+%Find when the time is 0.2 for fourier number
+timeCrit = 0.2 / alpha * L^2;
 
 %% Problem 6
 %Use one Fourier term and plot the temperature over time for the last
@@ -191,6 +180,16 @@ title('Variation in Thermal Diffusivity');
 
 legend(h([1,10]), 'Lowest Thermal Diffusivity', 'Highest Thermal Diffusivity', 'location', 'SE');
 
+
+%Plotting problem 5 fourier numbers
+figure();
+plot(times, F0, 'linewidth', 2);
+
+xlabel('Time (s)');
+ylabel('Fourier Number');
+yline(0.2, 'color', 'r', 'label', 'Valid for One Term: F_{0} \geq 0.2');
+
+title('Fourier Number With Different Time Durations');
 
 
 
