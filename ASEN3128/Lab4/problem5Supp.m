@@ -34,7 +34,7 @@ Alat = [0, g, 0; 0, 0, 1; -k3Lat, -k2Lat, -k1Lat];
 Along = [0, -g, 0,; 0, 0, 1; -k3Long, -k2Long, -k1Long];
 
 %Setting up various k3 values
-k3Values = linspace(-0.001,0.001,1000);
+k3Values = linspace(-0.01,0.01,1000);
 
 %Eig returns 3 by 1 eigenvalues
 eigenVecLat = zeros(length(k3Values), 3);
@@ -61,7 +61,7 @@ for i = 1:length(k3Values)
     realComponentsLong = real(eigenVecLong(i,:));
     
     if(realComponentsLong(1) == -1.04722 || realComponentsLong(2) == -1.04722 || realComponentsLong(3) == -1.04722)
-        x = 5
+        x = 5;
     end
 end
 
@@ -87,11 +87,11 @@ scatter(real(eigenVecLat(:,1)), imag(eigenVecLat(:,1)), 'r');
 hold on
 scatter(real(eigenVecLat(:,2)), imag(eigenVecLat(:,2)), 'r');
 scatter(real(eigenVecLat(:,3)), imag(eigenVecLat(:,3)), 'r');
-scatter(real(eigenFinalLat), imag(eigenFinalLat), 'g', 'filled');
 
 title('Lateral Eigenvectors');
 xlabel('Real Axis');
 ylabel('Imaginary Axis');
+
 
 %Longitudinal
 figure();
@@ -99,13 +99,9 @@ scatter(real(eigenVecLong(:,1)), imag(eigenVecLong(:,1)), 'r');
 hold on
 scatter(real(eigenVecLong(:,2)), imag(eigenVecLong(:,2)), 'r');
 scatter(real(eigenVecLong(:,3)), imag(eigenVecLong(:,3)), 'r');
-scatter(real(eigenFinalLong), imag(eigenFinalLong), 'g', 'filled');
 
 title('Longitudinal Eigenvectors');
 xlabel('Real Axis');
 ylabel('Imaginary Axis');
-
-
-
 
 

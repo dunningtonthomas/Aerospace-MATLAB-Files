@@ -1,5 +1,7 @@
 %% Clean Up
-clear; close all; clc;
+clear; 
+%close all; 
+clc;
 
 
 %% Analysis
@@ -125,19 +127,19 @@ end
 %% Plotting
 
 %Roll variation
-PlotAircraftSim(timeRoll, finalStateRoll, controlRoll, 1:6, '-');
+PlotAircraftSim(timeRoll, finalStateRoll, controlRoll, 1:6, '--');
 
 
 %Pitch variation
-PlotAircraftSim(timePitch, finalStatePitch, controlPitch, 7:12, '-');
+PlotAircraftSim(timePitch, finalStatePitch, controlPitch, 7:12, '--');
 
 
 %Roll rate variation
-PlotAircraftSim(timeRollRate, finalStateRollRate, controlRollRate, 13:18, '-');
+PlotAircraftSim(timeRollRate, finalStateRollRate, controlRollRate, 13:18, '--');
 
 
 %Pitch rate variation
-PlotAircraftSim(timePitchRate, finalStatePitchRate, controlPitchRate, 19:24, '-');
+PlotAircraftSim(timePitchRate, finalStatePitchRate, controlPitchRate, 19:24, '--');
 
 
 

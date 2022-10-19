@@ -2,9 +2,11 @@ function [Fc,Gc] = innerLoopFeedback(var)
 %INNERLOOPFEEDBACK This function takes in the 12by1 state matrix within var
 %and calculates the forces and moments 
 
+%Values for gravity and the mass
 g = 9.81;
 m = 0.068;
 
+%Harcodign the gains found in problem1, the spin gain is from Lab 3
 gainSpin = 0.004;
 k1_lat = 0.0013;
 k2_lat = 0.0023;
