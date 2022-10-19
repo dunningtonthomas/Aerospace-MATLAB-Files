@@ -6,10 +6,11 @@ function [Fc,Gc] = VelocityReferenceFeedback(t,var,latOrLong)
 %INPUTS: latOrLong is a string of 'lat' or 'long' which corresponds to a
 %lateral reference velocity or a longitudinal reference velocity
 
-
+%Gravity and mass
 g = 9.81;
 m = 0.068;
 
+%Gains determined in the previous problems
 gainSpin = 0.004;
 k1_lat = 0.0013;
 k2_lat = 0.0023;
