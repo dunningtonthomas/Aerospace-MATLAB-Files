@@ -22,11 +22,19 @@ stringsProb4 = {'P4rollPos'; 'P4rollAngles'; 'P4rollVel'; 'P4rollAngVel'; 'P4rol
 stringsProb4 = flip(stringsProb4);
 
 
+stringsProb7 = {'P7latPos'; 'P7latAngles'; 'P7latVel'; 'P7latAngVel'; 'P7latControl'; 'P7latPath';
+    'P7longPos'; 'P7longAngles'; 'P7longVel'; 'P7longAngVel'; 'P7longControl'; 'P7longPath'};
+stringsProb7 = flip(stringsProb7);
+
+stringsProb72 = {'P72latPos'; 'P72latAngles'; 'P72latVel'; 'P72latAngVel'; 'P72latControl'; 'P72latPath';
+    'P72longPos'; 'P72longAngles'; 'P72longVel'; 'P72longAngVel'; 'P72longControl'; 'P72longPath'};
+stringsProb72 = flip(stringsProb72);
+
 for i = 1:length(FigList)
     currFig = FigList(i);
     figName = num2str(get(currFig, 'Number'));
     set(0, 'CurrentFigure', currFig);
-    saveas(currFig, strcat(stringsProb4{i}, '.png'));   
+    saveas(currFig, strcat(stringsProb72{i}, '.png'));   
 end
 
 

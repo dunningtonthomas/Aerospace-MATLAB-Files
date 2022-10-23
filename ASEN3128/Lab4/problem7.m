@@ -31,8 +31,8 @@ odeFuncLong = @(t,var)QuadrotorEOMwithControlCommand(t,var,g,mass,nu,mu,I, latOr
 %LATERAL SIMULATION
 %Start at initial stationary position with no angles and 0 position
 initPos = [0;0;0];
-initAngle = [0;0;0]; %5 degree change in roll angle
-initVel = [0;0;0];
+initAngle = [0;0;0];
+initVel = [0;0.5;0]; %Start with the reference velocity
 initAngleVel = [0;0;0];
 
 x0_steady_hover = [initPos; initAngle; initVel; initAngleVel];
@@ -42,8 +42,8 @@ tspan = [0 10];
 %LONGITUDINAL SIMULATION
 %Start at initial stationary position with no angles and 0 position
 initPos = [0;0;0];
-initAngle = [0;0;0]; %5 degree change in roll angle
-initVel = [0;0;0];
+initAngle = [0;0;0];
+initVel = [0.5;0;0]; %Start with the reference velocity
 initAngleVel = [0;0;0];
 
 x0_steady_hover = [initPos; initAngle; initVel; initAngleVel];
@@ -89,7 +89,7 @@ PlotAircraftSim(timeLat, finalStateLat, controlLat, 1:6, '-');
 
 
 %LONGITUDINAL
-PlotAircraftSim(timeLong, finalStateLong, controlLong, 7:12, '-');
+PlotAircraftSim(timeLong, finalStateLong, controlLong, 7:12, 'r');
 
 
 %% Functions
