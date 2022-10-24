@@ -30,11 +30,17 @@ stringsProb72 = {'P72latPos'; 'P72latAngles'; 'P72latVel'; 'P72latAngVel'; 'P72l
     'P72longPos'; 'P72longAngles'; 'P72longVel'; 'P72longAngVel'; 'P72longControl'; 'P72longPath'};
 stringsProb72 = flip(stringsProb72);
 
+
+stringsProb8 = {'P8latPos'; 'P8latAngles'; 'P8latVel'; 'P8latAngVel'; 'P8latControl'; 'P8latPath'};
+stringsProb8 = flip(stringsProb8);
+
+
+
 for i = 1:length(FigList)
     currFig = FigList(i);
     figName = num2str(get(currFig, 'Number'));
     set(0, 'CurrentFigure', currFig);
-    saveas(currFig, strcat(stringsProb72{i}, '.png'));   
+    saveas(currFig, strcat(stringsProb8{i}, '.png'));   
 end
 
 

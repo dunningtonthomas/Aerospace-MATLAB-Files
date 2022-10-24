@@ -32,7 +32,7 @@ odeFuncLong = @(t,var)QuadrotorEOMwithControlCommand(t,var,g,mass,nu,mu,I, latOr
 %Start at initial stationary position with no angles and 0 position
 initPos = [0;0;0];
 initAngle = [0;0;0];
-initVel = [0;0.5;0]; %Start with the reference velocity
+initVel = [0;0;0]; %Start with the reference velocity
 initAngleVel = [0;0;0];
 
 x0_steady_hover = [initPos; initAngle; initVel; initAngleVel];
@@ -43,7 +43,7 @@ tspan = [0 10];
 %Start at initial stationary position with no angles and 0 position
 initPos = [0;0;0];
 initAngle = [0;0;0];
-initVel = [0.5;0;0]; %Start with the reference velocity
+initVel = [0;0;0]; %Start with the reference velocity
 initAngleVel = [0;0;0];
 
 x0_steady_hover = [initPos; initAngle; initVel; initAngleVel];
@@ -76,7 +76,7 @@ for i = 1:length(timeLong)
     [Fc, Gc] = VelocityReferenceFeedback(timeLong(i), finalStateLong(i,:), "long");
     controlLong(i,:) = [-1*Fc(3), Gc(1), Gc(2), Gc(3)];
     
-    %Finding the motor forces
+    %Finding the motor forcces
     motorForcesLong(i,:) = ComputeMotorForces(Fc, Gc, radialDist, km)';
 end
 
@@ -89,7 +89,7 @@ PlotAircraftSim(timeLat, finalStateLat, controlLat, 1:6, '-');
 
 
 %LONGITUDINAL
-PlotAircraftSim(timeLong, finalStateLong, controlLong, 7:12, 'r');
+%PlotAircraftSim(timeLong, finalStateLong, controlLong, 7:12, 'r');
 
 
 %% Functions
