@@ -30,6 +30,10 @@ control_input0 = [20*pi/180; 0; 0; .75];
 for i=1:length(TOUT)
     UOUT(i,:) = control_input0';
 end
+ 
 
+
+
+wind = [5;0;0];
 %%% plot results
-PlotAircraftSim(TOUT,YOUT,UOUT,'b')
+PlotAircraftSim(TOUT,YOUT,UOUT,wind,'b')

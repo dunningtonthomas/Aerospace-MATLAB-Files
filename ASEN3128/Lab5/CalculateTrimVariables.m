@@ -22,7 +22,7 @@ function [trim_variables, fval] = CalculateTrimVariables(trim_definition, aircra
 dt0 = .2;
 de0 = 0;
 alpha0=0;
-%[alpha0, de0] = CalculateSteadyTrim(trim_definition(3), trim_definition(1), aircraft_parameters);
+[alpha0, de0] = CalculateTrimFromStaticStability(trim_definition, aircraft_parameters);
 
 x0 = [alpha0; de0; dt0];
 

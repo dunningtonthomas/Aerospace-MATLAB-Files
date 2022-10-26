@@ -1,4 +1,4 @@
-function PlotAircraftSim(TOUT, aircraft_state, control_surfaces, col)
+function PlotAircraftSim(TOUT, aircraft_state, control_surfaces, background_wind_array, col)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -81,20 +81,75 @@ if (~isempty(control_surfaces))
     subplot(411);
     plot(TOUT, control_surfaces(:,1),col);hold on;
     title('Control Surfaces v Time');   
-    ylabel('\delta_e [rad]')    
+    ylabel('Elevator [rad]')    
 
     subplot(412);
     plot(TOUT, control_surfaces(:,2),col);hold on;
-    ylabel('\delta_a [rad]')      
+    ylabel('Aileron [rad]')      
  
     subplot(413);
     plot(TOUT, control_surfaces(:,3),col);hold on;
-    ylabel('\delta_r [rad]')       
+    ylabel('Rudder [rad]')       
     
     subplot(414);
     plot(TOUT, control_surfaces(:,4),col);hold on;
-    ylabel('\delta_t [frac]')     
+    ylabel('Throttle [frac]')     
     xlabel('time [sec]');
 
 end
+
+
+%%%%%%%%%%%%%%
+%Getting the wind angles over time
+inertVels = aircraft_state(:,7:9);
+eulerAngles = aircraft_state(:,4:6);
+
+%Creating variables for the wind angles
+Vvec = zeros(length(inertVels(:,1)),1);
+betaVec = zeros(length(inertVels(:,1)),1);
+alphaVec = zeros(length(inertVels(:,1)),1);
+
+
+%Calculating the wind from the inertial velocities
+for i = 1:length(inertVels(:,1))
+    inertVel = inertVels(i,:);
+    angles = eulerAngles(i,:);
+    inertWind = TransformFromInertialToBody(background_wind_array, angles);
+    airRelVel = inertVel - inertWind;
+    windAngles = WindAnglesFromVelocityBody(airRelVel);    
+    Vvec(i) = windAngles(1);
+    betaVec(i) = windAngles(2);
+    alphaVec(i) = windAngles(3);
+end
+
+figure(7);
+subplot(3,1,1);
+plot(TOUT, Vvec, col);
+hold on;
+
+ylabel('Wind Velocity (m/s)');
+title('Wind Angles Over Time');
+
+subplot(3,1,2);
+plot(TOUT, betaVec, col);
+hold on;
+
+ylabel('Sideslide Angle (rad)');
+
+subplot(3,1,3);
+plot(TOUT, alphaVec, col);
+hold on;
+
+ylabel('Angle of Attack (rad)');
+
+
+xlabel('Time (s)');
+
+
+
+
+
+
+
+
 
