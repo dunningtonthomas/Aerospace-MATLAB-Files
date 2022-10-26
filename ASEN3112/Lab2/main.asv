@@ -92,8 +92,8 @@ hold on
 yF1Plot = polyval(coeff1, xPlot);
 plot(xPlot, yF1Plot, 'linewidth', 2, 'color', rgb('orange'));
 
-xlabel('Applied Force $$(N)$$');
-ylabel('Internal Force $$(N)$$');
+xlabel('Applied Force $$(lb\cdot f)$$');
+ylabel('Internal Force $$(lb\cdot f)$$');
 title('$$F_{1}$$ Internal Loading');
 legend('Experimental Data', 'Linear Fit', 'location', 'NW');
 
@@ -105,8 +105,8 @@ hold on
 yF2Plot = polyval(coeff2, xPlot);
 plot(xPlot, yF2Plot, 'linewidth', 2, 'color', rgb('orange'));
 
-xlabel('Applied Force $$(N)$$');
-ylabel('Internal Force $$(N)$$');
+xlabel('Applied Force $$(lb\cdot f)$$');
+ylabel('Internal Force $$(lb\cdot f)$$');
 title('$$F_{2}$$ Internal Loading');
 legend('Experimental Data', 'Linear Fit', 'location', 'NW');
 
@@ -118,8 +118,8 @@ hold on
 yF3Plot = polyval(coeff3, xPlot);
 plot(xPlot, yF3Plot, 'linewidth', 2, 'color', rgb('orange'));
 
-xlabel('Applied Force $$(N)$$');
-ylabel('Internal Force $$(N)$$');
+xlabel('Applied Force $$(lb\cdot f)$$');
+ylabel('Internal Force $$(lb\cdot f)$$');
 title('$$F_{3}$$ Internal Loading');
 legend('Experimental Data', 'Linear Fit', 'location', 'NW');
 
@@ -131,8 +131,8 @@ hold on
 yLVDTPlot = polyval(coeffLVDT, xPlot);
 plot(xPlot, yLVDTPlot, 'linewidth', 2, 'color', rgb('purple'));
 
-xlabel('Applied Force $$(N)$$');
-ylabel('Linear Displacement $$(mm)$$');
+xlabel('Applied Force $$(lb\cdot f)$$');
+ylabel('Linear Displacement $$(in)$$');
 title('Displacement With Varying Load Force');
 legend('Experimental Data', 'Linear Fit', 'location', 'NE');
 
