@@ -70,14 +70,14 @@ end
 
 % -------------------> ALUM 28
 %Calculating the analytical solution for model1B, varying the alpha term
+time28 = 3000;
 for j = 1:length(alphaVar_alum)
 for i = 1:8
         % Loops thermocouple location
-     for t = 1:time
+     for t = 1:time28
           % Loops time
           uxt(1, t) = u(T0_alum28, H_alum28, d(1, i)) + FourierCoefficients(N, d(1, i), t, H_alum28, alphaVar_alum(j)); % Calculate U
      end
-        uxt_an(i, :) = uxt;
         alphaAlum28Cell{j,i} = uxt;
 end
 end
@@ -161,6 +161,8 @@ alpha_steelFinal = alphaVar_steel(20);
 
 %% Aluminium 26 figures with various alphas
 
+set(0,'defaulttextinterpreter', 'latex');
+
 % for i = 1:length(alphaVar_alum)
 %     figure();
 %     %Plotting the experimental
@@ -174,6 +176,24 @@ alpha_steelFinal = alphaVar_steel(20);
 %         plot(1:2000, [alphaAlum26Cell{i, j}], 'b');  
 %     end
 % end
+
+figure();
+%Plotting the experimental
+    for j = 2:length(alum26(1,:))
+        plotExp = plot(expTime_alum26, alum26(:,j), 'k', 'linewidth', 1.5, 'linestyle', '-');
+        hold on    
+    end
+
+%Plotting the analytical data
+for j = 1:8
+    plotAnal = plot(1:2000, [alphaAlum26Cell{7,j}], 'b', 'linewidth', 2);
+end
+
+
+title('Aluminium 26V With Optimized Thermal Diffusivity');
+xlabel('Time ($$s$$)');
+ylabel('Temperature ($$^\circ C$$)');
+legend([plotExp, plotAnal], 'Experimental', 'Analytical', 'location', 'NW');
 
 %% Alum 28 with various alphas 
 
@@ -190,7 +210,26 @@ alpha_steelFinal = alphaVar_steel(20);
 %         plot(1:2000, [alphaAlum28Cell{i, j}], 'b');  
 %     end
 % end
+% 
+% xlabel('Time ($$s$$)');
+% ylabel('Temperature ($$^\circ C$$)');
 
+figure();
+%Plotting the experimental
+    for j = 2:length(alum28(1,:))
+        plotExp = plot(expTime_alum28, alum28(:,j), 'k', 'linewidth', 1.5, 'linestyle', '-');
+        hold on    
+    end
+
+%Plotting the analytical data
+for j = 1:8
+    plotAnal = plot(1:3000, [alphaAlum28Cell{2,j}], 'b', 'linewidth', 2);
+end
+
+title('Aluminium 28V With Optimized Thermal Diffusivity');
+xlabel('Time ($$s$$)');
+ylabel('Temperature ($$^\circ C$$)');
+legend([plotExp, plotAnal], 'Experimental', 'Analytical', 'location', 'NW');
 
 
 %% Brass 26 with various alphas 
@@ -208,7 +247,26 @@ alpha_steelFinal = alphaVar_steel(20);
 %         plot(1:6000, [alphaBrass26Cell{i, j}], 'b');  
 %     end
 % end
+% 
+% xlabel('Time ($$s$$)');
+% ylabel('Temperature ($$^\circ C$$)');
 
+figure();
+%Plotting the experimental
+    for j = 2:length(brass26(1,:))
+        plotExp = plot(expTime_brass26, brass26(:,j), 'k', 'linewidth', 1.5, 'linestyle', '-');
+        hold on    
+    end
+
+%Plotting the analytical data
+for j = 1:8
+    plotAnal = plot(1:6000, [alphaBrass26Cell{1,j}], 'b', 'linewidth', 2);
+end
+
+title('Brass 26V With Optimized Thermal Diffusivity');
+xlabel('Time ($$s$$)');
+ylabel('Temperature ($$^\circ C$$)');
+legend([plotExp, plotAnal], 'Experimental', 'Analytical', 'location', 'NW');
 
 %% Brass 29 with various alphas 
 
@@ -225,26 +283,64 @@ alpha_steelFinal = alphaVar_steel(20);
 %         plot(1:6000, [alphaBrass29Cell{i, j}], 'b');  
 %     end
 % end
+% 
+% xlabel('Time ($$s$$)');
+% ylabel('Temperature ($$^\circ C$$)');
 
+figure();
+%Plotting the experimental
+    for j = 2:length(brass29(1,:))
+        plotExp = plot(expTime_brass29, brass29(:,j), 'k', 'linewidth', 1.5, 'linestyle', '-');
+        hold on    
+    end
+
+%Plotting the analytical data
+for j = 1:8
+    plotAnal = plot(1:6000, [alphaBrass29Cell{1,j}], 'b', 'linewidth', 2);
+end
+
+title('Brass 29V With Optimized Thermal Diffusivity');
+xlabel('Time ($$s$$)');
+ylabel('Temperature ($$^\circ C$$)');
+legend([plotExp, plotAnal], 'Experimental', 'Analytical', 'location', 'NW');
 
 
 %% Steel with various alphas 
 
-for i = 1:length(alphaVar_steel)
-    figure();
-    %Plotting the experimental
-    for j = 2:length(steel(1,:))
-        plot(expTime_steel, steel(:,j), 'k');
-        hold on    
-    end
-    
-    %Plotting the analytical data on top
-    for j = 1:8
-        plot(1:12600, [alphaSteelCell{i, j}], 'b');  
-    end
-end
+% for i = 1:length(alphaVar_steel)
+%     figure();
+%     %Plotting the experimental
+%     for j = 2:length(steel(1,:))
+%         plot(expTime_steel, steel(:,j), 'k', 'linewidth', 2, 'linestyle', '--');
+%         hold on    
+%     end
+%     
+%     %Plotting the analytical data on top
+%     for j = 1:8
+%         plot(1:12600, [alphaSteelCell{i, j}], 'b', 'linewidth', 2);  
+%     end
+% end
+% 
+% xlabel('Time ($$s$$)');
+% ylabel('Temperature ($$^\circ C$$)');
    
 
+figure();
+%Plotting the experimental
+    for j = 2:length(steel(1,:))
+        plotExp = plot(expTime_steel, steel(:,j), 'k', 'linewidth', 1.5, 'linestyle', '-');
+        hold on    
+    end
+
+%Plotting the analytical data
+for j = 1:8
+    plotAnal = plot(1:12600, [alphaSteelCell{20,j}], 'b', 'linewidth', 2);
+end
+
+title('Steel 21V With Optimized Thermal Diffusivity');
+xlabel('Time ($$s$$)');
+ylabel('Temperature ($$^\circ C$$)');
+legend([plotExp, plotAnal], 'Experimental', 'Analytical', 'location', 'NW');
 
 %% Functions
 %Function to calculated the fourier term of the expression
