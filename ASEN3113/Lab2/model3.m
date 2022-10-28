@@ -156,6 +156,10 @@ alpha_brass29Final = alphaVar_brass(1);
 %Figure 20 matches best for steel
 alpha_steelFinal = alphaVar_steel(20);
 
+
+%Saving alphas into a file
+save('alphaAdj', 'alpha_alum26Final', 'alpha_alum28Final', 'alpha_brass26Final', 'alpha_brass29Final', 'alpha_steelFinal');
+
 %% Plotting
 
 

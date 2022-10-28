@@ -67,6 +67,18 @@ stdF2Perc = stdF2 / max(abs(F2));
 stdF3Perc = stdF3 / max(abs(F3));
 stdLVDTPerc = stdLVDT / max(abs(LVDT));
 
+%% Analyzing the ANSYS Data and Comparing
+%Nodes 1 and 52 correspond to the F2 load cell
+%Nodes 17 and 68 correspond to the other load cells, not the in line one
+
+%USE THE REACTIONS FOR THE PLATE MOUNTED LOAD CELLS
+%USE INTERNAL LOADING FOR THE IN-LINE LOAD CELL
+%USE DISPLACEMENT AT THE MIDSPAN FOR DISPLACEMENT
+
+
+
+
+
 
 %% Plotting
 %Plotting each force separately with a linear regression
