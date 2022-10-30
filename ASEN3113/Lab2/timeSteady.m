@@ -35,8 +35,8 @@ firstTC_brass29 = brass29(:,9);
 firstTC_steel = steel(:,9);
 
 %Finding when it gets to 95% These values are the steady state
-finalVal_alum26 = .975*(firstTC_alum26(end) - firstTC_alum26(1));
-finalVal_alum28 = .975*(firstTC_alum28(end) - firstTC_alum28(1));
+finalVal_alum26 = .95*(firstTC_alum26(end) - firstTC_alum26(1));
+finalVal_alum28 = .95*(firstTC_alum28(end) - firstTC_alum28(1));
 finalVal_brass26 = .975*(firstTC_brass26(end) - firstTC_brass26(1));
 finalVal_brass29 = .975*(firstTC_brass29(end) - firstTC_brass29(1));
 finalVal_steel = .975*(firstTC_steel(end) - firstTC_steel(1));

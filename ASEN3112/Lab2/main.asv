@@ -82,22 +82,13 @@ stdLVDTPerc = stdLVDT / max(abs(LVDT));
 %USE DISPLACEMENT AT THE MIDSPAN FOR DISPLACEMENT
 loadVec = [0; 10; 20; 30; 40; 50] * 4.44822; %Newtons
 disp_0 = 0;
-disp_10 = -0.37034;
-disp_20 = -0.74068;
-disp_30 = -1.1110;
-disp_40 = -1.4814;
-disp_50 = -1.8517;
-dispVec = [disp_0; disp_10; disp_20; disp_30; disp_40; disp_50]; %miliMeters
+disp_10 = -0.56969e-006;
+disp_20 = -0.11394e-005;
+disp_30 = -0.17091e-005;
+disp_40 = -0.22788e-005;
+disp_50 = -0.28831e-005;
+dispVec = [disp_0; disp_10; disp_20; disp_30; disp_40; disp_50] * 1000; %Meters
 
-
-
-%Getting the reaction forces
-rec17 = [0,11.121,22.242,33.363,44.484,55.595];
-    recf0 = rec17;
-    rec68 = [0,11.121,22.24,33.357, 44.476,55.595];
-    recf1 = rec68;
-    rec1  = [0,11.119,22.238,33.357,44.476,55.605];
-    recf2 = 2*rec1;
 
 
 
@@ -115,8 +106,8 @@ yF0Plot = polyval(coeff0, xPlot);
 plot(xPlot, yF0Plot, 'linewidth', 2, 'color', rgb('orange'));
 
 xlabel('Applied Force $$(N)$$');
-ylabel('Reaction Force $$(N)$$');
-title('$$F_{0}$$ Reaction Loading');
+ylabel('Internal Force $$(N)$$');
+title('$$F_{0}$$ Internal Loading');
 legend('Experimental Data', 'Linear Fit', 'location', 'NW');
 
 
@@ -128,8 +119,8 @@ yF1Plot = polyval(coeff1, xPlot);
 plot(xPlot, yF1Plot, 'linewidth', 2, 'color', rgb('orange'));
 
 xlabel('Applied Force $$(N)$$');
-ylabel('Reaction Force $$(N)$$');
-title('$$F_{1}$$ Reaction Loading');
+ylabel('Internal Force $$(N)$$');
+title('$$F_{1}$$ Internal Loading');
 legend('Experimental Data', 'Linear Fit', 'location', 'NW');
 
 
@@ -141,12 +132,12 @@ yF2Plot = polyval(coeff2, xPlot);
 plot(xPlot, yF2Plot, 'linewidth', 2, 'color', rgb('orange'));
 
 xlabel('Applied Force $$(N)$$');
-ylabel('Reaction Force $$(N)$$');
-title('$$F_{2}$$ Reaction Loading');
+ylabel('Internal Force $$(N)$$');
+title('$$F_{2}$$ Internal Loading');
 legend('Experimental Data', 'Linear Fit', 'location', 'NW');
 
 
-%F3 Plot
+%F0 Plot
 figure();
 scatter(loadForce, F3, 'filled', 'markerfacecolor', 'r');
 hold on
@@ -166,7 +157,6 @@ hold on
 yLVDTPlot = polyval(coeffLVDT, xPlot);
 plot(xPlot, yLVDTPlot, 'linewidth', 2, 'color', rgb('purple'));
 
-
 xlabel('Applied Force $$(N)$$');
 ylabel('Linear Displacement $$(mm)$$');
 title('Displacement With Varying Load Force');
@@ -174,24 +164,7 @@ legend('Experimental Data', 'Linear Fit', 'location', 'NE');
 
 
 
-%% Experimental vs Analytical
 
-%Plotting the LVDT which is the displacement
-figure();
-scatter(loadForce, LVDT, 'filled', 'markerfacecolor', rgb('blue'));
-hold on
-yLVDTPlot = polyval(coeffLVDT, xPlot);
-plot(xPlot, yLVDTPlot, 'linewidth', 2, 'color', rgb('purple'));
-
-%ANSYS
-scatter(loadVec, dispVec, 'filled', 'markerfacecolor', rgb('red'));
-plot(loadVec, dispVec, 'linewidth', 2, 'color', rgb('orange'));
-
-
-xlabel('Applied Force $$(N)$$');
-ylabel('Linear Displacement $$(mm)$$');
-title('Displacement With Varying Load Force');
-legend('Experimental Data', 'Linear Fit', 'ANSYS Data', 'Linear Fit', 'location', 'NE');
 
 
 
