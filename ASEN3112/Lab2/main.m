@@ -93,13 +93,44 @@ dispVec = [disp_0; disp_10; disp_20; disp_30; disp_40; disp_50]; %miliMeters
 
 %Getting the reaction forces
 rec17 = [0,11.121,22.242,33.363,44.484,55.595];
-    recf0 = rec17;
-    rec68 = [0,11.121,22.24,33.357, 44.476,55.595];
-    recf1 = rec68;
-    rec1  = [0,11.119,22.238,33.357,44.476,55.605];
-    recf2 = 2*rec1;
+recf0 = rec17;
+rec68 = [0,11.121,22.24,33.357, 44.476,55.595];
+recf1 = rec68;
+rec1  = [0,11.119,22.238,33.357,44.476,55.605];
+recf2 = 2*rec1;
+
+%Performing linear regression to get the slopes
+coeffAnsys0 = polyfit(loadVec, recf0, 1);
+coeffAnsys1 = polyfit(loadVec, recf1, 1);
+coeffAnsys2 = polyfit(loadVec, recf2, 1);
+coeffAnsysDisp = polyfit(loadVec, dispVec, 1);
 
 
+%Calculating the percent difference between the experimental slope and the
+%analytical slope
+percentDiff0 = (coeff0(1) - coeffAnsys0(1)) / ((coeff0(1) + coeffAnsys0(1))/2) * 100;
+percentDiff1 = (coeff1(1) - coeffAnsys1(1)) / ((coeff1(1) + coeffAnsys1(1))/2) * 100;
+percentDiff2 = (coeff2(1) - coeffAnsys2(1)) / ((coeff2(1) + coeffAnsys2(1))/2) * 100;
+percentDiffDisp = (coeffLVDT(1) - coeffAnsysDisp(1)) / ((coeffLVDT(1) + coeffAnsysDisp(1))/2) * 100;
+
+
+%Finding the mean of the residuals for the ANSYS vs Experimental
+%Exp - predicted
+ansysResidF0 = polyval(coeff0,  loadVec) - polyval(coeffAnsys0, loadVec);
+ansysAvgF0 = (polyval(coeff0,  loadVec) + polyval(coeffAnsys0, loadVec)) / 2;
+meanResidF0 = mean(ansysResidF0 ./ ansysAvgF0);
+
+ansysResidF1 = polyval(coeff1,  loadVec) - polyval(coeffAnsys1, loadVec);   
+ansysAvgF1 = (polyval(coeff1,  loadVec) + polyval(coeffAnsys1, loadVec)) / 2;
+meanResidF1 = mean(ansysResidF1 ./ ansysAvgF1);
+
+ansysResidF2 = polyval(coeff2,  loadVec) - polyval(coeffAnsys2, loadVec);   
+ansysAvgF2 = (polyval(coeff2,  loadVec) + polyval(coeffAnsys2, loadVec)) / 2;
+meanResidF2 = mean(ansysResidF2 ./ ansysAvgF2);
+
+ansysResidDisp = polyval(coeffLVDT,  loadVec) - polyval(coeffAnsysDisp, loadVec);   
+ansysAvgDisp = (polyval(coeffLVDT,  loadVec) + polyval(coeffAnsysDisp, loadVec)) / 2;
+meanResidDisp = mean(ansysResidDisp ./ ansysAvgDisp);
 
 
 
@@ -175,6 +206,74 @@ legend('Experimental Data', 'Linear Fit', 'location', 'NE');
 
 
 %% Experimental vs Analytical
+
+%F0 Plot
+set(0, 'defaulttextinterpreter', 'latex');
+figure();
+xPlot = linspace(0,222.4,100);
+scatter(loadForce, F0, 'filled', 'markerfacecolor', rgb('blue'));
+hold on
+yF0Plot = polyval(coeff0, xPlot);
+plot(xPlot, yF0Plot, 'linewidth', 2, 'color', rgb('purple'));
+
+%ANSYS
+scatter(loadVec, recf0, 'filled', 'markerfacecolor', rgb('red'));
+plot(loadVec, recf0, 'linewidth', 2, 'color', rgb('orange'));
+
+xlabel('Applied Force $$(N)$$');
+ylabel('Reaction Force $$(N)$$');
+title('$$F_{0}$$ Reaction Loading');
+legend('Experimental Data', 'Linear Fit', 'ANSYS Data', 'Linear Fit','location', 'NW');
+
+
+%F1 Plot
+figure();
+scatter(loadForce, F1, 'filled', 'markerfacecolor', rgb('blue'));
+hold on
+yF1Plot = polyval(coeff1, xPlot);
+plot(xPlot, yF1Plot, 'linewidth', 2, 'color', rgb('purple'));
+
+%ANSYS
+scatter(loadVec, recf1, 'filled', 'markerfacecolor', rgb('red'));
+plot(loadVec, recf1, 'linewidth', 2, 'color', rgb('orange'));
+
+xlabel('Applied Force $$(N)$$');
+ylabel('Reaction Force $$(N)$$');
+title('$$F_{1}$$ Reaction Loading');
+legend('Experimental Data', 'Linear Fit','ANSYS Data', 'Linear Fit', 'location', 'NW');
+
+
+%F2 Plot
+figure();
+scatter(loadForce, F2, 'filled', 'markerfacecolor', rgb('blue'));
+hold on
+yF2Plot = polyval(coeff2, xPlot);
+plot(xPlot, yF2Plot, 'linewidth', 2, 'color', rgb('purple'));
+
+%ANSYS
+scatter(loadVec, recf2, 'filled', 'markerfacecolor', rgb('red'));
+plot(loadVec, recf2, 'linewidth', 2, 'color', rgb('orange'));
+
+xlabel('Applied Force $$(N)$$');
+ylabel('Reaction Force $$(N)$$');
+title('$$F_{2}$$ Reaction Loading');
+legend('Experimental Data', 'Linear Fit','ANSYS Data', 'Linear Fit', 'location', 'NW');
+
+
+%F3 Plot
+figure();
+scatter(loadForce, F3, 'filled', 'markerfacecolor', rgb('blue'));
+hold on
+yF3Plot = polyval(coeff3, xPlot);
+plot(xPlot, yF3Plot, 'linewidth', 2, 'color', rgb('purple'));
+
+
+xlabel('Applied Force $$(N)$$');
+ylabel('Internal Force $$(N)$$');
+title('$$F_{3}$$ Internal Loading');
+legend('Experimental Data', 'Linear Fit', 'location', 'NW');
+
+
 
 %Plotting the LVDT which is the displacement
 figure();
