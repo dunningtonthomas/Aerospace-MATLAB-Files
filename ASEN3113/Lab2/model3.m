@@ -159,6 +159,7 @@ alpha_steelFinal = alphaVar_steel(20);
 
 %Saving alphas into a file
 save('alphaAdj', 'alpha_alum26Final', 'alpha_alum28Final', 'alpha_brass26Final', 'alpha_brass29Final', 'alpha_steelFinal');
+save('model3', 'alphaAlum26Cell', 'alphaAlum28Cell', 'alphaBrass26Cell', 'alphaBrass29Cell', 'alphaSteelCell');
 
 %% Plotting
 
