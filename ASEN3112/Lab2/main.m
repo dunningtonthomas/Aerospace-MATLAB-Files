@@ -10,6 +10,7 @@ F2 = data(:,4) * 4.44822;
 F3 = data(:,5) * 4.44822;
 LVDT = data(:,6) * 25.4;
 
+
 %Index 60 is when it starts going back down to 0 from 50 pounds
 loadForce = loadForce(1:60);
 F0 = F0(1:60);
@@ -90,7 +91,6 @@ disp_50 = -1.8517;
 dispVec = [disp_0; disp_10; disp_20; disp_30; disp_40; disp_50]; %miliMeters
 
 
-
 %Getting the reaction forces
 rec17 = [0,11.121,22.242,33.363,44.484,55.595];
 recf0 = rec17;
@@ -117,20 +117,31 @@ percentDiffDisp = (coeffLVDT(1) - coeffAnsysDisp(1)) / ((coeffLVDT(1) + coeffAns
 %Finding the mean of the residuals for the ANSYS vs Experimental
 %Exp - predicted
 ansysResidF0 = polyval(coeff0,  loadVec) - polyval(coeffAnsys0, loadVec);
-ansysAvgF0 = (polyval(coeff0,  loadVec) + polyval(coeffAnsys0, loadVec)) / 2;
-meanResidF0 = mean(ansysResidF0 ./ ansysAvgF0);
+stdResidF0 = std(ansysResidF0);
 
 ansysResidF1 = polyval(coeff1,  loadVec) - polyval(coeffAnsys1, loadVec);   
-ansysAvgF1 = (polyval(coeff1,  loadVec) + polyval(coeffAnsys1, loadVec)) / 2;
-meanResidF1 = mean(ansysResidF1 ./ ansysAvgF1);
+stdResidF1 = std(ansysResidF1);
 
 ansysResidF2 = polyval(coeff2,  loadVec) - polyval(coeffAnsys2, loadVec);   
-ansysAvgF2 = (polyval(coeff2,  loadVec) + polyval(coeffAnsys2, loadVec)) / 2;
-meanResidF2 = mean(ansysResidF2 ./ ansysAvgF2);
+stdResidF2 = std(ansysResidF2);
 
 ansysResidDisp = polyval(coeffLVDT,  loadVec) - polyval(coeffAnsysDisp, loadVec);   
-ansysAvgDisp = (polyval(coeffLVDT,  loadVec) + polyval(coeffAnsysDisp, loadVec)) / 2;
-meanResidDisp = mean(ansysResidDisp ./ ansysAvgDisp);
+stdResidDisp = std(ansysResidDisp);
+
+%% Uncertainty Analysis Addition Sources of Error
+
+%Imperfect Joints
+%Varing the youngs modulus
+maxDisp58 = -2.1661;
+maxDisp78 = -1.6170;
+
+%These values do not change
+f0_58 = 55.6;
+f1_58 = 55.6;
+f2_58 = 2*55.6;
+
+
+
 
 
 
@@ -202,6 +213,85 @@ xlabel('Applied Force $$(N)$$');
 ylabel('Linear Displacement $$(mm)$$');
 title('Displacement With Varying Load Force');
 legend('Experimental Data', 'Linear Fit', 'location', 'NE');
+
+
+
+
+%% ANSYS Model Plots
+%F0 Plot
+set(0, 'defaulttextinterpreter', 'latex');
+figure();
+
+
+%ANSYS
+scatter(loadVec, recf0, 'filled', 'markerfacecolor', rgb('red'));
+hold on;
+plot(loadVec, recf0, 'linewidth', 2, 'color', rgb('orange'));
+
+xlabel('Applied Force $$(N)$$');
+ylabel('Reaction Force $$(N)$$');
+title('$$F_{0}$$ Reaction Loading');
+legend('ANSYS Data', 'Linear Fit','location', 'NW');
+
+
+%F1 Plot
+figure();
+
+%ANSYS
+scatter(loadVec, recf1, 'filled', 'markerfacecolor', rgb('red'));
+hold on;
+plot(loadVec, recf1, 'linewidth', 2, 'color', rgb('orange'));
+
+xlabel('Applied Force $$(N)$$');
+ylabel('Reaction Force $$(N)$$');
+title('$$F_{1}$$ Reaction Loading');
+legend('ANSYS Data', 'Linear Fit', 'location', 'NW');
+
+
+%F2 Plot
+figure();
+
+%ANSYS
+scatter(loadVec, recf2, 'filled', 'markerfacecolor', rgb('red'));
+hold on
+plot(loadVec, recf2, 'linewidth', 2, 'color', rgb('orange'));
+
+xlabel('Applied Force $$(N)$$');
+ylabel('Reaction Force $$(N)$$');
+title('$$F_{2}$$ Reaction Loading');
+legend('ANSYS Data', 'Linear Fit', 'location', 'NW');
+
+
+%F3 Plot
+% figure();
+% scatter(loadForce, F3, 'filled', 'markerfacecolor', rgb('blue'));
+% hold on
+% yF3Plot = polyval(coeff3, xPlot);
+% plot(xPlot, yF3Plot, 'linewidth', 2, 'color', rgb('purple'));
+% 
+% 
+% xlabel('Applied Force $$(N)$$');
+% ylabel('Internal Force $$(N)$$');
+% title('$$F_{3}$$ Internal Loading');
+% legend('Experimental Data', 'Linear Fit', 'location', 'NW');
+
+
+
+%Plotting the LVDT which is the displacement
+figure();
+
+%ANSYS
+scatter(loadVec, dispVec, 'filled', 'markerfacecolor', rgb('red'));
+hold on
+plot(loadVec, dispVec, 'linewidth', 2, 'color', rgb('orange'));
+
+
+xlabel('Applied Force $$(N)$$');
+ylabel('Linear Displacement $$(mm)$$');
+title('Displacement With Varying Load Force');
+legend('ANSYS Data', 'Linear Fit', 'location', 'NE');
+
+
 
 
 

@@ -1,0 +1,19 @@
+
+ PRINT F    REACTION SOLUTIONS PER NODE
+ 
+  ***** POST1 TOTAL REACTION SOLUTION LISTING *****                            
+ 
+  LOAD STEP=     1  SUBSTEP=     1                                             
+   TIME=    1.0000      LOAD CASE=   0                                         
+ 
+  THE FOLLOWING X,Y,Z SOLUTIONS ARE IN THE GLOBAL COORDINATE SYSTEM            
+ 
+    NODE       FX           FY           FZ    
+       1 -0.11684       55.595       1.8052     
+      17                55.605      0.19032     
+      52  0.11684       55.605      -1.8125     
+      68                55.595     -0.18302     
+
+ TOTAL VALUES
+ VALUE  -0.34506E-010  222.40     -0.48093E-011
+
