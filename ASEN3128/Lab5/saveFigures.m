@@ -14,6 +14,8 @@ stringsProb3b = {'windAng3b', 'control3b', 'path3b', 'angVel3b', 'vel3b', 'euler
 %stringsProb3 = flip(stringsProb3);
 
 
+
+
 for i = 1:length(FigList)
     currFig = FigList(i);
     figName = num2str(get(currFig, 'Number'));

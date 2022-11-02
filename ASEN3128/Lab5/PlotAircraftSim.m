@@ -5,7 +5,8 @@ function PlotAircraftSim(TOUT, aircraft_state, control_surfaces, background_wind
 figure(1);
  
 subplot(311);
-h1= plot(TOUT, aircraft_state(:,1),col, 'linewidth', 2);hold on;
+plot(TOUT, aircraft_state(:,1),col, 'linewidth', 2);
+hold on;
 title('Position v Time');   
 ylabel('X [m]')    
 
