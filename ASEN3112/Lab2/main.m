@@ -99,6 +99,9 @@ recf1 = rec68;
 rec1  = [0,11.119,22.238,33.357,44.476,55.605];
 recf2 = 2*rec1;
 
+%Internal Forces for F_{3}
+recf3Max = 181.564; %Newtons
+
 %Performing linear regression to get the slopes
 coeffAnsys0 = polyfit(loadVec, recf0, 1);
 coeffAnsys1 = polyfit(loadVec, recf1, 1);
