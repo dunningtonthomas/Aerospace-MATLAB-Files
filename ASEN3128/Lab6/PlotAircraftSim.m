@@ -80,7 +80,7 @@ if (~isempty(control_surfaces))
     
     subplot(411);
     plot(TOUT, control_surfaces(:,1),col);hold on;
-    title('Motor Thrust Forces v Time');   
+    title('Control Surfaces v Time');   
     ylabel('\delta_e [rad]')    
 
     subplot(412);
