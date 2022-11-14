@@ -73,6 +73,11 @@ xlabel('time [sec]');
 figure(5);
 plot3(aircraft_state(:,1),aircraft_state(:,2),-aircraft_state(:,3),col);hold on;
 
+title('Path');
+xlabel('X-Position');
+ylabel('Y-Position');
+zlabel('Z-Position');
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 if (~isempty(control_surfaces))
@@ -80,7 +85,7 @@ if (~isempty(control_surfaces))
     
     subplot(411);
     plot(TOUT, control_surfaces(:,1),col);hold on;
-    title('Motor Thrust Forces v Time');   
+    title('Control Surfaces v Time');   
     ylabel('\delta_e [rad]')    
 
     subplot(412);

@@ -49,12 +49,19 @@ mat4 = [Cmq; Clq];
 %Matrix equations
 rhs1 = mat2*[0;-cos(phi)]*(omega*b/(2*u0));
 
-rhs2 = -mat4*((omega*c*sin(phi))/(2*u0));
+n = 1 / cos(phi);
+Cw = 1.75074;
+rhs2 = -mat4*((omega*c*sin(phi))/(2*u0)) + [0; (n-1)*Cw];
 
 %Solving for the values
 solMat1 = mat1 \ rhs1;
 
 solMat2 = mat3 \ rhs2;
+
+
+%Converting to degrees
+solMat1 * (180/pi)
+solMat2 * (180/pi)
 
 
 
