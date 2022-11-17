@@ -27,11 +27,11 @@ trim_definition = [Va_trim; h_trim];
 % STUDENTS COMPLETE
 
 %Getting the eigenvectors for longitudinal
-[eigenLon, ~] = eig(Alon); %5 and 6 columns are the phugoid eigens
+[eigenLon, eigVals] = eig(Alon); %5 and 6 columns are the phugoid eigens
 
 phuEigen = eigenLon(:,5);
 phuEigen = phuEigen / (phuEigen(4));
-phuEigen = phuEigen * (2*pi/180); %Scaling so initial pitch is 2 degrees
+phuEigen = phuEigen * (15*pi/180); %Scaling so initial pitch is 2 degrees
 phuEigenReal = real(phuEigen); %Order [u,w,q,theta,x,z]
 addInitialPhu = [phuEigenReal(5); 0; phuEigenReal(6); 0; phuEigenReal(4); 0; phuEigenReal(1); 0; phuEigenReal(2); 0; phuEigenReal(3); 0];
 
