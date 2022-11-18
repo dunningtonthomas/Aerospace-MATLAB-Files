@@ -1,4 +1,4 @@
-function h = color_line3d(c, x, y)
+function h = colorLine3D(c, x, y)
 % color_line3 plots a 3-D "line" with c-data as color
 %
 %       color_line3d(c, x, y)
@@ -7,9 +7,7 @@ function h = color_line3d(c, x, y)
 %       y      y-data
 %       c      coloring
 %
-
 z = zeros(size(x));
-
 h = surface(...
   'XData',[x(:) x(:)],...
   'YData',[y(:) y(:)],...
@@ -19,7 +17,5 @@ h = surface(...
   'EdgeColor','interp',...
   'Marker','none', ...
   'LineWidth',2);
-
 colorbar
-
 end
