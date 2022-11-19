@@ -178,14 +178,13 @@ s = plot(time / 3600, TempSS_S - 273, 'linewidth', 2, 'color', [0.9290 0.6940 0.
 plot(time2 / 3600, ones(1, length(time2))*(TempSS_S_Const - 273), 'linewidth', 2, 'color', [0.9290 0.6940 0.1250], 'linestyle', '-');
 
 
-yline(20, 'linewidth', 2, 'color', 'k', 'linestyle', '--', 'label', 'Required Operational Range');
-yline(30, 'linewidth', 2, 'color', 'k', 'linestyle', '--');
-yline(-40, 'linewidth', 2, 'color', 'k', 'linestyle', '--', 'label', 'Required Survival Temperature');
+yline(20, 'linewidth', 2, 'color', 'r', 'linestyle', '--', 'label', 'Required Temperature Range');
+yline(30, 'linewidth', 2, 'color', 'r', 'linestyle', '--');
+yline(-40, 'linewidth', 2, 'color', 'r', 'linestyle', '--', 'label', 'Required Survival Temperature');
 
 
 ylabel('Temperature $$(^{\circ}C)$$');
 ylim([-100 40]);
-xlim([0 24]);
 
 %Heater power on the right
 yyaxis right
@@ -194,10 +193,10 @@ Qop = plot(time / 3600, QH_SS_Op, 'linewidth', 2, 'color', 'b');
 hold on
 plot(time2 / 3600, ones(1,length(time2))*QH_SS_Op_Const, 'linewidth', 2, 'color', 'b', 'linestyle', '-');
 
-Qs = plot(time / 3600, QH_SS_S, 'linewidth', 2, 'color', [0.3010 0.7450 0.9330], 'linestyle', '-');
-plot(time2 / 3600, ones(1,length(time2))*QH_SS_S_Const, 'linewidth', 2, 'color', [0.3010 0.7450 0.9330], 'linestyle', '-');
+Qs = plot(time / 3600, QH_SS_S, 'linewidth', 2, 'color', [0.4940 0.1840 0.5560], 'linestyle', '-');
+plot(time2 / 3600, ones(1,length(time2))*QH_SS_S_Const, 'linewidth', 2, 'color', [0.4940 0.1840 0.5560], 'linestyle', '-');
 
-title('Summer Solstice Temperature and Power');
+title('Summer Solstice Operational');
 xlabel('Time (hours)');
 
 %Setting the colors of the axis
@@ -208,9 +207,6 @@ ax.YAxis(2).Color = 'b';
 %Legend
 legend([op, s, Qop, Qs], 'Operational Temp', 'Survival Temp', 'Operational Power', 'Survival Power', 'location', 'best');
 
-%Setting xticks
-xticks([0 6 12 18 24])
-xticklabels({'0 (Noon)','6','12 (Midnight)','18','24 (Noon)'})
 
 %Summer Solstice Survival
 % figure();
@@ -255,26 +251,25 @@ s = plot(time / 3600, TempWS_S - 273, 'linewidth', 2, 'color', [0.9290 0.6940 0.
 plot(time2 / 3600, ones(1, length(time2))*(TempWS_S_Const - 273), 'linewidth', 2, 'color', [0.9290 0.6940 0.1250], 'linestyle', '-');
 
 
-yline(20, 'linewidth', 2, 'color', 'k', 'linestyle', '--', 'label', 'Required Operational Range');
-yline(30, 'linewidth', 2, 'color', 'k', 'linestyle', '--');
-yline(-40, 'linewidth', 2, 'color', 'k', 'linestyle', '--', 'label', 'Required Survival Temperature');
+yline(20, 'linewidth', 2, 'color', 'r', 'linestyle', '--', 'label', 'Required Temperature Range');
+yline(30, 'linewidth', 2, 'color', 'r', 'linestyle', '--');
+yline(-40, 'linewidth', 2, 'color', 'r', 'linestyle', '--', 'label', 'Required Survival Temperature');
 
 
 ylabel('Temperature $$(^{\circ}C)$$');
 ylim([-100 40]);
-xlim([0 24]);
 
 %Heater power on the right
 yyaxis right
 ylabel('Heater Power (W)');
 Qop = plot(time / 3600, QH_WS_Op, 'linewidth', 2, 'color', 'b');
 hold on
-plot(time2 / 3600, ones(1,length(time2))*QH_WS_Op_Const, 'linewidth', 2, 'color', 'b', 'linestyle', '-');
+plot(time2 / 3600, ones(1,length(time2))*QH_SS_Op_Const, 'linewidth', 2, 'color', 'b', 'linestyle', '-');
 
-Qs = plot(time / 3600, QH_WS_S, 'linewidth', 2, 'color', [0.3010 0.7450 0.9330], 'linestyle', '-');
-plot(time2 / 3600, ones(1,length(time2))*QH_WS_S_Const, 'linewidth', 2, 'color', [0.3010 0.7450 0.9330], 'linestyle', '-');
+Qs = plot(time / 3600, QH_SS_S, 'linewidth', 2, 'color', [0.4940 0.1840 0.5560], 'linestyle', '-');
+plot(time2 / 3600, ones(1,length(time2))*QH_SS_S_Const, 'linewidth', 2, 'color', [0.4940 0.1840 0.5560], 'linestyle', '-');
 
-title('Winter Solstice Temperature and Power');
+title('Summer Solstice Operational');
 xlabel('Time (hours)');
 
 %Setting the colors of the axis
@@ -284,10 +279,6 @@ ax.YAxis(2).Color = 'b';
 
 %Legend
 legend([op, s, Qop, Qs], 'Operational Temp', 'Survival Temp', 'Operational Power', 'Survival Power', 'location', 'best');
-
-%Setting xticks
-xticks([0 6 12 18 24])
-xticklabels({'0 (Noon)','6','12 (Midnight)','18','24 (Noon)'})
 
 % 
 % %%%%WINTER SOLSTICE
@@ -353,7 +344,7 @@ xticklabels({'0 (Noon)','6','12 (Midnight)','18','24 (Noon)'})
 % ax.YAxis(1).Color = 'r';
 % ax.YAxis(2).Color = 'b';
 
-%% Equinox Total
+
 %%%%EQUINOX
 %Equinox Operational
 figure();
@@ -361,39 +352,31 @@ set(0, 'defaulttextinterpreter', 'latex');
 
 yyaxis left
 
-op = plot([time / 3600, time2 / 3600] , [TempE_Op - 273, TempE_Op_Const_Plot - 273],  'linewidth', 2, 'color', 'r');
+plot([time / 3600, time2 / 3600] , [TempE_Op - 273, TempE_Op_Const_Plot - 273],  'linewidth', 2, 'color', 'r');
 hold on
-s = plot([time / 3600, time2 / 3600] , [TempE_S - 273, TempE_S_Const_Plot - 273],  'linewidth', 2, 'color', [0.9290 0.6940 0.1250], 'linestyle', '-');
+plot([time / 3600, time2 / 3600] , [TempE_S - 273, TempE_S_Const_Plot - 273],  'linewidth', 2, 'color', [0.9290 0.6940 0.1250], 'linestyle', '-');
 
-yline(20, 'linewidth', 2, 'color', 'k', 'linestyle', '--', 'label', 'Required Operational Range');
-yline(30, 'linewidth', 2, 'color', 'k', 'linestyle', '--');
-yline(-40, 'linewidth', 2, 'color', 'k', 'linestyle', '--', 'label', 'Required Survival Temperature');
+yline(20, 'linewidth', 2, 'color', 'r', 'linestyle', '--', 'label', 'Required Temperature Range');
+yline(30, 'linewidth', 2, 'color', 'r', 'linestyle', '--');
+yline(-40, 'linewidth', 2, 'color', 'r', 'linestyle', '--', 'label', 'Required Survival Temperature');
 
 ylabel('Temperature $$(^{\circ}C)$$');
 ylim([-160 40]);
-xlim([0 24]);
 
 %Heater power on the right
 yyaxis right
 ylabel('Heater Power (W)');
-Qop = plot([time / 3600, time2/3600], [QH_E_Op, QH_E_Op_Const_Plot] , 'linewidth', 2, 'color', 'b');
+plot([time / 3600, time2/3600], [QH_E_Op, QH_E_Op_Const_Plot] , 'linewidth', 2, 'color', 'b');
 hold on
-Qs = plot([time / 3600, time2/3600], [QH_E_S, QH_E_S_Const_Plot] , 'linewidth', 2, 'color', [0.3010 0.7450 0.9330], 'linestyle', '-');
+plot([time / 3600, time2/3600], [QH_E_S, QH_E_S_Const_Plot] , 'linewidth', 2, 'color', [0.4940 0.1840 0.5560], 'linestyle', '-');
 
-title('Equinox Temperature and Power');
+title('Winter Solstice Operational');
 xlabel('Time (hours)');
 
 %Setting the colors of the axis
 ax = gca;
 ax.YAxis(1).Color = 'r';
 ax.YAxis(2).Color = 'b';
-
-%Legend
-legend([op, s, Qop, Qs], 'Operational Temp', 'Survival Temp', 'Operational Power', 'Survival Power', 'location', 'SE');
-
-%Setting xticks
-xticks([0 6 12 18 24])
-xticklabels({'0 (Noon)','6','12 (Midnight)','18','24 (Noon)'})
 
 
 
