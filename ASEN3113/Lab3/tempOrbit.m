@@ -174,8 +174,8 @@ yyaxis left
 op = plot(time / 3600, TempSS_Op - 273, 'linewidth', 2, 'color', 'r');
 hold on
 plot(time2 / 3600, ones(1, length(time2))*(TempSS_Op_Const - 273), 'linewidth', 2, 'color', 'r', 'linestyle', '-');
-s = plot(time / 3600, TempSS_S - 273, 'linewidth', 2, 'color', [0.9290 0.6940 0.1250], 'linestyle', '-');
-plot(time2 / 3600, ones(1, length(time2))*(TempSS_S_Const - 273), 'linewidth', 2, 'color', [0.9290 0.6940 0.1250], 'linestyle', '-');
+s = plot(time / 3600, TempSS_S - 273, 'linewidth', 2, 'color', rgb('mango'), 'linestyle', '-');
+plot(time2 / 3600, ones(1, length(time2))*(TempSS_S_Const - 273), 'linewidth', 2, 'color', rgb('mango'), 'linestyle', '-');
 
 
 yline(20, 'linewidth', 2, 'color', 'k', 'linestyle', '--', 'label', 'Required Operational Range');
@@ -251,8 +251,8 @@ yyaxis left
 op = plot(time / 3600, TempWS_Op - 273, 'linewidth', 2, 'color', 'r');
 hold on
 plot(time2 / 3600, ones(1, length(time2))*(TempWS_Op_Const - 273), 'linewidth', 2, 'color', 'r', 'linestyle', '-');
-s = plot(time / 3600, TempWS_S - 273, 'linewidth', 2, 'color', [0.9290 0.6940 0.1250], 'linestyle', '-');
-plot(time2 / 3600, ones(1, length(time2))*(TempWS_S_Const - 273), 'linewidth', 2, 'color', [0.9290 0.6940 0.1250], 'linestyle', '-');
+s = plot(time / 3600, TempWS_S - 273, 'linewidth', 2, 'color', rgb('mango'), 'linestyle', '-');
+plot(time2 / 3600, ones(1, length(time2))*(TempWS_S_Const - 273), 'linewidth', 2, 'color', rgb('mango'), 'linestyle', '-');
 
 
 yline(20, 'linewidth', 2, 'color', 'k', 'linestyle', '--', 'label', 'Required Operational Range');
@@ -363,7 +363,7 @@ yyaxis left
 
 op = plot([time / 3600, time2 / 3600] , [TempE_Op - 273, TempE_Op_Const_Plot - 273],  'linewidth', 2, 'color', 'r');
 hold on
-s = plot([time / 3600, time2 / 3600] , [TempE_S - 273, TempE_S_Const_Plot - 273],  'linewidth', 2, 'color', [0.9290 0.6940 0.1250], 'linestyle', '-');
+s = plot([time / 3600, time2 / 3600] , [TempE_S - 273, TempE_S_Const_Plot - 273],  'linewidth', 2, 'color', rgb('mango'), 'linestyle', '-');
 
 yline(20, 'linewidth', 2, 'color', 'k', 'linestyle', '--', 'label', 'Required Operational Range');
 yline(30, 'linewidth', 2, 'color', 'k', 'linestyle', '--');
