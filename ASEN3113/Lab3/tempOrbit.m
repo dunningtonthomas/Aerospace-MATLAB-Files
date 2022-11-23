@@ -11,9 +11,17 @@ area = 0.2863;
 alphaSolar = 0.2;
 alphaIR = 0.85;
 epsilon = 0.85;
-fluxEq = 1361;
-fluxSum = 1361 - 0.033*1361; %3.3 variation in flux
-fluxWin = 1361 + 0.033*1361; %3.3 variation in flux
+
+%Solar constants
+Gs = (5.67*10^-8)*(5771.5^4);
+radSum = 215*(1+0.0167);
+radWin = 215*(1-0.0167);
+
+fluxEq = Gs / (215^2);
+% fluxSum = 1361 - 0.033*1361; %3.3 variation in flux
+% fluxWin = 1361 + 0.033*1361; %3.3 variation in flux
+fluxSum = Gs / (radSum^2); %3.3 variation in flux
+fluxWin = Gs / (radWin^2); %3.3 variation in flux
 
 %Angle of earth's tilt
 tilt = 23.5*pi/180;
@@ -42,6 +50,10 @@ TempSS_Op_Const = ((1/(area*epsilon*sigma))*(20 + 63*area*alphaIR)).^(1/4);
 TempSS_S = ((1/(area*epsilon*sigma))*(alphaSolar*fluxSum*area*cos(tilt)*sin(theta) + 63*area*alphaIR)).^(1/4);
 TempSS_S_Const = ((1/(area*epsilon*sigma))*(63*area*alphaIR)).^(1/4);
 
+%%Absorbed solar radiation
+qSS = alphaSolar*fluxSum*area*cos(tilt)*sin(theta);
+
+
 %%%%WINTER SOLSTICE
 %%Operation
 TempWS_Op = ((1/(area*epsilon*sigma))*(20 + alphaSolar*fluxWin*area*cos(tilt)*sin(theta) + 88*area*alphaIR)).^(1/4);
@@ -51,6 +63,8 @@ TempWS_Op_Const = ((1/(area*epsilon*sigma))*(20 + 88*area*alphaIR)).^(1/4);
 TempWS_S = ((1/(area*epsilon*sigma))*(alphaSolar*fluxWin*area*cos(tilt)*sin(theta) + 88*area*alphaIR)).^(1/4);
 TempWS_S_Const = ((1/(area*epsilon*sigma))*(88*area*alphaIR)).^(1/4);
 
+%%Absorbed solar radiation
+qWS = alphaSolar*fluxWin*area*cos(tilt)*sin(theta);
 
 %%%%EQUINOX
 %%Operation
@@ -63,6 +77,12 @@ TempOp_Eclipse = ((1/(area*epsilon*sigma))*(20 + 11*area))^(1/4);
 %%Survival
 TempE_S = ((1/(area*epsilon*sigma))*(alphaSolar*fluxEq*area*sin(theta) + 75.5*area*alphaIR)).^(1/4);
 TempE_S_Const = ((1/(area*epsilon*sigma))*(75.5*area*alphaIR)).^(1/4);
+
+%%Absorbed solar radiation
+qE = alphaSolar*fluxEq*area*sin(theta);
+thetaLog = theta >= (pi - (1/2)*angleShadow);
+qE(thetaLog) = 0;
+
 
 %Eclipse
 TempS_Eclipse = ((1/(area*epsilon*sigma))*(11*area))^(1/4);
@@ -397,3 +417,22 @@ xticklabels({'0 (Noon)','6','12 (Midnight)','18','24 (Noon)'})
 
 
 
+%% Total Solar Flux for all three scenarios
+figure();
+plot([time / 3600, time2/3600], [qE, zeros(1,length(time2))] , 'linewidth', 2, 'color', rgb('light purple'));
+hold on
+plot([time / 3600, time2/3600], [qWS, zeros(1,length(time2))] , 'linewidth', 2, 'color', rgb('light red'));
+plot([time / 3600, time2/3600], [qSS, zeros(1,length(time2))] , 'linewidth', 2, 'color', rgb('medium blue'));
+
+
+
+
+%Setting xticks
+xticks([0 6 12 18 24])
+xticklabels({'0 (Noon)','6','12 (Midnight)','18','24 (Noon)'})
+xlabel('Time (hours)');
+
+ylabel('Radiation Absorbed (W)');
+title('Solar Radiation Absorbed');
+
+legend('Equinox', 'Winter Solstice','Summer Solstice');
