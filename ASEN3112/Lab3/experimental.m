@@ -22,7 +22,6 @@ disp3_2min_all = data_2min_all(:,9);
 laserDisp_2min_all = data_2min_all(:,10);
 
 
-
 %% Analysis
 %Determine the frequency
 [timeFreq, freq_2min_all] = calcFrequency(time2min_all, shakerAccel2min_all);
