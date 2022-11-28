@@ -46,7 +46,7 @@ freqLinSpace = linspace(2, 50, length(time2min_all));
 %Want a plot of the response of the system as a function of excitation
 %frequency
 figure();
-plot(freqLinSpace, disp3_2min_all);
+plot(freqLinSpace, 
 
 
 
