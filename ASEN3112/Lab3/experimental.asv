@@ -7,7 +7,6 @@ data_2min_all = readmatrix('test_2min_all_3');
 time2min_all = data_2min_all(:,1);
 
 shakerAccel2min_all = data_2min_all(:,2);
-
 accel1_2min_all = data_2min_all(:,3);
 accel2_2min_all = data_2min_all(:,4);
 accel3_2min_all = data_2min_all(:,5);
@@ -18,36 +17,41 @@ shakerDisp_2min_all = data_2min_all(:,6);
 disp1_2min_all = data_2min_all(:,7);
 disp2_2min_all = data_2min_all(:,8);
 disp3_2min_all = data_2min_all(:,9);
-
-laserDisp_2min_all = data_2min_all(:,10);
+disp4_2min_all = data_2min_all(:,10);
 
 
 %% Analysis
 %Determine the frequency
-[timeFreq, freq_2min_all] = calcFrequency(time2min_all, shakerAccel2min_all);
-
-%Get the displacements in the time interval for each frequency
-%Data Cleaning: Start at index 780 for the start of increasing frequency
-timeFreq = timeFreq(780:end);
-freq_2min_all = freq_2min_all(780:end);
-
-%The frequency sweep starts at index 780
-freqLinSpace = linspace(2, 50, length(time2min_all));
+%Perform a fourier transform
+numData = length(data_2min_all(:,1)); %Number of data points
+sampFreq = length(time2min_all) / time2min_all(end); %Samples per second
 
 
+freqVec = (0:numData-1) * sampFreq / numData;
+FT_disp1 = (1/numData) * fft(accel1_2min_all);
+FT_disp2 = (1/numData) * fft(accel2_2min_all);
+FT_disp3 = (1/numData) * fft(accel3_2min_all);
 
-%% Frequency Analysis
-%Perform a fourier transform to get in the frequency domain and determine
-%where resonance is
+
+figure();
+subplot(3,1,1)
+plot(freqVec, abs(FT_disp1), 'linewidth', 2);
+xlim([0 50]);
+
+subplot(3,1,2)
+plot(freqVec, abs(FT_disp2), 'linewidth', 2);
+xlim([0 50]);
+
+subplot(3,1,3)
+plot(freqVec, abs(FT_disp3), 'linewidth', 2);
+xlim([0 50]);
+
 
 
 
 %% Plotting
 %Want a plot of the response of the system as a function of excitation
 %frequency
-figure();
-plot(freqLinSpace, 
-
 
 
 %% Functions
@@ -79,6 +83,45 @@ function [timeFinal, frequencies] = calcFrequency(time, accelVec)
     
 end
 
+
+function [fft1, fft2, fft3] = plotFFT(data)
+%Input: The raw data file
+%Output: the FFT data for each sensor and a plot with each sensor
+
+time = data(:,1);
+accell1 = data(:,3);
+accell2 = data(:,4);
+accell3 = data(:,5);
+
+
+%Determine the frequency
+%Perform a fourier transform
+numData = length(data(:,1)); %Number of data points
+sampFreq = length(time) / time(end); %Samples per second
+
+
+freqVec = (0:numData-1) * sampFreq / numData;
+FT_disp1 = (1/numData) * fft(accel1_2min_all);
+FT_disp2 = (1/numData) * fft(accel2_2min_all);
+FT_disp3 = (1/numData) * fft(accel3_2min_all);
+
+
+figure();
+subplot(3,1,1)
+plot(freqVec, abs(FT_disp1), 'linewidth', 2);
+xlim([0 50]);
+
+subplot(3,1,2)
+plot(freqVec, abs(FT_disp2), 'linewidth', 2);
+xlim([0 50]);
+
+subplot(3,1,3)
+plot(freqVec, abs(FT_disp3), 'linewidth', 2);
+xlim([0 50]);
+
+
+
+end
 
 
 
