@@ -72,7 +72,7 @@ TempE_Op = ((1/(area*epsilon*sigma))*(20 + alphaSolar*fluxEq*area*sin(theta) + 7
 TempE_Op_Const = ((1/(area*epsilon*sigma))*(20 + 75.5*area*alphaIR)).^(1/4);
 
 %Eclipse
-TempOp_Eclipse = ((1/(area*epsilon*sigma))*(20 + 11*area))^(1/4);
+TempOp_Eclipse = ((1/(area*epsilon*sigma))*(11*area))^(1/4);
 
 %%Survival
 TempE_S = ((1/(area*epsilon*sigma))*(alphaSolar*fluxEq*area*sin(theta) + 75.5*area*alphaIR)).^(1/4);
@@ -151,7 +151,7 @@ TempE_STOT = [TempE_S, TempE_S_Const_Plot];
 %Operation
 QH_E_Op = area*epsilon*sigma*(20+273)^(4) - 20 - (alphaSolar*fluxSum*area*sin(theta)) - 75.5*area*alphaIR;
 QH_E_Op_Const = area*epsilon*sigma*(20+273)^(4) - 20 - 75.5*area*alphaIR;
-QH_E_Op_Eclipse = area*epsilon*sigma*(20+273)^(4) - 20 - 11*area*alphaIR;
+QH_E_Op_Eclipse = area*epsilon*sigma*(20+273)^(4) - 11*area*alphaIR;
 
 %Survival
 QH_E_S = area*epsilon*sigma*(-40+273)^(4) - (alphaSolar*fluxSum*area*sin(theta)) - 75.5*area*alphaIR;
@@ -400,6 +400,7 @@ Qop = plot([time / 3600, time2/3600], [QH_E_Op, QH_E_Op_Const_Plot] , 'linewidth
 hold on
 Qs = plot([time / 3600, time2/3600], [QH_E_S, QH_E_S_Const_Plot] , 'linewidth', 2, 'color', [0.3010 0.7450 0.9330], 'linestyle', '-');
 
+ylim([0 105]);
 title('Equinox Temperature and Power');
 xlabel('Time (hours)');
 
