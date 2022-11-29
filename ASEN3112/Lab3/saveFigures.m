@@ -11,12 +11,15 @@ cd('./Figures');
 stringsProb1 = {'wing2min', 'tail2min', 'nose2min', 'all5min', 'all2min'};
 %stringsProb3 = flip(stringsProb3);
 
+stringsProb1_2 = {'wing2minReal', 'tail2minReal', 'nose2minReal', 'all5minReal', 'all2minReal'};
+%stringsProb3 = flip(stringsProb3);
+
 
 for i = 1:length(FigList)
     currFig = FigList(i);
     figName = num2str(get(currFig, 'Number'));
     set(0, 'CurrentFigure', currFig);
-    saveas(currFig, strcat(stringsProb1{i}, '.png'));   
+    saveas(currFig, strcat(stringsProb1_2{i}, '.png'));   
 end
 
 
