@@ -15,15 +15,15 @@ omega_body = aircraft_state(10:12,1);
 %%% other controllers]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 theta_c = 5*pi/180;
-kq = 1; %NOT REASONABLE VALUES
-kth = 1; %NOT REASONABLE VALUES
+kq = -350; %NOT REASONABLE VALUES
+kth = -100; %NOT REASONABLE VALUES
 
 elev_perturb = PitchAttitudeControl(theta_c, aircraft_state(5), aircraft_state(11), kth, kq); 
 aircraft_surfaces = aircraft_surfaces0 + [elev_perturb; 0; 0; 0];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% YAW DAMPER
 rc = 0;
-kr = 7.5;
+kr = -6.87;
 
 rudder_perturb = yawDamper(rc, aircraft_state(6), kr);
 aircraft_surfaces = aircraft_surfaces + [0; 0; rudder_perturb; 0];

@@ -21,15 +21,16 @@ trim_definition = [Va_trim; h_trim];
 
 %Root locus for determining the k value
 rlocus(ss(Alat, Blat(:,2), [0 0 -1 0 0 0], 0));
-kr = 7.5;
+kr = -6.87;
 
 %Determine the new state space 
-AnewLat = Alat - Blat(:,2)*[0 0 -kr 0 0 0];
+AnewLat = Alat - Blat(:,2)*[0 0 kr 0 0 0];
 
 %Finding the eigenvalues to see how it affects the mode
-[eig, eigVal] = eig(Alat);
+%[eig, eigVal] = eig(Alat);
 
-[eigAfter, eigValAfter] = eig(AnewLat);
+%[eigAfter, eigValAfter] = eig(AnewLat);
+outputDamp = damp(AnewLat);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -42,8 +43,8 @@ AnewLat = Alat - Blat(:,2)*[0 0 -kr 0 0 0];
 [num_elev2pitch, den_elev2pitch] = ss2tf(Alon(1:4,1:4), Blon(1:4,1), [0 0 0 1],0);
 
 %%% Controller
-kq = 1; %NOT REASONABLE VALUES
-kth = 1; %NOT REASONABLE VALUES
+kq = -350; %NOT REASONABLE VALUES
+kth = -100; %NOT REASONABLE VALUES
 num_c = [kq kth];
 den_c = 1;
 
@@ -56,6 +57,17 @@ pitch_cl = feedback(tf(conv(num_c, num_elev2pitch), conv(den_c, den_elev2pitch))
 roots(den_cl);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%Getting the new state space
+AnewLon = Alon - Blon(:,1)*[0 0 kq kth 0 0];
+
+
+%Root Locus
+%rlocus(ss(Alon, Blon(:,1), [0 0 0 -1 0 0], 0));
+rlocus(ss(Alon, Blon(:,1), [0 0 -1 0 0 0], 0));
+
+
+figure();
+step(pitch_cl);
 
 %%% Full sim in ode45
 aircraft_state0 = trim_state;
