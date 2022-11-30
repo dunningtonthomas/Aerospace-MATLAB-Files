@@ -357,7 +357,6 @@ xlabel('Excitation Frequency (Hz)');
 
 
 
-
 %%%%WING
 [timeFinal, frequencies] = calcFrequency(data_2min_wing(:,1), data_2min_wing(:,2));
 
@@ -434,6 +433,108 @@ xlim([10 49]);
 title('Vibrometer Amplitude');
 ylabel('Amplitude');
 xlabel('Excitation Frequency (Hz)');
+
+
+%% Plotting the mode shapes
+%Determine the displacement from the acceleration
+%Resonant frequencies: 12.26 and 45.68
+
+%Find the time that these resonant frequencies occur
+[timeFinal, frequencies] = calcFrequency(data_2min_tail(:,1), data_2min_tail(:,2));
+
+%By inspection the sweep starts at frequency 10.8 at 22.1 seconds and ends
+%at a frequency of 50 at 120 seconds
+logVec = data_2min_tail(:,1) > 22.1 & data_2min_tail(:,1) < 120;
+
+%Linearly spaced frequency vector for the linear region
+hzVec = linspace(10.5, 50, sum(logVec));
+
+
+%Raw Data
+timeTail = data_2min_tail(:,1);
+ch0Accel = data_2min_tail(:,2);
+ch1Accel = data_2min_tail(:,3);
+ch2Accel = data_2min_tail(:,4);
+ch3Accel = data_2min_tail(:,5);
+vibDisp = data_2min_tail(:,end);
+
+%Relevant Data
+timeData = timeTail(logVec);
+ch0Data = ch0Accel(logVec);
+ch1Data = ch1Accel(logVec);
+ch2Data = ch2Accel(logVec);
+ch3Data = ch3Accel(logVec);
+vibData = vibDisp(logVec);
+
+
+%Find the index that correcsponds to the resonant frequency
+[~, ind1] = min(abs(hzVec - 12));
+[~, ind2] = min(abs(hzVec - 45.68));
+
+%Converting the frequencies to radian frequency
+freq1 = 2*pi*12;
+freq2 = 2*pi*45.68;
+
+
+%To get the accelerometer data we take the max over the frequency time
+%interval to get the peak
+timeRange = [timeData(ind1), timeData(ind1) + (1/12)];
+logVec = timeData >= timeRange(1) & timeData <= 2*timeRange(2);
+maxAccel1_1 = max(abs(ch1Data(logVec)));
+maxAccel2_1 = max(abs(ch2Data(logVec)));
+maxAccel3_1 = max(abs(ch3Data(logVec)));
+vibDataMax_1 = max(abs(vibData(logVec)));
+
+
+ch1Disp_1 = maxAccel1_1 / freq1^2;
+ch2Disp_1 = maxAccel2_1 / freq1^2;
+ch3Disp_1 = maxAccel3_1 / freq1^2;
+
+
+%Converting to inches
+ch1Disp_1_inch = ch1Disp_1 * 0.0393701;
+ch2Disp_1_inch = ch2Disp_1 * 0.0393701;
+ch3Disp_1_inch = ch3Disp_1 * 0.0393701;
+
+%Experimental Displacement
+dispMode2 = [0; ch3Disp_1_inch; ch2Disp_1_inch; ch1Disp_1_inch];
+
+%Normalizing so the max is 1
+maxCh1 = dispMode2(end);
+dispMode2(end) = dispMode2(end) / max(dispMode2);
+
+
+%To get the accelerometer data we take the max over the frequency time
+%interval to get the peak
+timeRange = [timeData(ind2), timeData(ind2) + (1/45.68)];
+logVec = timeData >= timeRange(1) & timeData <= 2*timeRange(2);
+maxAccel1_2 = max(abs(ch1Data(logVec)));
+maxAccel2_2 = max(abs(ch2Data(logVec)));
+maxAccel3_2 = max(abs(ch3Data(logVec)));
+
+
+ch1Disp_2 = maxAccel1_2 / freq2^2;
+ch2Disp_2 = maxAccel2_2 / freq2^2;
+ch3Disp_2 = maxAccel3_2 / freq2^2;
+
+
+%Converting to inches
+ch1Disp_2_inch = ch1Disp_2 * 0.0393701;
+ch2Disp_2_inch = ch2Disp_2 * 0.0393701;
+ch3Disp_2_inch = ch3Disp_2 * 0.0393701;
+
+%Experimental Displacement
+dispMode5 = [0; ch3Disp_2_inch; ch2Disp_2_inch; ch1Disp_2_inch];
+
+%Normalizing so the max is 1
+dispMode5(end) = dispMode5(end) / dispMode5(end);
+
+%Distance Vector
+distances = [0; 4; 8; 11];
+
+save('ExperimentalShape', 'distances', 'dispMode5', 'dispMode2');
+
+
 
 %% Functions
 
@@ -542,11 +643,6 @@ xlabel('Frequency (Hz)');
 
 end
 
-
-function actualResponse(data)
-
-
-end
 
 
 
