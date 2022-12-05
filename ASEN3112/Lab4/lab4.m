@@ -19,9 +19,8 @@ timeSolid = data(:,1);
 voltageSolid = data(:,2);
 dispSolid = data(:,3);
 
-%Data cleaning 
-%Get rid of the multiple data points per displacement, take the max
-
+%Lengths
+L = 11 + 7/16; %in
 
 
 %% Analysis
@@ -45,12 +44,24 @@ plasticDispSolid = 0.9375;
 plasticDispHollow = 0.3125;
 
 
+
+%Analytical Solution
+PcrSolid = 122.8;
+PcrHollow = 230.2;
+
+PsolidTheoretical = @(x)(PcrSolid*(1 + (pi^2 * x.^2)/(8*L^2)));
+PhollowTheoretical = @(x)(PcrHollow*(1 + (pi^2 * x.^2)/(8*L^2)));
+
+dispTheo = [0:1/16:1, 1:1/8:2];
+
+
 %% Plotting
 %Hollow
 figure();
 set(0, 'defaulttextinterpreter', 'latex');
 plot(dispHollow, loadHollow, '*');
 hold on
+plot([0,dispTheo], [0,PhollowTheoretical(dispTheo)], 'linewidth', 2);
 xline(plasticDispHollow, 'r', 'linewidth', 2);
 
 title('Applied Load vs Displacement Hollow');
