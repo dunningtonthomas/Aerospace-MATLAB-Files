@@ -76,6 +76,10 @@ dutch = eigVec(:,3);
 lateralPhugoid(6,1) = lateralPhugoid(6,1) / 100;
 dutch(6,1) = dutch(6,1) / 100;
 
+%Get the v to beta
+lateralPhugoid(1,1) = lateralPhugoid(1,1) / 775;
+dutch(1,1) = dutch(1,1) / 775;
+
 %Normalize with respect to psi so it is 0.1 radians
 lateralPhugoid = lateralPhugoid / lateralPhugoid(5) * 0.1;
 dutch = dutch / dutch(5) * 0.1;
@@ -135,7 +139,7 @@ plot([0, dutchReal(6)], [0, dutchImag(6)], 'k');
 title('Phasor Plot Dutch Roll Mode');
 xlabel('Real');
 ylabel('Imag');
-legend('$\Delta v$', '$\Delta p$', '$\Delta r$', '$ \Delta \phi $', '$ \Delta \psi $', '$ \Delta y_{E} $', 'Interpreter','latex', 'FontSize', 14, 'location', 'best');
+legend('$\Delta \beta$', '$\Delta p$', '$\Delta r$', '$ \Delta \phi $', '$ \Delta \psi $', '$ \Delta y_{E} $', 'Interpreter','latex', 'FontSize', 14, 'location', 'best');
 
 
 %Lateral Phugoid
@@ -160,4 +164,4 @@ plot([0, lateralPReal(6)], [0, lateralPImag(6)], 'k');
 title('Phasor Plot Lateral Phugoid Mode');
 xlabel('Real');
 ylabel('Imag');
-legend('$\Delta v$', '$\Delta p$', '$\Delta r$', '$ \Delta \phi $', '$ \Delta \psi $', '$ \Delta y_{E} $', 'Interpreter','latex', 'FontSize', 14, 'location', 'best');
+legend('$\Delta \beta$', '$\Delta p$', '$\Delta r$', '$ \Delta \phi $', '$ \Delta \psi $', '$ \Delta y_{E} $', 'Interpreter','latex', 'FontSize', 14, 'location', 'best');
