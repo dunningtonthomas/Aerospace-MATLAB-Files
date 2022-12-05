@@ -63,7 +63,7 @@ plot(dispHollow, loadHollow, '*');
 hold on
 plot([0,dispTheo], [0,PhollowTheoretical(dispTheo)], 'linewidth', 2, 'color', rgb('light blue'));
 xline(plasticDispHollow, 'r', 'linewidth', 2);
-xline(0.3711, 'color', rgb('orange'), 'linewidth', 2);
+xline(0.7423, 'color', rgb(''), 'linewidth', 2);
 
 title('Applied Load vs Displacement Hollow');
 xlabel('Displacement ($$in$$)');
@@ -74,14 +74,13 @@ legend('Experimental Data', 'Theoretical', 'Experimental Plastic Deformation Ini
 figure();
 plot(dispSolid, loadSolid, '*');
 hold on
-plot([0,dispTheo], [0,PsolidTheoretical(dispTheo)], 'linewidth', 2, 'color', rgb('light blue'));
 xline(plasticDispSolid, 'r', 'linewidth', 2);
-xline(0.7423, 'color', rgb('orange'), 'linewidth', 2);
 
 title('Applied Load vs Displacement Solid');
 xlabel('Displacement ($$in$$)');
 ylabel('Applied Load ($$lbf$$)');
-legend('Experimental Data', 'Theoretical', 'Experimental Plastic Deformation Initiation', 'Theoretical Plastic Deformation Initiation', 'location', 'best');
+legend('Experimental Data', 'Plastic Deformation Initiation');
+
 
 
 
