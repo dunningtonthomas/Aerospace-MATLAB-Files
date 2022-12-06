@@ -55,6 +55,21 @@ PhollowTheoretical = @(x)(PcrHollow*(1 + (pi^2 * x.^2)/(8*L^2)));
 dispTheo = [0:1/16:1, 1:1/8:2];
 
 
+%% Problem 3
+%Vector of lengths
+lengths = linspace(6,60,100);
+
+%Plot Pcr for varying lengths
+I = 0.125 * 1^3 / 12;
+E = 10 * 10^6;
+Pcr = @(L)((pi^2 * E*I)./L);
+
+%Plot the yielding load in compression
+sigma = 35000;
+yieldLoad = sigma * 0.125*1;
+
+
+
 %% Plotting
 %Hollow
 figure();
@@ -84,4 +99,10 @@ ylabel('Applied Load ($$lbf$$)');
 legend('Experimental Data', 'Theoretical', 'Experimental Plastic Deformation Initiation', 'Theoretical Plastic Deformation Initiation', 'location', 'best');
 
 
+%Problem 3
+figure();
+plot(lengths, Pcr(lengths));
+hold on
+yline(yieldLoad, 'r')
 
+title('Solid Cross Section');
