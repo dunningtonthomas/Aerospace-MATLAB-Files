@@ -56,17 +56,31 @@ dispTheo = [0:1/16:1, 1:1/8:2];
 
 
 %% Problem 3
+%SOLID
 %Vector of lengths
-lengths = linspace(1.75,60,100);
+lengths = linspace(1.75,24,100);
+lengthsHollow = linspace(3.5,24,100);
 
 %Plot Pcr for varying lengths
 I = 0.125^3 * 1 / 12;
 E = 10 * 10^6;
 Pcr = @(L)((pi^2 * E*I)./L.^2);
+PcrFixed = @(L)((pi^2 * E*I)./(L/2).^2);
 
 %Plot the yielding load in compression
 sigma = 35000;
-yieldLoad = sigma * 0.125*1;
+yieldSolid = sigma * 0.125*1;
+
+
+%HOLLOW
+I2 = 3.0518 * 10^-4;
+Pcr2 = @(L)((pi^2 * E*I2)./L.^2);
+Pcr2Fixed = @(L)((pi^2 * E*I2)./(L/2).^2);
+
+thick = 0.0625;
+areaHollow = (0.25 * 0.25) - (0.25 - 2*thick)^2;
+
+yieldHollow = sigma * areaHollow;
 
 
 
@@ -100,9 +114,31 @@ legend('Experimental Data', 'Theoretical', 'Experimental Plastic Deformation Ini
 
 
 %Problem 3
+%Solid
 figure();
-plot(lengths, Pcr(lengths));
+plot(lengths, Pcr(lengths), 'linewidth', 2);
 hold on
-yline(yieldLoad, 'r')
+grid on
+plot(lengths, PcrFixed(lengths), 'linewidth', 2, 'color', rgb('purple'));
+yline(yieldSolid, 'r', 'linewidth', 2);
 
-title('Solid Cross Section');
+title('Solid Cross Section Buckling and Yield Load');
+xlabel('Length ($$in$$)');
+ylabel('Applied Load ($$lb$$)');
+legend('Simply Supported', 'Fixed', 'Compressive Yield');
+
+%Hollow
+figure();
+plot(lengthsHollow, Pcr2(lengthsHollow), 'linewidth', 2);
+hold on
+grid on
+plot(lengthsHollow, Pcr2Fixed(lengthsHollow), 'linewidth', 2, 'color', rgb('purple'));
+yline(yieldHollow, 'r', 'linewidth', 2);
+
+title('Hollow Cross Section Buckling and Yield Load');
+xlabel('Length ($$in$$)');
+ylabel('Applied Load ($$lb$$)');
+legend('Simply Supported', 'Fixed', 'Compressive Yield');
+
+
+
