@@ -57,12 +57,12 @@ dispTheo = [0:1/16:1, 1:1/8:2];
 
 %% Problem 3
 %Vector of lengths
-lengths = linspace(6,60,100);
+lengths = linspace(1.75,60,100);
 
 %Plot Pcr for varying lengths
-I = 0.125 * 1^3 / 12;
+I = 0.125^3 * 1 / 12;
 E = 10 * 10^6;
-Pcr = @(L)((pi^2 * E*I)./L);
+Pcr = @(L)((pi^2 * E*I)./L.^2);
 
 %Plot the yielding load in compression
 sigma = 35000;
