@@ -7,27 +7,40 @@ vel_body = aircraft_state(7:9,1);
 omega_body = aircraft_state(10:12,1);
 
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Control law
 %%% [This shows implementation of the pitch control. STUDENTS EDIT for
 %%% other controllers]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-theta_c = 5*pi/180;
-kq = -350; %NOT REASONABLE VALUES
-kth = -100; %NOT REASONABLE VALUES
+theta_c = 3*pi/180;
+kq = -8; 
+kth = -7.5; 
 
 elev_perturb = PitchAttitudeControl(theta_c, aircraft_state(5), aircraft_state(11), kth, kq); 
-aircraft_surfaces = aircraft_surfaces0 + [elev_perturb; 0; 0; 0];
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% YAW DAMPER
 rc = 0;
-kr = -6.87;
+kr = -6.38;
 
-rudder_perturb = yawDamper(rc, aircraft_state(6), kr);
-aircraft_surfaces = aircraft_surfaces + [0; 0; rudder_perturb; 0];
+rudder_perturb = yawDamper(rc, aircraft_state(12), kr);
+rudder_perturb = -kr*aircraft_state(12);
 
+%%%% Roll Control
+phi_c = atan2(21^2, 1000*9.81*cos(aircraft_state(5)));
+ka = -7;
+kp = 0.5;
+
+phi = aircraft_state(4);
+p = aircraft_state(10);
+
+
+aileron_perturb = ka*(kp*(phi_c - phi) - p);
+
+
+%Final Surfaces
+% aircraft_surfaces = [elev_perturb; aileron_perturb; rudder_perturb; 0];
+aircraft_surfaces = aircraft_surfaces0 + [0; aileron_perturb; rudder_perturb; 0];
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Kinematics
