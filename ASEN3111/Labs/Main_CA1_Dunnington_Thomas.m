@@ -13,10 +13,11 @@ close all; clear; clc;
 %% Problem 1
 
 %Symbolic integration to determine the sectional lift and drag coefficients
+    %%%%Double check that it is ok to have the symbolic implementation
 syms theta;
 Cp_syms = (1 - (4*(sin(theta)).^2 + 4*sin(theta) + 1));
-cl = int(Cp_syms*sin(theta), theta, 0, 2*pi);
-cd = int(Cp_syms*cos(theta), theta, 0, 2*pi);
+cl = int(-0.5*Cp_syms*sin(theta), theta, 0, 2*pi);
+cd = int(-0.5*Cp_syms*cos(theta), theta, 0, 2*pi);
 fprintf("Analytical sectional lift and drag coefficients:\n\t cl: %f \n\t cd: %f\n", double(cl), double(cd));
 
 %Numerical integration with the trapezoidal composite method
