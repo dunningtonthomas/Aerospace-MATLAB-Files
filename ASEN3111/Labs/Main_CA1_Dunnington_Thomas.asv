@@ -29,12 +29,9 @@ Cd_int = @(th)(2*(cos(th).*(sin(th).^2 + sin(th))));
 
 %Computing the coefficient 50 times from 1 to 50 discretizations of the
 %cylinder
-N = 1:50; %The number of panels
-
-%Strogin the value of the integrations
+N 
 Cl_int_outputs = zeros(50,1);
 Cd_int_outputs = zeros(50,1);
-
 for i = 1:50
     Cl_int_outputs(i) = trapzFuncy(Cl_int, [0 2*pi], i);
     Cd_int_outputs(i) = trapzFuncy(Cd_int, [0 2*pi], i);
@@ -43,10 +40,7 @@ end
 
 %% Plotting
 figure();
-plot(N, Cl_int_outputs);
-
-figure();
-plot(N, Cd_int_outputs);
+plot(1:50, 
 
 
 

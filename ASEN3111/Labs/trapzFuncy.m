@@ -15,7 +15,7 @@ xVals = linspace(interval(1), interval(2), N+1); %Creating N+1 grid points to in
 
 %Performing the trapezoidal integration
 outputInt = 0;
-for i = 1:length(N)
+for i = 1:N
     %Getting the left and right y values of the trapezoid
     leftY = func(xVals(i)); 
     rightY = func(xVals(i+1));
