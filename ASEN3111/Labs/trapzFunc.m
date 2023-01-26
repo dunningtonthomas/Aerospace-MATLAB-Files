@@ -1,4 +1,4 @@
-function outputInt = trapzFuncy(func,interval,N)
+function outputInt = trapzFunc(func,interval,N)
 %TRAPZFUNC Performs a trapezoidal numerical integration on a provided
 %interval using N number of panels in the discretization
 %INPUTS: 

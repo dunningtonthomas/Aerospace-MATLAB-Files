@@ -21,6 +21,7 @@ cd = int(-0.5*Cp_syms*cos(theta), theta, 0, 2*pi);
 fprintf("Analytical sectional lift and drag coefficients:\n\t cl: %f \n\t cd: %f\n", double(cl), double(cd));
 
 %%%%Numerical integration with the trapezoidal composite method
+
 %Anonymous function for the coefficient of pressure with the given
 %circulation
 Cl_int = @(th)(2*(sin(th).^3 + sin(th).^2));
@@ -30,12 +31,11 @@ Cd_int = @(th)(2*(cos(th).*(sin(th).^2 + sin(th))));
 %cylinder
 N = 1:50; %The number of panels
 
-%Storing the value of the integrations
-Cl_int_outputs = zeros(length(N),1);
-Cd_int_outputs = zeros(length(N),1);
+%Strogin the value of the integrations
+Cl_int_outputs = zeros(50,1);
+Cd_int_outputs = zeros(50,1);
 
-%Looping through different N values
-for i = N
+for i = 1:50
     Cl_int_outputs(i) = trapzFunc(Cl_int, [0 2*pi], i);
     Cd_int_outputs(i) = trapzFunc(Cd_int, [0 2*pi], i);
 end
@@ -45,33 +45,27 @@ end
 figure();
 set(0, 'defaulttextinterpreter', 'latex');
 %Cl versus N discretizations
-plot(N, double(cl)*ones(length(N),1), 'color', 'g', 'linewidth', 2)
+plot(N, Cl_int_outputs, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'markersize', 15, 'color', 'k');
 grid on
 hold on
-plot(N, Cl_int_outputs, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'markersize', 15, 'color', 'k');
+yline(
 
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Lift Coefficient $$cl$$');
 title('Sectional Lift Coefficient versus Number of Panels');
-legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
 
 figure();
 %Cd versus N discretizations
-plot(N, double(cd)*ones(length(N),1), 'color', 'g', 'linewidth', 2)
+plot(N, Cd_int_outputs, 'linewidth', 2);
 grid on
-hold on
-plot(N, Cd_int_outputs, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'markersize', 15, 'color', 'k');
 
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Drag Coefficient $$cd$$');
 title('Sectional Drag Coefficient versus Number of Panels');
-legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
 
 
 %%%%Numerical integration with the simpsons composite method
 
-
-%% Problem 2
 
 
 
