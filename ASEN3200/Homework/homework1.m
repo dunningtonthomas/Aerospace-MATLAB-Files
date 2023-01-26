@@ -2,8 +2,8 @@
 clear; close all; clc;
 
 %% Problem 4
-BN_Boi = rotateEB(30 * pi/180, -45 * pi/180, 60 * pi/180);
-FN_Boi = rotateEB(-25*pi/180, 25*pi/180, -15*pi/180);
+BN_Boi = rotateEB(60 * pi/180, -45 * pi/180, 30 * pi/180);
+FN_Boi = rotateEB(-15*pi/180, 25*pi/180, -25*pi/180);
 
 BF_Boi = BN_Boi * (FN_Boi');
      
