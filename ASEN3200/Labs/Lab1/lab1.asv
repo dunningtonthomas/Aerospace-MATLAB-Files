@@ -1,0 +1,21 @@
+%% Clean Up
+clear; close all; clc;
+
+%% Import Data
+data = readmatrix('ARW_0,5A_0,2Hz');
+data(1,:) = [];
+
+time = data(:,1);
+gyroRate = data(:,2); %rad/s
+inputRate = (data(:,3) / 60) * 2*pi; %rad/s
+
+%% Analysis
+
+
+%% Plotting
+figure();
+plot(time, gyroRate, 'linewidth', 2);
+hold on
+plot(time, inputRate);
+
+
