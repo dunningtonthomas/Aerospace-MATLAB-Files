@@ -31,28 +31,41 @@ Cd_int = @(th)(2*(cos(th).*(sin(th).^2 + sin(th))));
 N = 1:50; %The number of panels
 
 %Storing the value of the integrations
-Cl_int_outputs = zeros(length(N),1);
-Cd_int_outputs = zeros(length(N),1);
+Cl_int_trapz = zeros(length(N),1);
+Cd_int_trapz = zeros(length(N),1);
 
 %Looping through different N values
 for i = N
-    Cl_int_outputs(i) = trapzFunc(Cl_int, [0 2*pi], i);
-    Cd_int_outputs(i) = trapzFunc(Cd_int, [0 2*pi], i);
+    Cl_int_trapz(i) = trapzFunc(Cl_int, [0 2*pi], i);
+    Cd_int_trapz(i) = trapzFunc(Cd_int, [0 2*pi], i);
 end
 
 
+%%%%Numerical Integration with the simpson's composite method
+test = simpFunc(Cl_int, [0 2*pi], 10);
+
+%Looping through different N values
+for i = N
+    Cl_int_simp(i) = simpFunc(Cl_int, [0 2*pi], i);
+    Cd_int_simp(i) = simpFunc(Cd_int, [0 2*pi], i);
+end
+
+
+
+
 %%%%Plotting
+%%%%Trapz
 figure();
 set(0, 'defaulttextinterpreter', 'latex');
 %Cl versus N discretizations
 plot(N, double(cl)*ones(length(N),1), 'color', 'g', 'linewidth', 2)
 grid on
 hold on
-plot(N, Cl_int_outputs, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'markersize', 15, 'color', 'k');
+plot(N, Cl_int_trapz, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'markersize', 15, 'color', 'k');
 
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Lift Coefficient $$cl$$');
-title('Sectional Lift Coefficient versus Number of Panels');
+title('Sectional Lift Coefficient versus Number of Panels Trapezoid');
 legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
 
 figure();
@@ -60,15 +73,40 @@ figure();
 plot(N, double(cd)*ones(length(N),1), 'color', 'g', 'linewidth', 2)
 grid on
 hold on
-plot(N, Cd_int_outputs, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'markersize', 15, 'color', 'k');
+plot(N, Cd_int_trapz, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'markersize', 15, 'color', 'k');
 
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Drag Coefficient $$cd$$');
-title('Sectional Drag Coefficient versus Number of Panels');
+title('Sectional Drag Coefficient versus Number of Panels Trapezoid');
 legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
 
 
-%%%%Numerical integration with the simpsons composite method
+%%%%Simpz
+figure();
+set(0, 'defaulttextinterpreter', 'latex');
+%Cl versus N discretizations
+plot(N, double(cl)*ones(length(N),1), 'color', 'g', 'linewidth', 2)
+grid on
+hold on
+plot(N, Cl_int_simp, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'markersize', 15, 'color', 'k');
+
+xlabel('Number of Panels to Discretize');
+ylabel('Sectional Lift Coefficient $$cl$$');
+title('Sectional Lift Coefficient versus Number of Panels Simpsons');
+legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
+
+figure();
+%Cd versus N discretizations
+plot(N, double(cd)*ones(length(N),1), 'color', 'g', 'linewidth', 2)
+grid on
+hold on
+plot(N, Cd_int_simp, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'markersize', 15, 'color', 'k');
+
+xlabel('Number of Panels to Discretize');
+ylabel('Sectional Drag Coefficient $$cd$$');
+title('Sectional Drag Coefficient versus Number of Panels Simpsons');
+legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
+
 
 
 %% Problem 2

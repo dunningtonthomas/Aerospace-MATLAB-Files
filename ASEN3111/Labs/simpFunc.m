@@ -11,15 +11,21 @@ function outputInt = simpFunc(func,interval,N)
 % Collaborators: Nolan Stevenson
 % Date: 1/24/2023
 
-xVals = linspace(interval(1), interval(2), N+1); %Creating N+1 grid points to integrate over
 
-h = (func(xVals(end)) - func(xVals(1))) / (2*N);
+%Number of subpanels
+n = 2*N;
+h = (interval(2) - interval(1)) / n;
 
-%Performing the trapezoidal integration
-outputInt = 0;
+%X values
+xVals = linspace(interval(1), interval(2), n + 1);
+
+outputSum = 0;
 for i = 1:N
+    outputSum = outputSum + func(xVals(2*i - 1)) + 4*func(xVals(2*i)) + func(xVals(2*i + 1));
     
 end
+
+outputInt = (h / 3) * outputSum;    
 
 
 end
