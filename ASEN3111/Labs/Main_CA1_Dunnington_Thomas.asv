@@ -128,29 +128,12 @@ legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
 %Looping through and finding the first index where the error is less than 1
 %percent
 
-%Trapz
-j = 1;
-while(abs(trapzRelError(j)) > 1)
-    %Updating iterator
-    j = j + 1;
-end
+for i = 1:len
 
-%Required panels for less than 1 percent relative error
-trapzN = j;
 
-%Simp
-j = 1;
-while(abs(simpRelError(j)) > 1)
-    %Updating iterator
-    j = j + 1;
-end
+%Getting the first index
 
-%Required panels for less than 1 percent relative error
-simpN = j;
 
-%Printing to the command window
-fprintf('Number of panels required for less than 1 percent error with Trapezoid: %i \n', trapzN); 
-fprintf('Number of panels required for less than 1 percent error with Simpsons: %i \n', simpN); 
 
 %% Problem 2
 
