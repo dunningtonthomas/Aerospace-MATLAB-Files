@@ -28,7 +28,7 @@ Cd_int = @(th)(2*(cos(th).*(sin(th).^2 + sin(th))));
 
 %Computing the coefficient 50 times from 1 to 50 discretizations of the
 %cylinder
-N = 1:50; %The number of panels
+N = 1:10; %The number of panels
 
 %Storing the value of the integrations
 Cl_int_trapz = zeros(length(N),1);
