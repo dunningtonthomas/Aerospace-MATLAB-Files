@@ -168,45 +168,19 @@ upperCp = fnval(Cp_upper, xVals);
 lowerCp = fnval(Cp_lower, xVals);
 
 %Calculating the pressures from the coefficient of pressures
-pUpper = (upperCp * Qinf);
-pLower = (lowerCp * Qinf);
+pStaticUpper = (upperCp * Qinf) + Pinf;
 
 %Defining the thickness of the airfoil
-y_t = @(x) ((.12*3)/.2)*(.2969.*sqrt(x./3)-.1260.*(x./3)-(.3516.*(x./3).^2)+(.2843.*(x./3).^3)-(.1036.*(x./3).^4));
+c = chord;
+y_t = @(x) ((.12*c)/.2)*(.2969.*sqrt(x./c)-.1260.*(x./c)-(.3516.*(x./c)^2)+(.2843.*(x./c)^3)-(.1036.*(x./c)^4));
 
 %Integrating to get the upper Normal force
-PuSum = pUpper(2:end) + pUpper(1:end-1);
-Nupper = -1*sum(PuSum/2 .* diff(xVals));
+for i = 1:length(xVals)-1
 
-%Integrating to get the lower Normal force
-PlSum = pLower(2:end) + pLower(1:end-1);
-Nlower = sum(PlSum/2 .* diff(xVals)); %Flip the sign
+    pStaticUpper(i+1) + p
+    
 
-
-%Find the net normal force force
-Nnet = Nupper + Nlower;
-
-
-%Integrating to find the axial force
-yVals = y_t(xVals); %Y values
-deltaY = yVals(2:end) - yVals(1:end-1);
-
-%Upper
-Aupper = sum(PuSum / 2 .* deltaY);
-
-%Lower
-Alower = -1*sum(PlSum / 2 .* deltaY);
-
-%Net
-Anet = Aupper + Alower;
-
-
-
-%THINGS TO DO
-%Review normal and axial values
-%Calculate lift and drag
-
-
+end
 
 
 
