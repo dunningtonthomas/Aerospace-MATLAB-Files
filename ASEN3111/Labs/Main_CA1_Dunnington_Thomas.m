@@ -109,7 +109,7 @@ plot(N, Cl_int_simp, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'marker
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Lift Coefficient $$cl$$');
 title('Sectional Lift Coefficient versus Number of Panels Simpsons');
-legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
+legend('Analytical Integration', 'Numerical Integration', 'location', 'ne');
 
 figure();
 %Cd versus N discretizations
@@ -121,7 +121,7 @@ plot(N, Cd_int_simp, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'marker
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Drag Coefficient $$cd$$');
 title('Sectional Drag Coefficient versus Number of Panels Simpsons');
-legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
+legend('Analytical Integration', 'Numerical Integration', 'location', 'ne');
 
 
 %%%%Printing thet minimum N required to get below 1% relative error
@@ -153,7 +153,7 @@ fprintf('Number of panels required for less than 1 percent error with Trapezoid:
 fprintf('Number of panels required for less than 1 percent error with Simpsons: %i \n', simpN); 
 
 %% Problem 2
-
+load('Cp.mat');
 
 
 
