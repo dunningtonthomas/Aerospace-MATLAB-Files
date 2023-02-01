@@ -18,6 +18,12 @@ rotMat = eigVals';
 Iprincipal = rotMat * inertMatrix * rotMat';
 
 
+v1 = [-0.6829, 0.695, 0.2243];
+v2 = [0.2167, -0.1005, 0.9711];
+
+v3 = cross(v1, v2);
+
+
 %% Problem 5
 
 Isphere = [1.8, 0, 0; 0, 1.8, 0; 0, 0, 1.8];
