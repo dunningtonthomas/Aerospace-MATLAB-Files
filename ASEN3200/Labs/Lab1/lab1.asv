@@ -171,34 +171,19 @@ title('Measurement Error (0.5A 0.1Hz)');
 
 %%%%True angular position and measured angular position
 %%Data1
-truePos1 = cumtrapz(time1, inputRate1);
-measPos1 = cumtrapz(time1, gyroRateCorrect1);
-rawPos1 = cumtrapz(time1, gyroRateFlip1);
+truePos = cumtrapz(time1, inputRate1);
+measPos = cumtrapz(time1, gyroRateCorrect1);
 figure();
-plot(time1, truePos1, 'linewidth', 2);
+plot(time1, truePos, 'linewidth', 2);
 hold on
-plot(time1, measPos1, 'linewidth', 2, 'linestyle', '--');
-plot(time1, rawPos1, 'linewidth', 2);
+plot(time1, measPos, 'linewidth', 2, 'linestyle', '--');
 
 xlabel('Time (s)');
 ylabel('Angular Position (rad)');
 title('Angular Position Time History (0.5A 0.2Hz)');
-legend('True Position', 'Calibrated Measured Position', 'Raw Measured Position', 'location', 'nw')
+legend('T', 'Measured Rate', 'location', 'best')
 
 %%Data2
-truePos2 = cumtrapz(time2, inputRate2);
-measPos2 = cumtrapz(time2, gyroRateCorrect2);
-rawPos2 = cumtrapz(time2, gyroRateFlip2);
-figure();
-plot(time2, truePos2, 'linewidth', 2);
-hold on
-plot(time2, measPos2, 'linewidth', 2, 'linestyle', '--');
-plot(time2, rawPos2, 'linewidth', 2);
-
-xlabel('Time (s)');
-ylabel('Angular Position (rad)');
-title('Angular Position Time History (0.5A 0.1Hz)');
-legend('True Position', 'Calibrated Measured Position', 'Raw Measured Position', 'location', 'nw')
 
 
 %%%%Angular Position error (measured - true)
