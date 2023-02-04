@@ -203,9 +203,30 @@ legend('True Position', 'Calibrated Measured Position', 'Raw Measured Position',
 
 %%%%Angular Position error (measured - true)
 %%Data1
+rawError1 = rawPos1 - truePos1;
+calibError1 = measPos1 - truePos1;
+figure();
+plot(time1, rawError1, 'linewidth', 2);
+hold on
+plot(time1, calibError1, 'linewidth', 2);
+
+xlabel('Time (s)');
+ylabel('Angular Position Error (rad)');
+title('Angular Position Error Raw and Calibrated (0.5A 0.2Hz)');
+legend('Raw Error', 'Calibrated Error');
 
 
 %%Data2
+rawError2 = rawPos2 - truePos2;
+calibError2 = measPos2 - truePos2;
+figure();
+plot(time2, rawError2, 'linewidth', 2);
+hold on
+plot(time2, calibError2, 'linewidth', 2);
 
+xlabel('Time (s)');
+ylabel('Angular Position Error (rad)');
+title('Angular Position Error Raw and Calibrated (0.5A 0.1Hz)');
+legend('Raw Error', 'Calibrated Error');
 
 
