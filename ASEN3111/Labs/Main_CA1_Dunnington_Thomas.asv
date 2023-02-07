@@ -221,13 +221,10 @@ fprintf('Drag: %f N/m\n', -1*Drag);
 %of LIFT
 %Exact solutions
 liftExact = Lift;
-liftError = 100; %Initiallizing the error to 100
-i = 0; %Setting the iterator to 0
+liftError = 100: %Initiallizing the error to 100
+i = 1; %Setting the iterator to 1
 
 while(liftError > 1) %Once the error is less than 1, we exit the loop
-    %Update iterator
-    i = i + 1;
-    
     %Number of points in the for loop
     tempX = linspace(0,1,i);
     upperCp = fnval(Cp_upper, tempX);
@@ -239,89 +236,69 @@ while(liftError > 1) %Once the error is less than 1, we exit the loop
     
     %Integrating to get the upper Normal force
     PuSum = pUpper(2:end) + pUpper(1:end-1);
-    Nupper = -1*sum(PuSum/2 .* diff(tempX));
+    Nupper = -1*sum(PuSum/2 .* diff(xVals));
     
     %Integrating to get the lower Normal force
     PlSum = pLower(2:end) + pLower(1:end-1);
-    Nlower = sum(PlSum/2 .* diff(tempX)); %Flip the sign
+    Nlower = sum(PlSum/2 .* diff(xVals)); %Flip the sign
     
     %Find the net normal force force
     Nnet = Nupper + Nlower;
     
     %Integrating to find the axial force
-    yVals = y_t(tempX); %Y values
+    yVals = y_t(xVals); %Y values
 
-    %Axial Forces
+    %Upper
     Aupper = -1*sum(PuSum / 2 .* diff(yVals));
+
+    %Lower
     Alower = sum(PlSum / 2 .* diff(yVals));
 
     %Net
     Anet = Aupper + Alower;
-    
-    %Calculating Lift
-    Lift = Nnet * cos(aoa) - Anet * sin(aoa);
-    
-    %Calculating the relative error
-    liftError = abs((Lift - liftExact) / liftExact) * 100;
 end
 
-finalNumPointsLift = i * 2; %Times 2 because the number of points includes top and bottom of the airfoil
 
 
-%Determining the number of points required to get within 1% relative error
-%of DRAG
-%Exact solutions
-dragExact = Drag;
-dragError = 100; %Initiallizing the error to 100
-i = 0; %Setting the iterator to 0
 
-while(dragError > 1) %Once the error is less than 1, we exit the loop
-    %Update iterator
-    i = i + 1;
-    
-    %Number of points in the for loop
-    tempX = linspace(0,1,i);
-    upperCp = fnval(Cp_upper, tempX);
-    lowerCp = fnval(Cp_lower, tempX);
-    
-    %Calculating the pressures from the coefficient of pressures
-    pUpper = (upperCp * Qinf);
-    pLower = (lowerCp * Qinf);
-    
-    %Integrating to get the upper Normal force
-    PuSum = pUpper(2:end) + pUpper(1:end-1);
-    Nupper = -1*sum(PuSum/2 .* diff(tempX));
-    
-    %Integrating to get the lower Normal force
-    PlSum = pLower(2:end) + pLower(1:end-1);
-    Nlower = sum(PlSum/2 .* diff(tempX)); %Flip the sign
-    
-    %Find the net normal force force
-    Nnet = Nupper + Nlower;
-    
-    %Integrating to find the axial force
-    yVals = y_t(tempX); %Y values
+%Defining the thickness of the airfoil
+y_t = @(x) ((.12*3)/.2)*(.2969.*sqrt(x./3)-.1260.*(x./3)-(.3516.*(x./3).^2)+(.2843.*(x./3).^3)-(.1036.*(x./3).^4));
 
-    %Axial Forces
-    Aupper = -1*sum(PuSum / 2 .* diff(yVals));
-    Alower = sum(PlSum / 2 .* diff(yVals));
+%Integrating to get the upper Normal force
+PuSum = pUpper(2:end) + pUpper(1:end-1);
+Nupper = -1*sum(PuSum/2 .* diff(xVals));
 
-    %Net
-    Anet = Aupper + Alower;
-    
-    %Calculating Drag
-    Drag = Nnet * sin(aoa) - Anet * cos(aoa);
-    
-    %Calculating the relative error
-    dragError = abs((Drag - dragExact) / dragExact) * 100;
-end
-
-finalNumPointsDrag = i * 2; %Times 2 because the number of points includes top and bottom of the airfoil
+%Integrating to get the lower Normal force
+PlSum = pLower(2:end) + pLower(1:end-1);
+Nlower = sum(PlSum/2 .* diff(xVals)); %Flip the sign
 
 
-%Ouputing to the terminal
-fprintf("Number of integration points required for less than 1 percent relative error for Lift: %i \n", finalNumPointsLift);
-fprintf("Number of integration points required for less than 1 percent relative error for Drag: %i \n", finalNumPointsDrag);
+%Find the net normal force force
+Nnet = Nupper + Nlower;
+
+
+%Integrating to find the axial force
+yVals = y_t(xVals); %Y values
+deltaY = yVals(2:end) - yVals(1:end-1);
+
+%Upper
+Aupper = -1*sum(PuSum / 2 .* diff(yVals));
+
+%Lower
+Alower = sum(PlSum / 2 .* diff(yVals));
+
+%Net
+Anet = Aupper + Alower;
+
+
+
+%THINGS TO DO
+%Review normal and axial values
+%Calculate lift and drag
+Lift = Nnet * cos(aoa) - Anet * sin(aoa);
+Drag = Nnet * sin(aoa) - Anet * cos(aoa);
+
+
 
 
 
