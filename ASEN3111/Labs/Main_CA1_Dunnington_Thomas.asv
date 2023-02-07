@@ -10,11 +10,10 @@
 %Clean Up
 close all; clear; clc;
 
-%% Problem 1
+%% Problem 1 -- Analytical and Numerical Calculation
 fprintf("-----------Problem 1-----------\n");
 
-%Symbolic integration to determine the sectional lift and drag coefficients
-    %%%%Double check that it is ok to have the symbolic implementation
+%Printing analytically determined values for the coefficients
 cl = 2*pi;
 cd = 0;
 fprintf("Analytical sectional lift and drag coefficients:\n\t cl: 2\x03c0 \n\t cd: 0\n");
@@ -45,7 +44,6 @@ for i = N
     trapzRelError(i) = ((Cl_int_trapz(i) - double(cl)) / double(cl)) * 100;
 end
 
-
 %%%%Numerical Integration with the simpson's composite method
 test = simpFunc(Cl_int, [0 2*pi], 10);
 
@@ -65,10 +63,7 @@ for i = N
     simpRelError(i) = ((Cl_int_simp(i) - double(cl)) / double(cl)) * 100;
 end
 
-
-
-
-%%%%Plotting
+%% Problem 1 -- Plotting
 %%%%Trapz
 figure();
 set(0, 'defaulttextinterpreter', 'latex');
@@ -151,7 +146,7 @@ simpN = j;
 fprintf('Number of panels required for less than 1 percent error with Trapezoid: %i \n', trapzN); 
 fprintf('Number of panels required for less than 1 percent error with Simpsons: %i \n\n', simpN); 
 
-%% Problem 2
+%% Problem 2 -- Lift and Drag Calculation
 fprintf("-----------Problem 2-----------\n");
 
 %Loading Data
@@ -166,9 +161,9 @@ Pinf = 101.3 * 10^3; %pa
 Qinf = 0.5*rho*Vinf^2; %Dynamic Pressure
 
 %Getting Cp from the structs
-xVals = linspace(0, 1, 100); %100 values across the chord
-upperCp = fnval(Cp_upper, xVals);
-lowerCp = fnval(Cp_lower, xVals);
+xVals = linspace(0, 3, 10000); %100 values across the chord
+upperCp = fnval(Cp_upper, xVals ./ 3);
+lowerCp = fnval(Cp_lower, xVals ./ 3);
 
 %Calculating the pressures from the coefficient of pressures
 pUpper = (upperCp * Qinf);
@@ -176,8 +171,10 @@ pLower = (lowerCp * Qinf);
 
 %Defining the thickness of the airfoil
 y_t = @(x) ((.12*3)/.2)*(.2969.*sqrt(x./3)-.1260.*(x./3)-(.3516.*(x./3).^2)+(.2843.*(x./3).^3)-(.1036.*(x./3).^4));
+y_t2 = @(x) -1*((0.12*3/0.2)*(0.2969*sqrt(x./3) - 0.1260*(x./3) - 0.3516*(x./3).^2 + 0.2843*(x./3).^3 - 0.1036*(x./3).^4));
 
 %Integrating to get the upper Normal force
+%Defining the x values from 0 to 3
 PuSum = pUpper(2:end) + pUpper(1:end-1);
 Nupper = -1*sum(PuSum/2 .* diff(xVals));
 
@@ -185,120 +182,132 @@ Nupper = -1*sum(PuSum/2 .* diff(xVals));
 PlSum = pLower(2:end) + pLower(1:end-1);
 Nlower = sum(PlSum/2 .* diff(xVals)); %Flip the sign
 
-
 %Find the net normal force force
 Nnet = Nupper + Nlower;
 
-
 %Integrating to find the axial force
-yVals = y_t(xVals); %Y values
-deltaY = yVals(2:end) - yVals(1:end-1);
+yValsUpper = y_t(xVals); %Y values
+yValsLower = y_t2(xVals); %Y values
+deltaY = yValsUpper(2:end) - yValsUpper(1:end-1);
 
-%Upper
-Aupper = -1*sum(PuSum / 2 .* diff(yVals));
-
-%Lower
-Alower = sum(PlSum / 2 .* diff(yVals));
+%Axial Force Calculation
+Aupper = sum(PuSum / 2 .* diff(yValsUpper));
+Alower = -1*sum(PlSum / 2 .* diff(yValsLower));
 
 %Net
 Anet = Aupper + Alower;
 
-
-
-%THINGS TO DO
-%Review normal and axial values
 %Calculate lift and drag
 Lift = Nnet * cos(aoa) - Anet * sin(aoa);
-Drag = Nnet * sin(aoa) - Anet * cos(aoa);
-
+Drag = Nnet * sin(aoa) + Anet * cos(aoa);
 
 %Printing to the command window
 fprintf('Lift: %f N/m\n', Lift); 
-fprintf('Drag: %f N/m\n', -1*Drag); 
+fprintf('Drag: %f N/m\n', Drag); 
 
 
-%Determining the number of points required to get within 1% relative error
-%of LIFT
-%Exact solutions
+%% PROBLEM 2 --- Error Calculation
+%Initializing the lift and drag vectors as well as the error
+liftVec = zeros(length(xVals),1);
+dragVec = zeros(length(xVals),1);
+liftError = zeros(length(xVals),1);
+dragError = zeros(length(xVals),1);
+
+%Exact solutions based on our maximum number of points
 liftExact = Lift;
-liftError = 100: %Initiallizing the error to 100
-i = 1; %Setting the iterator to 1
+dragExact = Drag;
 
-while(liftError > 1) %Once the error is less than 1, we exit the loop
-    %Number of points in the for loop
-    tempX = linspace(0,1,i);
-    upperCp = fnval(Cp_upper, tempX);
-    lowerCp = fnval(Cp_lower, tempX);
+%Looping through different numbers of points up to 10000
+for i = 1:length(xVals)
+    %Getting Cp from the structs
+    xVals = linspace(0, 3, i); %i values across the chord
+    upperCp = fnval(Cp_upper, xVals ./ 3);
+    lowerCp = fnval(Cp_lower, xVals ./ 3);
     
     %Calculating the pressures from the coefficient of pressures
     pUpper = (upperCp * Qinf);
     pLower = (lowerCp * Qinf);
-    
+
     %Integrating to get the upper Normal force
+    %Defining the x values from 0 to 3
     PuSum = pUpper(2:end) + pUpper(1:end-1);
     Nupper = -1*sum(PuSum/2 .* diff(xVals));
     
     %Integrating to get the lower Normal force
     PlSum = pLower(2:end) + pLower(1:end-1);
-    Nlower = sum(PlSum/2 .* diff(xVals)); %Flip the sign
+    Nlower = sum(PlSum/2 .* diff(xVals)); %Flip the sign 
     
     %Find the net normal force force
-    Nnet = Nupper + Nlower;
+    Nnet = Nupper + Nlower; 
     
     %Integrating to find the axial force
-    yVals = y_t(xVals); %Y values
-
-    %Upper
-    Aupper = -1*sum(PuSum / 2 .* diff(yVals));
-
-    %Lower
-    Alower = sum(PlSum / 2 .* diff(yVals));
-
-    %Net
+    yValsUpper = y_t(xVals); %Y values
+    yValsLower = y_t2(xVals); %Y values
+    
+    %Axial Fores
+    Aupper = sum(PuSum / 2 .* diff(yValsUpper));
+    Alower = -1*sum(PlSum / 2 .* diff(yValsLower));
+    
+    %Net Axial
     Anet = Aupper + Alower;
+    
+    %Calculate lift and drag
+    liftVec(i) = Nnet * cos(aoa) - Anet * sin(aoa);
+    dragVec(i) = Nnet * sin(aoa) + Anet * cos(aoa);
+
+    %Calculate the Error
+    liftError(i) = abs((liftVec(i) - liftExact) / liftExact) * 100;
+    dragError(i) = abs((dragVec(i) - dragExact) / dragExact) * 100;
 end
 
+%Determining where the error is less than 1%
+%Creating logical vectors of less than 1%
+liftLog = liftError < 1;
+dragLog = dragError < 1;
+
+liftIndices = find(liftLog);
+dragIndices = find(dragLog);
+
+%2642 176
+
+%Boolen to determine when we have found the number of points for both lift
+%and drag
+liftBool = 1;
+dragBool = 1;
+
+%Iterator
+% j = length(xVals);
+% while(liftBool || dragBool) %Looping while we haven't found the points
+%     if(~liftLog(j)) %Condition for lift not converging
+%         finalNumPointsLift = (j+1) * 2;
+%         liftBool = 0;
+%     end
+%     if(~dragLog(j)) %Condition for lift not converging
+%         finalNumPointsDrag = (j+1) * 2;
+%         dragBool = 0;
+%     end
+%     
+%     %Updating the iterator
+%     j = j -1;
+% end
+
+%% Problem 2 ---- Plotting
+figure();
+plot(2:2:20000, dragError(1:end), 'linewidth', 2);
+set(gca, 'Yscale', 'log')
+set(0, 'defaulttextinterpreter', 'latex')
+hold on
+plot(2:2:20000, liftError(1:end), 'linewidth', 2);
+yline(1, 'linewidth',2, 'label', '1 \% Relative Error', 'color', 'g')
+
+xlabel('Number of Points');
+ylabel('Relative Error (%)');
+legend('Drag Error', 'Lift Error')
 
 
-
-%Defining the thickness of the airfoil
-y_t = @(x) ((.12*3)/.2)*(.2969.*sqrt(x./3)-.1260.*(x./3)-(.3516.*(x./3).^2)+(.2843.*(x./3).^3)-(.1036.*(x./3).^4));
-
-%Integrating to get the upper Normal force
-PuSum = pUpper(2:end) + pUpper(1:end-1);
-Nupper = -1*sum(PuSum/2 .* diff(xVals));
-
-%Integrating to get the lower Normal force
-PlSum = pLower(2:end) + pLower(1:end-1);
-Nlower = sum(PlSum/2 .* diff(xVals)); %Flip the sign
-
-
-%Find the net normal force force
-Nnet = Nupper + Nlower;
-
-
-%Integrating to find the axial force
-yVals = y_t(xVals); %Y values
-deltaY = yVals(2:end) - yVals(1:end-1);
-
-%Upper
-Aupper = -1*sum(PuSum / 2 .* diff(yVals));
-
-%Lower
-Alower = sum(PlSum / 2 .* diff(yVals));
-
-%Net
-Anet = Aupper + Alower;
-
-
-
-%THINGS TO DO
-%Review normal and axial values
-%Calculate lift and drag
-Lift = Nnet * cos(aoa) - Anet * sin(aoa);
-Drag = Nnet * sin(aoa) - Anet * cos(aoa);
-
-
+%Ouputing to the terminal
+fprintf("Number of integration points required for less than 1 percent relative error for Lift: %i \n", finalNumPointsLift);
+fprintf("Number of integration points required for less than 1 percent relative error for Drag: %i \n", finalNumPointsDrag);
 
 
 
