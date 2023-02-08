@@ -21,19 +21,21 @@ omegaDot = inv(I) * IomegaDot;
 
 %% Problem 9
 Ic = [15, 0, 0; 0, 11, 5; 0, 5, 16];
-psi = 30*pi/2;
-thet = 10*pi/2;
-phi = -12*pi/2;
+psi = 30*pi/180;
+thet = 10*pi/180;
+phi = -12*pi/180;
 
-psiD = -1*pi/2;
-thetD = -4*pi/2;
-phiD = 0.5*pi/2;
+psiD = -1*pi/180;
+thetD = 4*pi/180;
+phiD = 0.5*pi/180;
 
-euler2omega = [-sin(thet), 0, 1; sin(phi)*cos(thet), cos(phi), 0; cos(phi)*cos(thet), -sin(phi), 0];
+euler2omega = [-sin(thet), 0, 1; 
+    sin(phi)*cos(thet), cos(phi), 0; 
+    cos(phi)*cos(thet), -sin(phi), 0];
 
 omega = euler2omega*[psiD; thetD; phiD];
 
 Hc = Ic * omega;
 
-Trot = 0.5*Hc .* omega;
-Dp = sum(Trot);
+Trot = Hc .* omega;
+Dp = 0.5* sum(Trot);
