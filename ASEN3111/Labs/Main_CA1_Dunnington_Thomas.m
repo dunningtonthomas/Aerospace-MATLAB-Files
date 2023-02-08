@@ -1,13 +1,19 @@
 %% ASEN 3111 - Computational Assignment 1 - Main
-% Provide a breif summary of the problem statement and code so that
-% you or someone else can later understand what you attempted to do
-% it doesn’t have to be that long.
+%Problem 1: Compute the sectional lift and drag coefficients and determine
+%the number of panels to achieve less than 1 percent error
+%
+%Problem 2: Computer the lift and drag per span with an airfoil given a Cp
+%model for the upper and lower surface of the airfoil, the determine the
+%required number of integration points required to be below 1 percent error
+%
+%This code is the driver to solve the above problems and implements the
+%trapezoid and simpsons rule to integrate
 %
 % Author: Thomas Dunnington
 % Collaborators: Nolan Stevenson
-% Date: 1/17/2023
+% Date: 2/7/2023
 
-%Clean Up
+%% Clean Up
 close all; clear; clc;
 
 %% Problem 1 -- Analytical and Numerical Calculation
@@ -75,7 +81,7 @@ plot(N, Cl_int_trapz, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'marke
 
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Lift Coefficient $$cl$$');
-title('Sectional Lift Coefficient versus Number of Panels Trapezoid');
+title('Problem 1: Sectional Lift Coefficient versus Number of Panels Trapezoid');
 legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
 
 figure();
@@ -87,7 +93,7 @@ plot(N, Cd_int_trapz, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'marke
 
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Drag Coefficient $$cd$$');
-title('Sectional Drag Coefficient versus Number of Panels Trapezoid');
+title('Problem 1: Sectional Drag Coefficient versus Number of Panels Trapezoid');
 legend('Analytical Integration', 'Numerical Integration', 'location', 'se');
 
 
@@ -102,7 +108,7 @@ plot(N, Cl_int_simp, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'marker
 
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Lift Coefficient $$cl$$');
-title('Sectional Lift Coefficient versus Number of Panels Simpsons');
+title('Problem 1: Sectional Lift Coefficient versus Number of Panels Simpsons');
 legend('Analytical Integration', 'Numerical Integration', 'location', 'ne');
 
 figure();
@@ -114,11 +120,10 @@ plot(N, Cd_int_simp, 'linewidth', 2, 'linestyle', 'none', 'marker', '.', 'marker
 
 xlabel('Number of Panels to Discretize');
 ylabel('Sectional Drag Coefficient $$cd$$');
-title('Sectional Drag Coefficient versus Number of Panels Simpsons');
+title('Problem 1: Sectional Drag Coefficient versus Number of Panels Simpsons');
 legend('Analytical Integration', 'Numerical Integration', 'location', 'ne');
 
 
-%%%%Printing thet minimum N required to get below 1% relative error
 %Looping through and finding the first index where the error is less than 1
 %percent
 
@@ -128,7 +133,6 @@ while(abs(trapzRelError(j)) > 1)
     %Updating iterator
     j = j + 1;
 end
-
 %Required panels for less than 1 percent relative error
 trapzN = j;
 
@@ -138,7 +142,6 @@ while(abs(simpRelError(j)) > 1)
     %Updating iterator
     j = j + 1;
 end
-
 %Required panels for less than 1 percent relative error
 simpN = j;
 
@@ -170,8 +173,8 @@ pUpper = (upperCp * Qinf);
 pLower = (lowerCp * Qinf);
 
 %Defining the thickness of the airfoil
-y_t = @(x) ((.12*3)/.2)*(.2969.*sqrt(x./3)-.1260.*(x./3)-(.3516.*(x./3).^2)+(.2843.*(x./3).^3)-(.1036.*(x./3).^4));
-y_t2 = @(x) -1*((0.12*3/0.2)*(0.2969*sqrt(x./3) - 0.1260*(x./3) - 0.3516*(x./3).^2 + 0.2843*(x./3).^3 - 0.1036*(x./3).^4));
+y_tupper = @(x) ((.12*3)/.2)*(.2969.*sqrt(x./3)-.1260.*(x./3)-(.3516.*(x./3).^2)+(.2843.*(x./3).^3)-(.1036.*(x./3).^4));
+y_tlower = @(x) -1*((0.12*3/0.2)*(0.2969*sqrt(x./3) - 0.1260*(x./3) - 0.3516*(x./3).^2 + 0.2843*(x./3).^3 - 0.1036*(x./3).^4));
 
 %Integrating to get the upper Normal force
 %Defining the x values from 0 to 3
@@ -186,8 +189,8 @@ Nlower = sum(PlSum/2 .* diff(xVals)); %Flip the sign
 Nnet = Nupper + Nlower;
 
 %Integrating to find the axial force
-yValsUpper = y_t(xVals); %Y values
-yValsLower = y_t2(xVals); %Y values
+yValsUpper = y_tupper(xVals); %Y values
+yValsLower = y_tlower(xVals); %Y values
 deltaY = yValsUpper(2:end) - yValsUpper(1:end-1);
 
 %Axial Force Calculation
@@ -241,8 +244,8 @@ for i = 1:length(xVals)
     Nnet = Nupper + Nlower; 
     
     %Integrating to find the axial force
-    yValsUpper = y_t(xVals); %Y values
-    yValsLower = y_t2(xVals); %Y values
+    yValsUpper = y_tupper(xVals); %Y values
+    yValsLower = y_tlower(xVals); %Y values
     
     %Axial Fores
     Aupper = sum(PuSum / 2 .* diff(yValsUpper));
@@ -265,50 +268,35 @@ end
 liftLog = liftError < 1;
 dragLog = dragError < 1;
 
+%Getting the indices where the error is less than 1 percent
 liftIndices = find(liftLog);
 dragIndices = find(dragLog);
 
-%2642 176
-
-%Boolen to determine when we have found the number of points for both lift
-%and drag
-liftBool = 1;
-dragBool = 1;
-
-%Iterator
-% j = length(xVals);
-% while(liftBool || dragBool) %Looping while we haven't found the points
-%     if(~liftLog(j)) %Condition for lift not converging
-%         finalNumPointsLift = (j+1) * 2;
-%         liftBool = 0;
-%     end
-%     if(~dragLog(j)) %Condition for lift not converging
-%         finalNumPointsDrag = (j+1) * 2;
-%         dragBool = 0;
-%     end
-%     
-%     %Updating the iterator
-%     j = j -1;
-% end
+%From the plot we can see the drag doesn't converge until around 3000 so we
+%neglect the first two
+finalNumPointsLift = (liftIndices(1) * 2) - 2; %Multiply by 2 to get top and bottom, subtract 2 because the LE and TE points are double counted
+finalNumPointsDrag = (dragIndices(3) * 2) - 2;
 
 %% Problem 2 ---- Plotting
+%Plotting the error log scale
 figure();
-plot(2:2:20000, dragError(1:end), 'linewidth', 2);
+plot(2:2:20000, dragError(1:end), 'linewidth', 2); %Drag error
 set(gca, 'Yscale', 'log')
-set(0, 'defaulttextinterpreter', 'latex')
 hold on
-plot(2:2:20000, liftError(1:end), 'linewidth', 2);
-yline(1, 'linewidth',2, 'label', '1 \% Relative Error', 'color', 'g')
+plot(2:2:20000, liftError(1:end), 'linewidth', 2); %Lift error
+yline(1, 'linewidth',2,'color', [0.4660 0.6740 0.1880])
+plot(finalNumPointsLift, 1, 'marker', '.', 'markersize', 20, 'color', 'r');
+plot(finalNumPointsDrag, 1, 'marker', '.', 'markersize', 20, 'color', 'b');
 
-xlabel('Number of Points');
-ylabel('Relative Error (%)');
-legend('Drag Error', 'Lift Error')
-
+xlabel('Number of Equispaced Points');
+ylabel('Relative Error $$(\%)$$');
+title('Problem 2: Relative Error');
+legend('Drag Error', 'Lift Error', '1 $$\%$$ Error', 'Interpreter','latex')
 
 %Ouputing to the terminal
-fprintf("Number of integration points required for less than 1 percent relative error for Lift: %i \n", finalNumPointsLift);
-fprintf("Number of integration points required for less than 1 percent relative error for Drag: %i \n", finalNumPointsDrag);
+fprintf("Number of equispaced integration points required for less than 1 percent relative error for Lift: %i \n", finalNumPointsLift);
+fprintf("Number of equispaced integration points required for less than 1 percent relative error for Drag: %i \n", finalNumPointsDrag);
 
-
+%%%%END PROGRAM
 
 
