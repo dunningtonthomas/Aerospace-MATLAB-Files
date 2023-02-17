@@ -1,0 +1,7 @@
+% Run 1	Run 2		Run 3		Run 4		%Created: 2/10/2023
+34 28 39 46
+30 24 35 41
+28 21 31 35
+25 20 28 33 
+NaN NaN 26 29
+NaN NaN 23 NaN
