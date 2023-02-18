@@ -35,6 +35,26 @@ wpValues = wp(ws);
 %Solving for the time period given a precession rate
 timePeriod = (2*pi) ./ wpValues;
 
+%% Error Analysis
+%Combining data
+timeData = [trial1(:,1); trial2(:,1); trial3(:,1); trial4(:,1)];
+wpData = 2*pi ./ timeData;
+spinData = [trial1(:,2); trial2(:,2); trial3(:,2); trial4(:,2)];
+
+%Model based on the spin data
+wpModel = wp(spinData);
+TModel = 2*pi ./ wpModel;
+
+%Residuals = measured - approximate
+wpResid = wpData - wpModel;
+TResid = timeData - TModel;
+
+
+%Calculate the error 
+errorPercent = wpResid ./ wpData;
+meanErr =  mean(errorPercent) * 100; %Mean error percent
+
+
 
 %% Plotting Predicted Values
 %Plotting the precession and spin rates
@@ -46,8 +66,6 @@ plot(trial1(:,2), 2*pi ./ trial1(:,1), 'marker', '.', 'markerSize', 20, 'linesty
 plot(trial2(:,2), 2*pi ./ trial2(:,1), 'marker', '.', 'markerSize', 20, 'linestyle', 'none');
 plot(trial3(:,2), 2*pi ./ trial3(:,1), 'marker', '.', 'markerSize', 20, 'linestyle', 'none');
 plot(trial4(:,2), 2*pi ./ trial4(:,1), 'marker', '.', 'markerSize', 20, 'linestyle', 'none');
-
-
 
 xlabel('Spin Rate (rad/s)');
 ylabel('Precession Rate (rad/s)');
@@ -70,5 +88,21 @@ ylabel('Time Period (s)');
 title('Wheel Spin Rate vs Time Period');
 legend('Model', 'Trial 1', 'Trial 2', 'Trial 3', 'Trial 4', 'location', 'nw');
 
+
+%Plotting the residuals WP
+figure();
+plot(spinData, wpResid, 'linestyle', 'none', 'marker', '.', 'markerEdgeColor', 'k', 'markerSize', 20);
+
+xlabel('Spin Rate (rad/s)');
+ylabel('Residual (measured - model (rad/s))');
+title('Residuals of Precession Rate');
+
+%Plotting the percent error
+figure();
+plot(spinData, meanErr, 'linestyle', 'none', 'marker', '.', 'markerEdgeColor', 'k', 'markerSize', 20);
+
+xlabel('Spin Rate (rad/s)');
+ylabel('Percent Error (\%)');
+title('Percent Error of Precession Rate');
 
 
