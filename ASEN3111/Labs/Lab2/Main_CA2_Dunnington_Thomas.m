@@ -89,6 +89,9 @@ hold on
 plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
 
 
+%% Getting the Equipotential Lines
+%Need to calculate theta to get the equipotential lines
+
 
 
 
