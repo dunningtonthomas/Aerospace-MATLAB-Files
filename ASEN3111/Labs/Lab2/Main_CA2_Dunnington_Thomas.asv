@@ -1,0 +1,88 @@
+%% ASEN 3111 - Computational Assignment 2 - Main
+%
+%
+%
+% Author: Thomas Dunnington
+% Collaborators: Nolan Stevenson
+% Date: 2/21/2023
+
+%% Clean Up
+close all; clear; clc;
+
+
+%% Parameters
+c = 5; %meters
+alpha = 15 * pi/180; %Radius
+V_inf = 34; %m/s
+p_inf = 101.3 * 10^3;
+rho_inf = 1.225; %kg/m^3
+N = 50; %Just to start
+
+%%%%WRITING THE FUNCTION
+%% Define the Domain
+xmin = -0.5*c; %2 times the chord
+xmax = 1.5*c;
+ymin = -c;
+ymax = c;
+
+%% Define Number of Grid Points
+nx=100; % steps in the x direction
+ny=100; % steps in the y direction
+
+%% Create mesh over domain using number of grid points specified
+[x,y]=meshgrid(linspace(xmin,xmax,nx),linspace(ymin,ymax,ny));
+
+
+%% Parameters
+%Vortex Strength
+gamma = @(xi)(2*alpha*V_inf*sqrt((1 - xi/c)./(xi/c)));
+
+%Delta x along the airfoil
+delX = c / N;
+
+
+%% Calculate psi for vortex (Eq. 3.114)
+%Function to calculate the radius for every point
+%The radius is distance from the vortex center to the point in the meshgrid
+yCenter = 0; %Always at y = 0
+radius= @(x,y,xCenter) sqrt((x-xCenter).^2+(y-yCenter).^2);
+
+%3D matrix where each 2D section is the streamfunction for a vortex
+Psi_Gamma_arr = zeros(nx, ny, N);
+Psi_Gamma_final = zeros(nx, ny); %The total vortex streamlines
+
+xLoc = delX / 2; %Start the vortex location at 1/2 step
+%For loop to get the psi for each vortex, store in cell array
+
+for i = 1:N
+    %Calculating the strength of the vortex
+    Psi_Gamma_arr(:,:,i) = gamma(xLoc)*delX/(2*pi)*log(radius(x,y,xLoc));
+
+    %Update the next x location of the vortex
+    xLoc = xLoc + delX;
+
+    %Adding the streamlines together
+    Psi_Gamma_final = Psi_Gamma_final + Psi_Gamma_arr(:,:,i);
+end
+
+%% Calculating psi for uniform flow
+%We need the uniform flow to be at an angle of alpha
+
+Psi_U0 = V_inf * sin(alpha) * ;
+
+%% Summing to get the final psi
+StreamFunction = Psi_Gamma_final + Psi_U0;
+
+
+%% Determine color levels for contours
+levmin = StreamFunction(1,nx); % defines the color levels -> trial and error to find a good representation
+levmax = StreamFunction(ny,nx/2);
+levels = linspace(levmin,levmax,50)';
+
+%% Plot streamfunction at levels
+contour(x,y,StreamFunction,levels,'LineWidth',1.5)
+
+
+
+
+

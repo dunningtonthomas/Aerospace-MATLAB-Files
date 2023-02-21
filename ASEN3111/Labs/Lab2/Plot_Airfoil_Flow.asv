@@ -1,0 +1,35 @@
+function Plot_Airfoil_Flow(c,alpha,V_inf,p_inf,rho_inf,N)
+%SUMMARY: 
+%INPUTS:
+%OUTPUTS: Return nothing, plot the flow
+
+%% Define the Domain
+xmin = -2*c; %2 times the chord
+xmax = 2*c;
+ymin = -c;
+ymax = c;
+
+%% Define Number of Grid Points
+nx=100; % steps in the x direction
+ny=100; % steps in the y direction
+
+%% Create mesh over domain using number of grid points specified
+[x,y]=meshgrid(linspace(xmin,xmax,nx),linspace(ymin,ymax,ny));
+
+
+%% Parameters
+%Vortex Strength
+gamma = @(xi)(2*alpha*V_inf*sqrt((1 - xi./c)/(xi./c)));
+
+%Delta x along the airfoil
+delX = c / N;
+
+
+%% Calculate psi for vortex (Eq. 3.114)
+%Since we put leading edge at 0, the vortices have r values of their x 
+Psi_Gamma = gamma/(2*pi)*log(radius(x,y,x_cyl,y_cyl));
+
+
+
+end
+
