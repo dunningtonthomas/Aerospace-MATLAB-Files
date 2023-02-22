@@ -32,6 +32,12 @@ ws = linspace(15, 40, 100);
 wp = @(ws)((g*d)./(r^2 * ws));
 wpValues = wp(ws);
 
+%Also adjusting moment of inertia to fit the data better
+%Wp as a function of ws
+r = 0.5337 / 2; %meters, radius
+wpAdj = @(ws)((g*d)./(r^2 * ws));
+wpValuesAdj = wpAdj(ws);
+
 %Solving for the time period given a precession rate
 timePeriod = (2*pi) ./ wpValues;
 
@@ -54,6 +60,16 @@ TResid = timeData - TModel;
 errorPercent = wpResid ./ wpData;
 meanErr =  mean(errorPercent) * 100; %Mean error percent
 
+%%%%ERROR FOR ADJUSTED MOMENT OF INERTIA
+%Model based on the spin data
+wpModelAdj = wpAdj(spinData);
+
+%Residuals = measured - approximate
+wpResidAdj = wpData - wpModelAdj;
+
+%Calculate the error 
+errorPercentAdj = wpResidAdj ./ wpData;
+meanErrAdj =  mean(errorPercentAdj) * 100; %Mean error percent
 
 
 %% Plotting Predicted Values
@@ -104,5 +120,40 @@ plot(spinData, meanErr, 'linestyle', 'none', 'marker', '.', 'markerEdgeColor', '
 xlabel('Spin Rate (rad/s)');
 ylabel('Percent Error (\%)');
 title('Percent Error of Precession Rate');
+
+
+%Plotting the precession and spin rates ADJUSTED MOMENT OF INERTIA
+figure();
+set(0, 'defaulttextinterpreter', 'latex');
+plot(ws, wpValuesAdj, 'linewidth', 2);
+hold on
+plot(trial1(:,2), 2*pi ./ trial1(:,1), 'marker', '.', 'markerSize', 20, 'linestyle', 'none');
+plot(trial2(:,2), 2*pi ./ trial2(:,1), 'marker', '.', 'markerSize', 20, 'linestyle', 'none');
+plot(trial3(:,2), 2*pi ./ trial3(:,1), 'marker', '.', 'markerSize', 20, 'linestyle', 'none');
+plot(trial4(:,2), 2*pi ./ trial4(:,1), 'marker', '.', 'markerSize', 20, 'linestyle', 'none');
+
+xlabel('Spin Rate (rad/s)');
+ylabel('Precession Rate (rad/s)');
+title('Wheel Spin Rate vs Precession Rate With Adjusted Moment of Inertia');
+legend('Model Adjusted', 'Trial 1', 'Trial 2', 'Trial 3', 'Trial 4');
+
+
+
+%Plotting the residuals WP ADJUSTED
+figure();
+plot(spinData, wpResidAdj, 'linestyle', 'none', 'marker', '.', 'markerEdgeColor', 'k', 'markerSize', 20);
+
+xlabel('Spin Rate (rad/s)');
+ylabel('Residual (measured - model (rad/s))');
+title('Residuals of Precession Rate With Adjusted Moment of Inertia');
+
+%Plotting the percent error ADJUSTED
+figure();
+plot(spinData, meanErrAdj, 'linestyle', 'none', 'marker', '.', 'markerEdgeColor', 'k', 'markerSize', 20);
+
+xlabel('Spin Rate (rad/s)');
+ylabel('Percent Error (\%)');
+title('Percent Error of Precession Rate With Adjusted Moment of Inertia');
+
 
 
