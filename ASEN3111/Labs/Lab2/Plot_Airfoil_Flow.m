@@ -1,4 +1,4 @@
-function [StreamFunction, Equipotential, Cp] = Plot_Airfoil_Flow(c,alpha,V_inf,p_inf,rho_inf,N)
+function [StreamFunction, Equipotential, Cp] = Plot_Airfoil_Flow(c,alpha,V_inf,p_inf,rho_inf,N,boolPlot)
 %SUMMARY: 
 %INPUTS:
 %OUTPUTS: Return nothing, plot the flow
@@ -98,75 +98,78 @@ vTotal = v_final + v_uniform;
 %% Calculating the coefficient of pressure
 Cp = 1 - (uTotal ./ V_inf).^2 - (vTotal ./ V_inf).^2;
 
-%% Determine color levels for contours
-%Stream function levels
-% levminStream = StreamFunction(1,nx); % defines the color levels -> trial and error to find a good representation
-% levmaxStream = StreamFunction(ny,nx/2);
-levminStream = min(StreamFunction, [], 'all');
-levmaxStream = max(StreamFunction, [], 'all');
-levelsStream = linspace(levminStream,levmaxStream,20)';
 
-%Equipotential levels
-levminEq = min(Equipotential, [], 'all');
-levmaxEq = max(Equipotential, [], 'all');
-levelsEq = linspace(levminEq,levmaxEq,20)';
+%%%%ONLY CONTINUE IF THE PLOT BOOLEAN IS TRUE
+if(boolPlot)
 
-%Coefficient of Pressure
-levelsPress = linspace(-5,1,40);
+    %% Determine color levels for contours
+    %Stream function levels
+    % levminStream = StreamFunction(1,nx); % defines the color levels -> trial and error to find a good representation
+    % levmaxStream = StreamFunction(ny,nx/2);
+    levminStream = min(StreamFunction, [], 'all');
+    levmaxStream = max(StreamFunction, [], 'all');
+    levelsStream = linspace(levminStream,levmaxStream,20)';
+    
+    %Equipotential levels
+    levminEq = min(Equipotential, [], 'all');
+    levmaxEq = max(Equipotential, [], 'all');
+    levelsEq = linspace(levminEq,levmaxEq,20)';
+    
+    %Coefficient of Pressure
+    levelsPress = linspace(-5,1,40);
+    
+    %% Plot streamfunction at levels
+    figure();
+    set(0, 'defaulttextinterpreter', 'latex')
+    contourf(x,y,StreamFunction,levelsStream,'LineWidth',1.5)
+    axis equal;
+    hold on
+    
+    %Plot the airfoil
+    plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+    
+    %Labels
+    xlabel('x Position (m)');
+    ylabel('y Position (m)');
+    title('Streamlines');
+    c = colorbar;
+    c.Label.String = 'Streamfunction Value';
+    
+    %% Plot Equipotentials at levels
+    figure();
+    set(0, 'defaulttextinterpreter', 'latex')
+    contourf(x,y,Equipotential,levelsEq,'LineWidth',1.5)
+    axis equal;
+    hold on
+    
+    %Plot the airfoil
+    plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+    
+    %Labels
+    xlabel('x Position (m)');
+    ylabel('y Position (m)');
+    title('Equipotentials');
+    c = colorbar;
+    c.Label.String = 'Equipotential Value';
+    
+    
+    %% Plot Pressure at levels
+    figure();
+    set(0, 'defaulttextinterpreter', 'latex')
+    contourf(x,y,Cp,levelsPress,'Linewidth',0.5)
+    axis equal;
+    hold on
+    
+    %Plot the airfoil
+    plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+    
+    %Labels
+    xlabel('x Position (m)');
+    ylabel('y Position (m)');
+    title('Coefficient of Pressure Contours');
+    c = colorbar;
+    c.Label.String = 'Coefficient of Pressure';
 
-%% Plot streamfunction at levels
-figure();
-subplot(3,1,1);
-set(0, 'defaulttextinterpreter', 'latex')
-contourf(x,y,StreamFunction,levelsStream,'LineWidth',1.5)
-axis equal;
-hold on
-
-%Plot the airfoil
-plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
-
-%Labels
-xlabel('x Position (m)');
-ylabel('y Position (m)');
-title('Streamlines');
-c = colorbar;
-c.Label.String = 'Streamfunction Value';
-
-%% Plot Equipotentials at levels
-figure();
-set(0, 'defaulttextinterpreter', 'latex')
-contourf(x,y,Equipotential,levelsEq,'LineWidth',1.5)
-axis equal;
-hold on
-
-%Plot the airfoil
-plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
-
-%Labels
-xlabel('x Position (m)');
-ylabel('y Position (m)');
-title('Equipotentials');
-c = colorbar;
-c.Label.String = 'Equipotential Value';
-
-
-%% Plot Pressure at levels
-figure();
-set(0, 'defaulttextinterpreter', 'latex')
-contourf(x,y,Cp,levelsPress,'Linewidth',0.5)
-axis equal;
-hold on
-
-%Plot the airfoil
-plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
-
-%Labels
-xlabel('x Position (m)');
-ylabel('y Position (m)');
-title('Coefficient of Pressure Contours');
-c = colorbar;
-c.Label.String = 'Coefficient of Pressure';
-
-
+end %End if statement for plotting
 end
 
