@@ -30,7 +30,7 @@ delX = c / N;
 %The radius is distance from the vortex center to the point in the meshgrid
 yCenter = 0; %Always at y = 0
 radius= @(x,y,xCenter) sqrt((x-xCenter).^2+(y-yCenter).^2);
-theta = @(x,y,xCenter) (atan2(y,(x-xCenter)));
+theta = @(x,y,xCenter) (atan2(-1*y,-1*(x-xCenter)));
 
 %3D matrix where each 2D section is the streamfunction for a vortex
 Psi_Gamma_arr = zeros(nx, ny, N);
