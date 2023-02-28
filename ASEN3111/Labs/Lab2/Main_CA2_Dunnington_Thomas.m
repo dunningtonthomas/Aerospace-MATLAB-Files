@@ -18,12 +18,14 @@ p_inf = 101.3 * 10^3;
 rho_inf = 1.225; %kg/m^3
 N = 50; %Just to start
 
+Plot_Airfoil_Flow(c,alpha,V_inf,p_inf,rho_inf,N);
+
 %%%%WRITING THE FUNCTION
 %% Define the Domain
 xmin = -0.5*c; %2 times the chord
 xmax = 1.5*c;
-ymin = -c;
-ymax = c;
+ymin = -0.5*c;
+ymax = 0.5*c;
 
 %% Define Number of Grid Points
 nx=100; % steps in the x direction
@@ -46,54 +48,117 @@ delX = c / N;
 %The radius is distance from the vortex center to the point in the meshgrid
 yCenter = 0; %Always at y = 0
 radius= @(x,y,xCenter) sqrt((x-xCenter).^2+(y-yCenter).^2);
+theta = @(x,y,xCenter) (atan2(y,(x-xCenter)));
 
 %3D matrix where each 2D section is the streamfunction for a vortex
 Psi_Gamma_arr = zeros(nx, ny, N);
 Psi_Gamma_final = zeros(nx, ny); %The total vortex streamlines
 
+%3D matrix where each 2D section is the equipotential for a vortex
+Phi_Gamma_arr = zeros(nx, ny, N);
+Phi_Gamma_final = zeros(nx, ny); 
+
+%3D matrix where each 2D section is the u component of velocity for a vortex
+u_arr = zeros(nx, ny, N);
+u_final = zeros(nx, ny); 
+
+%3D matrix where each 2D section is the v component of velocity for a vortex
+v_arr = zeros(nx, ny, N);
+v_final = zeros(nx, ny); 
+
 xLoc = delX / 2; %Start the vortex location at 1/2 step
 %For loop to get the psi for each vortex, store in cell array
 
 for i = 1:N
-    %Calculating the strength of the vortex
+    %Calculating the psi due to the vortex
     Psi_Gamma_arr(:,:,i) = gamma(xLoc)*delX/(2*pi)*log(radius(x,y,xLoc));
+    
+    %Calculating the phi due to the vortex
+    Phi_Gamma_arr(:,:,i) = -1*gamma(xLoc)*delX/(2*pi)*theta(x,y,xLoc);
+    
+    %Calculating the u component of velocity due to the vortex
+    u_arr(:,:,i) = (gamma(xLoc)*delX*y) ./ (2*pi*radius(x,y,xLoc).^2); 
+    
+    %Calculating the v component of velocity due to the vortex
+    v_arr(:,:,i) = -1*(gamma(xLoc)*delX*(x - xLoc)) ./ (2*pi*radius(x,y,xLoc).^2);
 
     %Update the next x location of the vortex
     xLoc = xLoc + delX;
-
-    %Adding the streamlines together
-    Psi_Gamma_final = Psi_Gamma_final + Psi_Gamma_arr(:,:,i);
 end
 
-%% Calculating psi for uniform flow
-%We need the uniform flow to be at an angle of alpha
+%Adding the streamlines together
+Psi_Gamma_final = sum(Psi_Gamma_arr, 3);
 
+%Adding the equipotential lines together
+Phi_Gamma_final = sum(Phi_Gamma_arr, 3);
+
+%Adding the velocity components together
+u_final = sum(u_arr, 3); 
+v_final = sum(v_arr, 3); 
+
+%% Calculating psi, phi, and velocity components for uniform flow
+%We need the uniform flow to be at an angle of alpha
 Psi_U0 = -1*V_inf * sin(alpha) * x + V_inf * cos(alpha) * y;
 
-%% Summing to get the final psi
-StreamFunction = Psi_Gamma_final + Psi_U0;
+%Equipotential
+Phi_U0 = V_inf * cos(alpha) * x + V_inf * sin(alpha) * y;
 
+%Velocity components
+u_uniform = V_inf * cos(alpha);
+v_uniform = V_inf * sin(alpha);
+
+%% Summing to get the final psi, phi, and velocity components
+StreamFunction = Psi_Gamma_final + Psi_U0;
+Equipotential = Phi_Gamma_final + Phi_U0;
+uTotal = u_final + u_uniform;
+vTotal = v_final + v_uniform;
+
+%% Calculating the coefficient of pressure
+Cp = 1 - (uTotal ./ V_inf).^2 - (vTotal ./ V_inf).^2;
+Pressure = Cp * (0.5*rho_inf*V_inf^2) + p_inf; %Static pressure
 
 %% Determine color levels for contours
-levmin = StreamFunction(1,nx); % defines the color levels -> trial and error to find a good representation
-levmax = StreamFunction(ny,nx/2);
-levels = linspace(levmin,levmax,50)';
+%Stream function levels
+levminStream = StreamFunction(1,nx); % defines the color levels -> trial and error to find a good representation
+levmaxStream = StreamFunction(ny,nx/2);
+levelsStream = linspace(levminStream,levmaxStream,50)';
+
+%Equipotential levels
+levminEq = min(Equipotential, [], 'all');
+levmaxEq = max(Equipotential, [], 'all');
+levelsEq = linspace(levminEq,levmaxEq,50)';
+
+%Pressure Levels
+levminPress = min(Pressure, [], 'all');
+levmaxPress = max(Pressure, [], 'all');
+levelsPress = linspace(levminPress,levmaxPress,500)';
 
 %% Plot streamfunction at levels
 figure();
 set(0, 'defaulttextinterpreter', 'latex')
-contour(x,y,StreamFunction,levels,'LineWidth',1.5)
+contour(x,y,StreamFunction,levelsStream,'LineWidth',1.5)
 hold on
 
 %Plot the airfoil
 plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
 
 
-%% Getting the Equipotential Lines
-%Need to calculate theta to get the equipotential lines
+%% Plot Equipotentials at levels
+figure();
+set(0, 'defaulttextinterpreter', 'latex')
+contour(x,y,Equipotential,levelsEq,'LineWidth',1.5)
+hold on
+
+%Plot the airfoil
+plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
 
 
+%% Plot Pressure at levels
+figure();
+set(0, 'defaulttextinterpreter', 'latex')
+contour(x,y,Pressure,levelsPress,'LineWidth',1.5)
+hold on
 
-
-
+%Plot the airfoil
+plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
 
