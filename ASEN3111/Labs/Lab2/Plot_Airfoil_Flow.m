@@ -1,4 +1,4 @@
-function Plot_Airfoil_Flow(c,alpha,V_inf,p_inf,rho_inf,N)
+function [StreamFunction, Equipotential, Cp] = Plot_Airfoil_Flow(c,alpha,V_inf,p_inf,rho_inf,N)
 %SUMMARY: 
 %INPUTS:
 %OUTPUTS: Return nothing, plot the flow
@@ -6,8 +6,8 @@ function Plot_Airfoil_Flow(c,alpha,V_inf,p_inf,rho_inf,N)
 %% Define the Domain
 xmin = -0.5*c; %2 times the chord
 xmax = 1.5*c;
-ymin = -0.5*c;
-ymax = 0.5*c;
+ymin = -3;
+ymax = 3;
 
 %% Define Number of Grid Points
 nx=100; % steps in the x direction
@@ -97,28 +97,29 @@ vTotal = v_final + v_uniform;
 
 %% Calculating the coefficient of pressure
 Cp = 1 - (uTotal ./ V_inf).^2 - (vTotal ./ V_inf).^2;
-Pressure = Cp * (0.5*rho_inf*V_inf^2) + p_inf; %Static pressure
 
 %% Determine color levels for contours
 %Stream function levels
-levminStream = StreamFunction(1,nx); % defines the color levels -> trial and error to find a good representation
-levmaxStream = StreamFunction(ny,nx/2);
-levelsStream = linspace(levminStream,levmaxStream,50)';
+% levminStream = StreamFunction(1,nx); % defines the color levels -> trial and error to find a good representation
+% levmaxStream = StreamFunction(ny,nx/2);
+levminStream = min(StreamFunction, [], 'all');
+levmaxStream = max(StreamFunction, [], 'all');
+levelsStream = linspace(levminStream,levmaxStream,20)';
 
 %Equipotential levels
 levminEq = min(Equipotential, [], 'all');
 levmaxEq = max(Equipotential, [], 'all');
-levelsEq = linspace(levminEq,levmaxEq,50)';
+levelsEq = linspace(levminEq,levmaxEq,20)';
 
-%Pressure Levels
-levminPress = min(Pressure, [], 'all');
-levmaxPress = max(Pressure, [], 'all');
-levelsPress = linspace(levminPress,levmaxPress,500)';
+%Coefficient of Pressure
+levelsPress = linspace(-5,1,40);
 
 %% Plot streamfunction at levels
 figure();
+subplot(3,1,1);
 set(0, 'defaulttextinterpreter', 'latex')
-contour(x,y,StreamFunction,levelsStream,'LineWidth',1.5)
+contourf(x,y,StreamFunction,levelsStream,'LineWidth',1.5)
+axis equal;
 hold on
 
 %Plot the airfoil
@@ -134,7 +135,8 @@ c.Label.String = 'Streamfunction Value';
 %% Plot Equipotentials at levels
 figure();
 set(0, 'defaulttextinterpreter', 'latex')
-contour(x,y,Equipotential,levelsEq,'LineWidth',1.5)
+contourf(x,y,Equipotential,levelsEq,'LineWidth',1.5)
+axis equal;
 hold on
 
 %Plot the airfoil
@@ -151,7 +153,8 @@ c.Label.String = 'Equipotential Value';
 %% Plot Pressure at levels
 figure();
 set(0, 'defaulttextinterpreter', 'latex')
-contour(x,y,Pressure,levelsPress,'LineWidth',1.5)
+contourf(x,y,Cp,levelsPress,'Linewidth',0.5)
+axis equal;
 hold on
 
 %Plot the airfoil
@@ -160,9 +163,9 @@ plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
 %Labels
 xlabel('x Position (m)');
 ylabel('y Position (m)');
-title('Pressure Contours');
+title('Coefficient of Pressure Contours');
 c = colorbar;
-c.Label.String = 'Pressure Value (Pa)';
+c.Label.String = 'Coefficient of Pressure';
 
 
 end
