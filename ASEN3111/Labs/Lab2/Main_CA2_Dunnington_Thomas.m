@@ -51,26 +51,15 @@ end
 %Cp error
 figure();
 plot(5:5:N, CpError, 'linewidth', 2);
-
-xlabel('Number of N vortices');
-ylabel('Mean Percent Error (\%)');
-title('Coefficient of Pressure Error');
-
-%Streamfunction error
-figure();
+hold on;
 plot(5:5:N, streamfuncError, 'linewidth', 2);
-
-xlabel('Number of N vortices');
-ylabel('Mean Percent Error (\%)');
-title('Streamfunction Error');
-
-%Equipotential error
-figure();
 plot(5:5:N, equipotentialError, 'linewidth', 2);
 
 xlabel('Number of N vortices');
 ylabel('Mean Percent Error (\%)');
-title('Equipotential Error');
+title('Percent Error');
+legend('Cp', 'Streamfunction', 'Equipotential');
+
 
 
 

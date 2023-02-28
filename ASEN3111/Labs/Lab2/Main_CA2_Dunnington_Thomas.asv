@@ -36,12 +36,44 @@ CpError = zeros(1,N/5);
 for i = 1:100
     [streamfuncVals(:,:,i), equipotentialVals(:,:,i), CpVals(:,:,i)] = Plot_Airfoil_Flow(c,alpha,V_inf,p_inf,rho_inf,5*i,0);
 
-    %Calculate the error, (actual - expected) / expected
-    CpError(i) = mean(abs((CpVals(:,:,1) - CpTrue) ./ CpTrue, 'all')) * 100;
-    streamfuncError(i) = mean(abs((streamfuncVals(:,:,1) - streamfuncTrue) ./ streamfuncTrue, 'all')) * 100;
-    equipotentialError(i) = mean((equipotentialVals(:,:,1) - equipotentialTrue) ./ equipotentialTrue, 'all') * 100;
-
+    %Calculate the error, (actual - expected) / expected, absolute value of
+    %the difference to quantify error
+    CpError(i) = mean(abs((CpVals(:,:,i) - CpTrue) ./ CpTrue), 'all') * 100;
+    streamfuncError(i) = mean(abs((streamfuncVals(:,:,i) - streamfuncTrue) ./ streamfuncTrue), 'all') * 100;
+    equipotentialError(i) = mean(abs((equipotentialVals(:,:,i) - equipotentialTrue) ./ equipotentialTrue), 'all') * 100;
 end
+
+%Determining where the error is less than 1 percent
+
+
+
+%Plotting the error
+%Cp error
+figure();
+plot(5:5:N, CpError, 'linewidth', 2);
+hold on;
+plot(5:5:N, streamfuncError, 'linewidth', 2);
+plot(5:5:N, equipotentialError, 'linewidth', 2);
+
+xlabel('Number of N vortices');
+ylabel('Mean Percent Error (\%)');
+title('Coefficient of Pressure Error');
+
+%Streamfunction error
+figure();
+plot(5:5:N, streamfuncError, 'linewidth', 2);
+
+xlabel('Number of N vortices');
+ylabel('Mean Percent Error (\%)');
+title('Streamfunction Error');
+
+%Equipotential error
+figure();
+plot(5:5:N, equipotentialError, 'linewidth', 2);
+
+xlabel('Number of N vortices');
+ylabel('Mean Percent Error (\%)');
+title('Equipotential Error');
 
 
 
