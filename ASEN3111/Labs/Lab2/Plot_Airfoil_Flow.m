@@ -124,6 +124,12 @@ hold on
 %Plot the airfoil
 plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
 
+%Labels
+xlabel('x Position (m)');
+ylabel('y Position (m)');
+title('Streamlines');
+c = colorbar;
+c.Label.String = 'Streamfunction Value';
 
 %% Plot Equipotentials at levels
 figure();
@@ -133,6 +139,13 @@ hold on
 
 %Plot the airfoil
 plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+
+%Labels
+xlabel('x Position (m)');
+ylabel('y Position (m)');
+title('Equipotentials');
+c = colorbar;
+c.Label.String = 'Equipotential Value';
 
 
 %% Plot Pressure at levels
@@ -144,6 +157,12 @@ hold on
 %Plot the airfoil
 plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
 
+%Labels
+xlabel('x Position (m)');
+ylabel('y Position (m)');
+title('Pressure Contours');
+c = colorbar;
+c.Label.String = 'Pressure Value (Pa)';
 
 
 end
