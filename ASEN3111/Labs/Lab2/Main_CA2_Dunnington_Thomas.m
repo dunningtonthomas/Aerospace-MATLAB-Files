@@ -12,7 +12,7 @@ close all; clear; clc;
 
 %% PROBLEM 1: Streamlines, Equipotential lines, and Pressure Contour
 c = 5; %meters
-alpha = 15 * pi/180; %Radius
+alpha = 15 * pi/180; %Radians
 V_inf = 34; %m/s
 p_inf = 101.3 * 10^3;
 rho_inf = 1.225; %kg/m^3
@@ -162,7 +162,7 @@ axis equal;
 hold on
     
 %Plot the airfoil
-plot([0 2.5], [0 0], 'linewidth', 2, 'color', 'k');
+plot([0 2.5], [0 0], 'linewidth', 2, 'color', 'r');
     
 title('Chord = 2.5 m');
 c = colorbar;
@@ -175,7 +175,7 @@ axis equal;
 hold on
     
 %Plot the airfoil
-plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+plot([0 5], [0 0], 'linewidth', 2, 'color', 'r');
 
 title('Chord = 5 m');
 ylabel('Y Position (m)');
@@ -189,7 +189,7 @@ axis equal;
 hold on
     
 %Plot the airfoil
-plot([0 10], [0 0], 'linewidth', 2, 'color', 'k');
+plot([0 10], [0 0], 'linewidth', 2, 'color', 'r');
 
 title('Chord = 10 m');
 xlabel('X Position (m)');
@@ -204,7 +204,7 @@ axis equal;
 hold on
     
 %Plot the airfoil
-plot([0 2.5], [0 0], 'linewidth', 2, 'color', 'k');
+plot([0 2.5], [0 0], 'linewidth', 2, 'color', 'r');
 
 title('Chord = 2.5 m');
 c = colorbar;
@@ -217,7 +217,7 @@ axis equal;
 hold on
     
 %Plot the airfoil
-plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+plot([0 5], [0 0], 'linewidth', 2, 'color', 'r');
 
 title('Chord = 5 m');
 ylabel('Y Position (m)');
@@ -231,7 +231,7 @@ axis equal;
 hold on
     
 %Plot the airfoil
-plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+plot([0 5], [0 0], 'linewidth', 2, 'color', 'r');
 
 title('Chord = 10 m');
 xlabel('X Position (m)');

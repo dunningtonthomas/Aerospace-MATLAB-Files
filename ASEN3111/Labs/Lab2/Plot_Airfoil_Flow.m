@@ -124,7 +124,7 @@ if(boolPlot)
     hold on
     
     %Plot the airfoil
-    plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+    plot([0 5], [0 0], 'linewidth', 2, 'color', 'r');
     
     %Labels
     xlabel('x Position (m)');
@@ -141,7 +141,7 @@ if(boolPlot)
     hold on
     
     %Plot the airfoil
-    plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+    plot([0 5], [0 0], 'linewidth', 2, 'color', 'r');
     
     %Labels
     xlabel('x Position (m)');
@@ -159,7 +159,7 @@ if(boolPlot)
     hold on
     
     %Plot the airfoil
-    plot([0 5], [0 0], 'linewidth', 2, 'color', 'k');
+    plot([0 5], [0 0], 'linewidth', 2, 'color', 'r');
     
     %Labels
     xlabel('x Position (m)');
