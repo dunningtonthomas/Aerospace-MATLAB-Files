@@ -6,8 +6,8 @@ function [StreamFunction, Equipotential, Cp] = Plot_Airfoil_Flow(c,alpha,V_inf,p
 %% Define the Domain
 xmin = -0.5*c; %2 times the chord
 xmax = 1.5*c;
-ymin = -3;
-ymax = 3;
+ymin = -5;
+ymax = 5;
 
 %% Define Number of Grid Points
 nx=100; % steps in the x direction
@@ -104,8 +104,6 @@ if(boolPlot)
 
     %% Determine color levels for contours
     %Stream function levels
-    % levminStream = StreamFunction(1,nx); % defines the color levels -> trial and error to find a good representation
-    % levmaxStream = StreamFunction(ny,nx/2);
     levminStream = min(StreamFunction, [], 'all');
     levmaxStream = max(StreamFunction, [], 'all');
     levelsStream = linspace(levminStream,levmaxStream,20)';
@@ -116,7 +114,7 @@ if(boolPlot)
     levelsEq = linspace(levminEq,levmaxEq,20)';
     
     %Coefficient of Pressure
-    levelsPress = linspace(-5,1,40);
+    levelsPress = linspace(-3,1,40);
     
     %% Plot streamfunction at levels
     figure();
@@ -131,7 +129,7 @@ if(boolPlot)
     %Labels
     xlabel('x Position (m)');
     ylabel('y Position (m)');
-    title('Streamlines');
+    title('Streamlines With 500 Vortices');
     c = colorbar;
     c.Label.String = 'Streamfunction Value';
     
@@ -148,7 +146,7 @@ if(boolPlot)
     %Labels
     xlabel('x Position (m)');
     ylabel('y Position (m)');
-    title('Equipotentials');
+    title('Equipotentials With 500 Vortices');
     c = colorbar;
     c.Label.String = 'Equipotential Value';
     
@@ -166,7 +164,7 @@ if(boolPlot)
     %Labels
     xlabel('x Position (m)');
     ylabel('y Position (m)');
-    title('Coefficient of Pressure Contours');
+    title('Coefficient of Pressure Contours With 500 Vortices');
     c = colorbar;
     c.Label.String = 'Coefficient of Pressure';
 
