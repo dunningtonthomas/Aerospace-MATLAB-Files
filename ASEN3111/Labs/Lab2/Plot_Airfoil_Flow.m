@@ -1,10 +1,27 @@
 function [StreamFunction, Equipotential, Cp] = Plot_Airfoil_Flow(c,alpha,V_inf,p_inf,rho_inf,N,boolPlot)
-%SUMMARY: 
-%INPUTS:
-%OUTPUTS: Return nothing, plot the flow
+%SUMMARY: Plot_Arifoil_Flow visualizes the streamfunction, equipotential,
+%and coefficient of pressure contours for a flow over a given airfoil. It also returns 3
+%different matrices with the values of the streamfunction, equipotential,
+%and coefficient of pressure.
+%
+%INPUTS: c is the chord length, alpha is the angle of attack, V_inf is the
+%free stream velocity, p_inf is the free stream pressure, rho_inf is the
+%free stream density, N is the number of discrete vortices, and boolPlot is
+%a boolen used to determine whether or not the plots are produced---> true
+%means they are produced and false means not
+%
+%OUTPUTS: Create three figures of the contours of the streamfunction, the
+%equipotentials, and the coefficient of pressure, also return the matrices
+%associated with these three visualizations
+%
+%Author: Thomas Dunnington
+%Collaborators: Nolan Stevenson, Owen Craig, Carson Kohlbrenner, Chase
+%Rupprecht
+%Data: 3/1/2023
 
 %% Define the Domain
-xmin = -0.5*c; %2 times the chord
+%Creating the domain of the meshgrid
+xmin = -0.5*c; 
 xmax = 1.5*c;
 ymin = -5;
 ymax = 5;
@@ -49,8 +66,9 @@ v_arr = zeros(nx, ny, N);
 v_final = zeros(nx, ny); 
 
 xLoc = delX / 2; %Start the vortex location at 1/2 step
-%For loop to get the psi for each vortex, store in cell array
 
+%Loop through each vortex and calculate the various components as induced
+%by that vortex
 for i = 1:N
     %Calculating the psi due to the vortex
     Psi_Gamma_arr(:,:,i) = gamma(xLoc)*delX/(2*pi)*log(radius(x,y,xLoc));
@@ -99,7 +117,8 @@ vTotal = v_final + v_uniform;
 Cp = 1 - (uTotal ./ V_inf).^2 - (vTotal ./ V_inf).^2;
 
 
-%%%%ONLY CONTINUE IF THE PLOT BOOLEAN IS TRUE
+%% Plotting
+%Only continue to plot if the boolPlot variable is true
 if(boolPlot)
 
     %% Determine color levels for contours
@@ -127,11 +146,12 @@ if(boolPlot)
     plot([0 5], [0 0], 'linewidth', 2, 'color', 'r');
     
     %Labels
-    xlabel('x Position (m)');
-    ylabel('y Position (m)');
-    title('Streamlines With 500 Vortices');
-    c = colorbar;
-    c.Label.String = 'Streamfunction Value';
+    xlabel('X Position (m)');
+    ylabel('Y Position (m)');
+    title('\textbf{Streamlines With 500 Vortices}');
+    subtitle('c = 5 m, $$\alpha = 15^{\circ}$$, $$V_{\infty} = 34$$ m/s, $$p_{\infty} = 101.3e3$$ Pa, $$\rho_{\infty} = 1.225$$ $$kg/m^{3}$$');
+    c1 = colorbar;
+    c1.Label.String = 'Streamfunction Value';
     
     %% Plot Equipotentials at levels
     figure();
@@ -144,11 +164,12 @@ if(boolPlot)
     plot([0 5], [0 0], 'linewidth', 2, 'color', 'r');
     
     %Labels
-    xlabel('x Position (m)');
-    ylabel('y Position (m)');
-    title('Equipotentials With 500 Vortices');
-    c = colorbar;
-    c.Label.String = 'Equipotential Value';
+    xlabel('X Position (m)');
+    ylabel('Y Position (m)');
+    title('\textbf{Equipotentials With 500 Vortices}');
+    subtitle('c = 5 m, $$\alpha = 15^{\circ}$$, $$V_{\infty} = 34$$ m/s, $$p_{\infty} = 101.3e3$$ Pa, $$\rho_{\infty} = 1.225$$ $$kg/m^{3}$$');
+    c2 = colorbar;
+    c2.Label.String = 'Equipotential Value';
     
     
     %% Plot Pressure at levels
@@ -162,12 +183,14 @@ if(boolPlot)
     plot([0 5], [0 0], 'linewidth', 2, 'color', 'r');
     
     %Labels
-    xlabel('x Position (m)');
-    ylabel('y Position (m)');
-    title('Coefficient of Pressure Contours With 500 Vortices');
-    c = colorbar;
-    c.Label.String = 'Coefficient of Pressure';
+    xlabel('X Position (m)');
+    ylabel('Y Position (m)');
+    title('\textbf{Coefficient of Pressure Contours With 500 Vortices}');
+    subtitle('c = 5 m, $$\alpha = 15^{\circ}$$, $$V_{\infty} = 34$$ m/s, $$p_{\infty} = 101.3e3$$ Pa, $$\rho_{\infty} = 1.225$$ $$kg/m^{3}$$');
+    c3 = colorbar;
+    c3.Label.String = 'Coefficient of Pressure';
 
 end %End if statement for plotting
-end
+
+end %End Function
 
