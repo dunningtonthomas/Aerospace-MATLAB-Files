@@ -21,38 +21,48 @@ LSB = range / 2^12; %Least significant bit
 binVals = minV:LSB:maxV;
 binNums = 1:1:length(binVals);
 
+%Create the input sine function
+inputVFunc = @(x) 1.65*sin(x) + 1.65;
+
+%Arbitrary array numbers
+arrayInput = linspace(0,2*pi, 100);
+arrayNums = 1:1:length(arrayInput);
+inputV = inputVFunc(arrayInput);
 
 
+%Calling the function
+[binsF, voltsF] = Voltage2Bin(minV, maxV, 12, inputV);
 
 
 %% Plotting
-% figure();
-% plot(testSignal, bins1, 'marker', '.', 'markersize', 20);
-% 
-% xlabel('Signal Voltage');
-% ylabel('Bin Number');
-% title('Bin Number vs Voltage 4 Bits');
-% 
-% figure();
-% plot(testSignal, bins2, 'marker', '.', 'markersize', 20);
-% 
-% xlabel('Signal Voltage');
-% ylabel('Bin Number');
-% title('Bin Number vs Voltage 8 Bits');
-% 
-% figure();
-% plot(testSignal, bins3, 'marker', '.', 'markersize', 20);
-% 
-% xlabel('Signal Voltage');
-% ylabel('Bin Number');
-% title('Bin Number vs Voltage 12 Bits');
+figure();
+plot(testSignal, bins1, 'marker', '.', 'markersize', 20);
+
+xlabel('Signal Voltage');
+ylabel('Bin Number');
+title('Bin Number vs Voltage 4 Bits');
 
 figure();
-plot(binNums, binVals, 'linewidth', 2);
+plot(testSignal, bins2, 'marker', '.', 'markersize', 20);
 
-xlabel('Array Number');
-ylabel('Bin Voltage');
-title('Array Number vs Bin Voltage for 3.3Vpp 1.65 DC Offset');
+xlabel('Signal Voltage');
+ylabel('Bin Number');
+title('Bin Number vs Voltage 8 Bits');
+
+figure();
+plot(testSignal, bins3, 'marker', '.', 'markersize', 20);
+
+xlabel('Signal Voltage');
+ylabel('Bin Number');
+title('Bin Number vs Voltage 12 Bits');
+
+
+% figure();
+% plot(arrayNums, binsF, 'marker', '.', 'markersize', 20);
+% 
+% xlabel('Array Number');
+% ylabel('Bin Number');
+% title('Array Number vs Bin Number for 3.3Vpp 1.65 DC Offset 1 Period');
 
 %% Functions
 
