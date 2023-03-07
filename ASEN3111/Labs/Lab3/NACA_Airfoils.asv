@@ -1,0 +1,30 @@
+function [x,y] = NACA_Airfoils(m,p,t,c,N)
+%NACA_AIRFOILS 
+%INPUTS: 
+%   m = maximum camber
+%   p = location of maximum camber
+%   t = maximum thickness
+%   c = chord length
+%   N = number of employed panels
+%OUTPUTS: 
+%   x = vector of x locations of the boundary
+%   y = vector of y locations of the boundary
+
+%Define x locations from 0 to c
+xLoc = linspace(0, c, N);
+
+
+%Define the half thickness at a location x
+yThick = @(x)((t/0.2)*c*(0.2969*sqrt(x/c)-0.1260*(x/c)-0.3516*(x/c).^2+0.2843*(x/c).^3-0.1036*(x/c).^4));
+
+
+%Define mean camber line function
+%Less than maximum camber
+xLess = xLoc(xLoc <= p*c); %X locations before max camber
+xGreat = xLoc(xLoc > p*c); %X lovations after max camber
+
+ycLess = @(x)((m*x/p^2)*(2*p - x/c));
+ycGreat = @(x)((m*(c-x)/))
+
+end
+
