@@ -1,5 +1,8 @@
 function [x,y] = NACA_Airfoils(m,p,t,c,N)
 %NACA_AIRFOILS 
+%Summary: This function takes in characteristics of a NACA airfoil and
+%calculates N
+%
 %INPUTS: 
 %   m = maximum camber
 %   p = location of maximum camber
@@ -9,9 +12,13 @@ function [x,y] = NACA_Airfoils(m,p,t,c,N)
 %OUTPUTS: 
 %   x = vector of x locations of the boundary
 %   y = vector of y locations of the boundary
+%The x and y outputs start at the trailing edge of the airfoil and go
+%counterclockwise
 
 %Define x locations from 0 to c
-xLoc = linspace(0, c, N);
+%Divide by 2 since there are panels on top and bottom so we want half
+%points on top and half on bottom
+xLoc = linspace(0, c, N/2);
 
 %Define the half thickness at a location x
 yThickFunc = @(x)((t/0.2)*c*(0.2969*sqrt(x/c)-0.1260*(x/c)-0.3516*(x/c).^2+0.2843*(x/c).^3-0.1036*(x/c).^4));
@@ -43,7 +50,7 @@ zeta = [0, zeta1, zeta2, 0]; %0 at the leading and trailing edge
 
 %Check if the airfoil has no camber
 if(m == 0)
-    zeta = zeros(1,N); %Zeta is zero everywhere for no camber
+    zeta = zeros(1,N/2); %Zeta is zero everywhere for no camber
 end
 
 %Upper and lower x,y locations
@@ -53,9 +60,10 @@ xl = xLoc + yThick .* sin(zeta);
 yu = ycTot + yThick .* cos(zeta);
 yl = ycTot - yThick .* cos(zeta);
 
-%Total x and y 
-x = [xu, xl];
-y = [yu, yl];
+%Total x and y, start at trailing edge and go around clockwise ending at
+%trailing edge
+x = [flip(xu), xl(2:end)];
+y = [flip(yu), yl(2:end)];
 
 end
 

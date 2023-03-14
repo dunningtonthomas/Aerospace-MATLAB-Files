@@ -17,14 +17,14 @@ t = 12 / 100;
 c = 5;
 N = 100;
 
-[x1,y1] = NACA_Airfoils(m,p,t,c,N);
+[x,y] = NACA_Airfoils(m,p,t,c,N);
 
-CL_NACA0012 = Vortex_Panel(x1,y1,100,10); %AoA of 10 degrees
+[CL] = Vortex_Panel(XB,YB,VINF,ALPHA)
 
 
-%% Plotting
+%Plotting
 figure();
-plot(x1,y1);
+plot(x,y);
 axis equal;
 
 
