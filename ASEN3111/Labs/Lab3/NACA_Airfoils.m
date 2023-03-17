@@ -62,8 +62,8 @@ yl = ycTot - yThick .* cos(zeta);
 
 %Total x and y, start at trailing edge and go around clockwise ending at
 %trailing edge
-x = [flip(xu), xl(2:end)];
-y = [flip(yu), yl(2:end)];
+x = [flip(xl), xu(2:end)];
+y = [flip(yl), yu(2:end)];
 
 end
 
