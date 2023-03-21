@@ -195,6 +195,8 @@ alphaTA_L0_0012 = 0;
 alphaTA_L0_2412 = zeroLiftALpha(2/100, 4/10);
 alphaTA_L0_4412 = zeroLiftALpha(4/100, 4/10);
 
+%Solve for 
+
 %Plotting the cl versus angle of attack for the above airfoils
 figure()
 set(0, 'defaulttextinterpreter', 'latex');
@@ -204,9 +206,9 @@ grid on;
 plot(AoAVec, CL_2412, 'linewidth', 2, 'color', 'm');
 plot(AoAVec, CL_4412, 'linewidth', 2, 'color', 'b');
 %Plotting thin airfoil theory
-% plot(AoAVec, polyval([2*pi*pi/180, 0], AoAVec), 'linestyle', '--', 'color', 'r');
-% plot(AoAVec, polyval([2*pi*pi/180, alphaTA_L0_2412], AoAVec), 'linestyle', '--', 'color', 'm');
-% plot(AoAVec, polyval([2*pi*pi/180, alphaTA_L0_4412], AoAVec), 'linestyle', '--', 'color', 'b');
+plot(AoAVec, polyval([2*pi*pi/180, 0], AoAVec), 'linestyle', '--', 'color', 'r');
+plot(AoAVec, polyval([2*pi*pi/180, alphaTA_L0_2412], AoAVec), 'linestyle', '--', 'color', 'm');
+plot(AoAVec, polyval([2*pi*pi/180, alphaTA_L0_4412], AoAVec), 'linestyle', '--', 'color', 'b');
 
 
 title('Sectional Lift Coefficient Versus Angle of Attack');
@@ -251,7 +253,6 @@ fprintf('\t\tSectional Lift Slope (cl/deg): %f\n', 2*pi * pi / 180);
 fprintf('\t\tZero Lift Angle of Attack (deg): %f\n', alphaTA_L0_4412)
 
 %%TODO
-%Plot thin airfoil theory on top of vortex panels
 %Problem 4
 
 

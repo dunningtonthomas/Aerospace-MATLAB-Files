@@ -12,6 +12,7 @@ function [x,y] = NACA_Airfoils(m,p,t,c,N)
 %OUTPUTS: 
 %   x = vector of x locations of the boundary
 %   y = vector of y locations of the boundary
+%   zeroLiftAlpha = angle of attack at zero angle of attack
 %The x and y outputs start at the trailing edge of the airfoil and go
 %counterclockwise
 
@@ -64,6 +65,9 @@ yl = ycTot - yThick .* cos(zeta);
 %trailing edge
 x = [flip(xl), xu(2:end)];
 y = [flip(yl), yu(2:end)];
+
+%Calculate the zero anlge of attack
+
 
 end
 
