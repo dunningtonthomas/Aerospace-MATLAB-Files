@@ -61,8 +61,8 @@ e1 = vecnorm(e1Vec, 2, 2);
 e2Vec = (1/mu)*cross(v2, h2Vec, 2) - (1./vecnorm(r2, 2, 2)).*r2;
 e2 = vecnorm(e2Vec, 2, 2);
 
-e3Vec = (1/mu)*cross(v3, h3Vec, 2) - (1./vecnorm(r1, 2, 2)).*r1;
-e1 = vecnorm(e1Vec, 2, 2);
+e3Vec = (1/mu)*cross(v3, h3Vec, 2) - (1./vecnorm(r3, 2, 2)).*r3;
+e3 = vecnorm(e3Vec, 2, 2);
 
 %Creating sphere for the earth
 [x,y,z] = sphere;
@@ -108,6 +108,32 @@ ylabel('Specific Angular Momentum $$(km^{2}/s)$$');
 title('Specific Angular Momentum Over Time');
 legend('1e-3 Tolerance', '1e-6 Tolerance', '1e-12 Tolerance', 'location', 'best');
 
+%Plotting the eccentricity over time
+figure();
+plot(TOUT1, e1, 'linewidth', 2);
+hold on
+plot(TOUT2, e2, 'linewidth', 2);
+plot(TOUT3, e3, '--', 'linewidth', 2);
+
+xlabel('Time (s)');
+ylabel('Eccentricity Magnitude');
+title('Eccentricity Over Time');
+legend('1e-3 Tolerance', '1e-6 Tolerance', '1e-12 Tolerance', 'location', 'best');
+
+%% Problem 3
+%Initial conditions
+r0 = [7642; 170; 2186]; %km
+rDot0 = [0.32; 6.91; 4.29]; %km/s
+
+period = 2*pi*sqrt(norm(r0)^3 / mu);
+tspan = [0 5*1.8*period]; %5 orbital periods
+
+%Creating function handle
+orbitHandle2 = @(t, state)EOM2(t, state, mu);
+
+%Calling ode
+
+
 %% Functions
 function outVec = EOM(t, state, mu)
     %Two body problem EOM
@@ -123,3 +149,31 @@ function outVec = EOM(t, state, mu)
     
     outVec = [dr; rDotDot];
 end
+
+function outVec = EOM2(t, state, mu)
+    %Two body problem EOM with earth and spacecraft
+    %State is [xs;ys;zs;vxs;vys;vzs;xe;ye;ze;vxe;vye;vze]
+    %e is the earth, s is the spacecraft
+    %t is time
+    %mu is gravitational constant
+    
+    %Get state variables
+    rs = state(1:3);
+    re = state(7:9);
+    rDots = state(4:6);
+    rDote = state(7:end);
+    
+    %Get r position, spacecraft relative to earth
+    r = rs - re;
+    
+    %Define rate of change of r for both spacecraft and earth
+    drs = rDots;
+    dre = rDote;
+    
+    %Calculate r double dot for the space craft
+    rDotDot = -1*mu*r ./ (norm(r))^3;
+    
+    outVec = [drs; rDotDot; dre; [0;0;0]];
+end
+
+

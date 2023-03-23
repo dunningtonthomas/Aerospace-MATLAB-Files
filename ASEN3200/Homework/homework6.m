@@ -120,6 +120,78 @@ ylabel('Eccentricity Magnitude');
 title('Eccentricity Over Time');
 legend('1e-3 Tolerance', '1e-6 Tolerance', '1e-12 Tolerance', 'location', 'best');
 
+%% Problem 3
+%Initial conditions spacecraft
+r0 = [7642; 170; 2186]; %km
+rDot0 = [0.32; 6.91; 4.29]; %km/s
+
+%Initial conditions earth
+r0e = [0; 0; 0];
+rDot0e = [5; 5; 5];
+
+period = 2*pi*sqrt(norm(r0)^3 / mu);
+tspan = [0 3*period]; %5 orbital periods
+
+%Creating function handle
+orbitHandle2 = @(t, state)EOM2(t, state, mu);
+
+%Calling ode45
+[TOUT4, YOUT4] = ode45(orbitHandle2, tspan, [r0; rDot0; r0e; rDot0e], opts3);
+
+%Plotting
+figure();
+plot3(YOUT4(:,7), YOUT4(:,8), YOUT4(:,9), 'linewidth', 2);
+hold on
+grid on
+plot3(YOUT4(:,1), YOUT4(:,2), YOUT4(:,3), 'linewidth', 2);
+
+
+xlabel('X Location (km)');
+ylabel('Y Location (km)');
+zlabel('Z Location (km)');
+title('Inertial Frame Earth Moving');
+legend('Earth Position', 'Satellite', 'location', 'best');
+
+
+%Plotting center of mass as a function of time
+figure();
+subplot(3,1,1);
+plot(TOUT4, YOUT4(:,7), 'linewidth', 2);
+
+ylabel('X Position (km)');
+
+subplot(3,1,2);
+plot(TOUT4, YOUT4(:,7), 'linewidth', 2);
+
+ylabel('Y Position (km)');
+
+subplot(3,1,3);
+plot(TOUT4, YOUT4(:,7), 'linewidth', 2);
+
+ylabel('Z Position (km)');
+xlabel('Time (s)');
+sgtitle('Position of Center of Mass over Time');
+
+%Plotting center of mass as a function of time
+figure();
+subplot(3,1,1);
+plot(TOUT4, YOUT4(:,10), 'linewidth', 2);
+
+ylabel('X Velocity (km/s)');
+
+subplot(3,1,2);
+plot(TOUT4, YOUT4(:,11), 'linewidth', 2);
+
+ylabel('Y Velocity (km/s)');
+
+subplot(3,1,3);
+plot(TOUT4, YOUT4(:,12), 'linewidth', 2);
+
+ylabel('Z Velocity (km/s)');
+xlabel('Time (s)');
+sgtitle('Velocity of Center of Mass over Time');
+
+
 %% Functions
 function outVec = EOM(t, state, mu)
     %Two body problem EOM
@@ -135,3 +207,31 @@ function outVec = EOM(t, state, mu)
     
     outVec = [dr; rDotDot];
 end
+
+function outVec = EOM2(t, state, mu)
+    %Two body problem EOM with earth and spacecraft
+    %State is [xs;ys;zs;vxs;vys;vzs;xe;ye;ze;vxe;vye;vze]
+    %e is the earth, s is the spacecraft
+    %t is time
+    %mu is gravitational constant
+    
+    %Get state variables
+    rs = state(1:3);
+    re = state(7:9);
+    rDots = state(4:6);
+    rDote = state(10:end);
+    
+    %Get r position, spacecraft relative to earth
+    r = rs - re;
+    
+    %Define rate of change of r for both spacecraft and earth
+    drs = rDots;
+    dre = rDote;
+    
+    %Calculate r double dot for the space craft
+    rDotDot = -1*mu*r ./ (norm(r))^3;
+    
+    outVec = [drs; rDotDot; dre; [0;0;0]];
+end
+
+
