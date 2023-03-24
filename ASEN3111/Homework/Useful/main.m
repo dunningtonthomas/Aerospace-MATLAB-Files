@@ -2,15 +2,99 @@
 close all; clear; clc;
 
 %% Calculating shock
-u1 = 680;
-P1 = 101325;
-gamma = 1.4;
-R = 287;
-T = 288;
-
-a1 = sqrt(gamma*R*T);
-M1 = u1 / a1;
+rho1 = 1.22586;
+p1 = 101325;
+M1 = 2.6;
+T1 = 288;
+p01 = 2.02184e6;
 
 [M2n,p2op1,rho2orho1,t2ot1,deltasoR,p02op01] = shock_calc(M1);
+
+
+%% Problem 9.5
+theta = 22.2 * pi / 180; 
+M1 = 2.5;
+p1 = 101325;
+T1 = 300;
+beta = BTMeq( theta,M1 );
+
+Mn1 = M1 * sin(beta);
+
+[M2n,p2op1,rho2orho1,t2ot1,deltasoR,p02op01] = shock_calc(Mn1);
+
+
+%% Problem 9.8
+theta = 25.3 * pi / 180;
+M1 = 4;
+p1 = 1;
+beta = BTMeq( theta,M1 );
+
+Mn1 = M1 * sin(beta);
+
+[M2n,p2op1,rho2orho1,t2ot1,deltasoR,p02op01] = shock_calc(Mn1);
+
+M2 = M2n / sin(beta - theta);
+
+[M3n,p3op2,rho3orho2,t3ot2,deltasoR,p03op02] = shock_calc(M2);
+
+
+
+%Second part
+M2 = 2.1876;
+theta = 20 * pi / 180;
+beta = BTMeq( theta,M2 );
+
+Mn2 = M2 * sin(beta);
+
+[M3n,p3op2,rho3orho2,t3ot2,deltasoR,p03op02] = shock_calc(Mn2);
+
+
+M3 = M3n / sin(beta - theta);
+
+[M3n,p4op3,rho3orho2,t3ot2,deltasoR,p03op02] = shock_calc(M3);
+
+
+%% Problem 9.9
+M1 = 3.2;
+theta = 18.2 * pi / 180;
+beta = BTMeq( theta,M1 );
+
+Mn1 = M1 * sin(beta);
+
+[M2n,p2op1,rho2orho1,t2ot1,deltasoR,p02op01] = shock_calc(Mn1);
+
+M2 = M2n / sin(beta - theta);
+
+beta = BTMeq( theta,M2 );
+phi = beta - theta;
+
+Mn2 = M2 * sin(beta);
+
+[M3n,p3op2,rho3orho2,t3ot2,deltasoR,p03op02] = shock_calc(Mn2);
+
+M3 = M3n / sin(beta - theta);
+
+
+%% Problem 9.13
+M1 = 2.6;
+nu1 = NuFromM(M1);
+
+theta = 5 * pi / 180;
+beta = BTMeq( theta,M1 );
+
+Mn1 = M1 * sin(beta);
+
+[M2n,p2op1,rho2orho1,t2ot1,deltasoR,p02op01] = shock_calc(Mn1);
+
+
+%% Problem 9.14
+M1 = 3;
+nu1 = NuFromM(M1);
+
+theta = 25 * pi / 180;
+beta = BTMeq( theta,M1 );
+Mn1 = M1 * sin(beta);
+
+[M2n,p2op1,rho2orho1,t2ot1,deltasoR,p02op01] = shock_calc(Mn1);
 
 
