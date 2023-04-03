@@ -42,26 +42,27 @@ plot(TOUT, YOUT);
 xlabel('Time (s)');
 ylabel('Y');
 
-%Create function handle for EOM function with a state vector
-funcHandle_3 = @odeFun2;
-
-%Time span and initial conditions
-tspan = [0 5];
-initState = [2; 4];
-
-%Calling ode45
-[TOUT2,STATEOUT] = ode45(funcHandle_3,tspan,initState);
-%The first column of STATEOUT is x1 and the second is x2
-
-%Plotting results
-figure();
-plot(TOUT2, STATEOUT(:,1)); %First column is x1
-hold on
-plot(TOUT2, STATEOUT(:,2)); %Second column is x2
-
-xlabel('Time (s)');
-ylabel('Output');
-legend('x1', 'x2');
+%% This section is the assignment for this week
+% %Create function handle for EOM function with a state vector
+% funcHandle_3 = @odeFun2;
+% 
+% %Time span and initial conditions
+% tspan = [0 5];
+% initState = [2; 4];
+% 
+% %Calling ode45
+% [TOUT2,STATEOUT] = ode45(funcHandle_3,tspan,initState);
+% %The first column of STATEOUT is x1 and the second is x2
+% 
+% %Plotting results
+% figure();
+% plot(TOUT2, STATEOUT(:,1)); %First column is x1
+% hold on
+% plot(TOUT2, STATEOUT(:,2)); %Second column is x2
+% 
+% xlabel('Time (s)');
+% ylabel('Output');
+% legend('x1', 'x2');
 
 
 %% 3D Plotting
