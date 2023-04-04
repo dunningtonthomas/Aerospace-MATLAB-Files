@@ -99,7 +99,7 @@ hold on;
 grid on;
 plot(AoAVec, CL_0012, 'linewidth', 2);
 plot(AoAVec, CL_0024, 'linewidth', 2);
-plot(AoAVec, 2*pi*pi/180 *AoAVec, 'linewidth', 2)
+plot(AoAVec, 2*pi*pi/180 *AoAVec, 'linewidth', 2, 'linestyle', '--')
 
 title('Sectional Lift Coefficient Versus Angle of Attack');
 xlabel('Angle of Attack ($$^{\circ}$$)');
@@ -235,6 +235,40 @@ fprintf('\t\tSectional Lift Slope (cl/deg): %f\n', 2*pi * pi / 180);
 fprintf('\t\tZero Lift Angle of Attack (deg): %f\n', alphaTA_L0_4412)
 
 %% Problem 4
+%Reproduce Fig 5.20 from Anderson
+cr = 10;
+ct = linspace(0.01*cr, cr, 100); %Various ct/cr ratios
+
+%AR = 10, 8, 6, 4
+ARvals = [4; 6; 8; 10];
+eVals = zeros(length(ct),length(ARvals));
+
+for j = 1:length(ARvals)
+    AR = ARvals(j);
+    for i = 1:length(ct)
+        b = AR *(cr + ct(i)) / 2;
+        [eVals(i,j),~,~] = PLLT(b,2*pi,2*pi,ct(i),cr,0,0,4*pi/180,4*pi/180,50);
+    end
+end
+
+%Solving for delta given e
+delta = 1 ./ eVals - 1;
+
+%Plotting the results of delta versus taper ratio
+figure();
+plot(ct ./ cr, delta(:,1), 'linewidth', 2);
+hold on
+plot(ct ./ cr, delta(:,2), 'linewidth', 2);
+plot(ct ./ cr, delta(:,3), 'linewidth', 2);
+plot(ct ./ cr, delta(:,4), 'linewidth', 2);
+
+xlabel('Taper Ratio, $$\frac{c_{t}}{c_{r}}$$');
+ylabel('$$\delta$$');
+legend('AR = 4', 'AR = 6', 'AR = 8', 'AR = 10');
+title('$$\delta$$ Versus Taper Ratio');
+
+
+%% Problem 5
 %Defining characteristics of Cessna 150 Wing
 b = 33 + 4/12;
 a0_t = coeff0012(1) * 180/pi;
@@ -246,34 +280,42 @@ aero_r = zeroAOA_2412 * pi/180;
 geo_t = (3 + 0) * pi / 180;
 geo_r = (3 + 1) * pi / 180;
 
-%Reproduce Fig 5.20 from Anderson
-cr = c_r;
-ct = linspace(0.01*cr, cr, 100); %Various ct/cr ratios
-eVals = zeros(length(ct),1);
+%Calling PLLT for the Cessna
+[e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,100);
 
-for i = 1:length(ct)
-    [eVals(i),~,~] = PLLT(b,a0_t,a0_r,ct(i),cr,aero_t,aero_r,geo_t,geo_r,50);
+%60 knots at 15000 ft std atmos
+rho = 0.1948; %kg/m^3
+speed = 60 * 1.94384; %m/s
+
+%Calculating lift and induced drag
+S = b/2*(c_t + c_r) * 0.3048^2; %m^2
+lift = c_L * (0.5*rho*speed^2*S);
+drag = c_Di * (0.5*rho*speed^2*S);
+
+%Determining the number of terms to get 10, 1, and 1/10 relative error
+Nvec = 2:1:100;
+cLVec = zeros(length(Nvec),1);
+cDVec = zeros(length(Nvec),1);
+for i = Nvec
+    [~,cLVec(i-1),cDVec(i-1)] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,i);
 end
 
-%Solving for delta given e
-delta = 1 ./ eVals - 1;
-
-%Plotting the results of delta versus taper ratio
+%Plotting error for CL and CD
+%CL plot
 figure();
-plot(ct ./ cr, delta);
+plot(Nvec, cLVec, 'linewidth', 2);
 
-
-%% Problem 5
-
-
-[e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,50);
-
+%CD plot
+figure();
+plot(Nvec, cDVec, 'linewidth', 2, 'color', 'r');
 
 
 
-%TO DO
-%Debug PLLT function to get figure 5.20 from anderson
-
+%Printing values to the command window
+fprintf("-----------Problem 5-----------\n");
+fprintf("Cessna 150 traveling 60 knots at 15,000 ft:\n")
+fprintf("\t Lift (N): %f\n", lift)
+fprintf("\t Drag (N): %f\n", drag)
 
 
 

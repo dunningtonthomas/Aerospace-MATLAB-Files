@@ -99,7 +99,7 @@ hold on;
 grid on;
 plot(AoAVec, CL_0012, 'linewidth', 2);
 plot(AoAVec, CL_0024, 'linewidth', 2);
-plot(AoAVec, 2*pi*pi/180 *AoAVec, 'linewidth', 2)
+plot(AoAVec, 2*pi*pi/180 *AoAVec, 'linewidth', 2, 'linestyle', '--')
 
 title('Sectional Lift Coefficient Versus Angle of Attack');
 xlabel('Angle of Attack ($$^{\circ}$$)');
@@ -235,17 +235,6 @@ fprintf('\t\tSectional Lift Slope (cl/deg): %f\n', 2*pi * pi / 180);
 fprintf('\t\tZero Lift Angle of Attack (deg): %f\n', alphaTA_L0_4412)
 
 %% Problem 4
-%Reproduce Fig 5.20 from Anderson
-cr = 1;
-ct = linspace(0.05, 1, 100); %Various ct/cr ratios
-
-for i = 1:length(ct)
-    [e,~,~] = PLLT(40,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,N)
-end
-
-
-
-%% Problem 5
 %Defining characteristics of Cessna 150 Wing
 b = 33 + 4/12;
 a0_t = coeff0012(1) * 180/pi;
@@ -257,12 +246,36 @@ aero_r = zeroAOA_2412 * pi/180;
 geo_t = (3 + 0) * pi / 180;
 geo_r = (3 + 1) * pi / 180;
 
-[e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,100);
+%Reproduce Fig 5.20 from Anderson
+cr = 10;
+ct = linspace(0.01*cr, cr, 100); %Various ct/cr ratios
+eVals = zeros(length(ct),1);
+
+%AR = 10, 8, 6, 4
+AR = 10;
+for i = 1:length(ct)
+    b = 2*AR / 
+    [eVals(i),~,~] = PLLT(b,2*pi,2*pi,ct(i),cr,0,0,4*pi/180,4*pi/180,50);
+end
+
+%Solving for delta given e
+delta = 1 ./ eVals - 1;
+
+%Plotting the results of delta versus taper ratio
+figure();
+plot(ct ./ cr, delta);
+
+
+%% Problem 5
+
+
+[e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,50);
 
 
 
 
-
+%TO DO
+%Debug PLLT function to get figure 5.20 from anderson
 
 
 
