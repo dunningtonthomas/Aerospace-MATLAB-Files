@@ -4,12 +4,7 @@
 %the number of panels required for less than 1 percent error. Problem 2
 %Compares three different symmetric airfoils of varying thickness and
 %calculates lift with the vortex panel method and thin airfoil theory.
-%Problem 3 does the same with airfoils of the same thickness but different
-%camber. Problem 4 involves the PLLT function which implements the PLLT
-%equation to get the span efficiency factor. It then outputs a figure of
-%deltas with different root/tip chord ratios. Problem 5 calculates the lift
-%and drag of a cessna 150 and number of odd terms required for various
-%errors.
+%Problem 3 does the same with 
 %
 % Author: Thomas Dunnington
 % Collaborators: Nolan Stevenson, Owen Craig, Carson Kohlbrenner, Chase
