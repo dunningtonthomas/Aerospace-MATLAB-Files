@@ -235,6 +235,17 @@ fprintf('\t\tSectional Lift Slope (cl/deg): %f\n', 2*pi * pi / 180);
 fprintf('\t\tZero Lift Angle of Attack (deg): %f\n', alphaTA_L0_4412)
 
 %% Problem 4
+%Reproduce Fig 5.20 from Anderson
+cr = 1;
+ct = linspace(0.05, 1, 100); %Various ct/cr ratios
+
+for i = 1:length(ct)
+    [e,~,~] = PLLT(40,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,N)
+end
+
+
+
+%% Problem 5
 %Defining characteristics of Cessna 150 Wing
 b = 33 + 4/12;
 a0_t = coeff0012(1) * 180/pi;
@@ -246,33 +257,12 @@ aero_r = zeroAOA_2412 * pi/180;
 geo_t = (3 + 0) * pi / 180;
 geo_r = (3 + 1) * pi / 180;
 
-%Reproduce Fig 5.20 from Anderson
-cr = c_r;
-ct = linspace(0.01*cr, cr, 100); %Various ct/cr ratios
-eVals = zeros(length(ct),1);
-
-for i = 1:length(ct)
-    [eVals(i),~,~] = PLLT(b,a0_t,a0_r,ct(i),cr,aero_t,aero_r,geo_t,geo_r,50);
-end
-
-%Solving for delta given e
-delta = 1 ./ eVals - 1;
-
-%Plotting the results of delta versus taper ratio
-figure();
-plot(ct ./ cr, delta);
-
-
-%% Problem 5
-
-
-[e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,50);
+[e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,100);
 
 
 
 
-%TO DO
-%Debug PLLT function to get figure 5.20 from anderson
+
 
 
 

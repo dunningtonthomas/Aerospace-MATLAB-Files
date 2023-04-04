@@ -1,7 +1,0 @@
-%% Clean Up
-close all; clear; clc;
-
-%% Prelab
-
-fprintf('A \t O \t F \t S\n');
-fprintf('%d \t %d \t %d ', 0, 0, 0, sirenFunc(0,0,0));
