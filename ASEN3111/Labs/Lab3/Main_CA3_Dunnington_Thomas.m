@@ -269,6 +269,7 @@ delta = 1 ./ eVals - 1;
 figure();
 plot(ct ./ cr, delta(:,1), 'linewidth', 2);
 hold on
+grid on
 plot(ct ./ cr, delta(:,2), 'linewidth', 2);
 plot(ct ./ cr, delta(:,3), 'linewidth', 2);
 plot(ct ./ cr, delta(:,4), 'linewidth', 2);
@@ -310,8 +311,8 @@ speed = 30.8667; %m/s
 
 %Calculating lift and induced drag
 S = b/2*(c_t + c_r) * 0.3048^2; %m^2
-lift2 = c_L * (0.5*rho*speed^2*S);
-drag2 = c_Di * (0.5*rho*speed^2*S);
+lift_SI = c_L * (0.5*rho*speed^2*S);
+drag_SI = c_Di * (0.5*rho*speed^2*S);
 
 %Determining the number of terms to get 10, 1, and 1/10 relative error
 Nvec = 2:1:100;
@@ -357,8 +358,12 @@ cDN01 = cDN01(1) + 1;
 %Printing values to the command window
 fprintf("\n-----------Problem 5-----------\n");
 fprintf("Cessna 150 traveling 60 knots at 15,000 ft:\n")
-fprintf("\t Lift (lbf): %f\n", lift)
-fprintf("\t Drag (lbf): %f\n", drag)
+fprintf("\t English Units:\n")
+fprintf("\t\t Lift (lbf): %f\n", lift)
+fprintf("\t\t Drag (lbf): %f\n", drag)
+fprintf("\t SI Units:\n")
+fprintf("\t\t Lift (N): %f\n", lift_SI)
+fprintf("\t\t Drag (N): %f\n", drag_SI)
 fprintf("Number of odd terms for less than 10 percent error:\n")
 fprintf("\t CL: %d \n", cLN10);
 fprintf("\t CDi: %d \n", cDN10);

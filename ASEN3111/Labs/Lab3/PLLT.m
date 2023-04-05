@@ -3,6 +3,10 @@ function [e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,N)
 %Summary: This function solves the prandlt lifting line theory equation to
 %get the span efficiency factor, the coefficient of lift, and the induced
 %coefficient of drag
+%   Author: Thomas Dunnington
+%   Collaborators: Nolan Stevenson, Carson Kohlbrenner, Chase Rupprecht,
+%   Owen Craig
+%   Date: 4/5/2023
 %
 %INPUTS: 
 %   b = span

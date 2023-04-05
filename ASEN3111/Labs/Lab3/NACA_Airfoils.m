@@ -2,6 +2,10 @@ function [x,y] = NACA_Airfoils(m,p,t,c,N)
 %NACA_AIRFOILS 
 %Summary: This function takes in characteristics of a NACA airfoil and
 %calculates N
+%   Author: Thomas Dunnington
+%   Collaborators: Nolan Stevenson, Carson Kohlbrenner, Chase Rupprecht,
+%   Owen Craig
+%   Date: 4/5/2023
 %
 %INPUTS: 
 %   m = maximum camber

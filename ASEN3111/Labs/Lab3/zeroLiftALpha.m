@@ -2,6 +2,10 @@ function alpha_L0 = zeroLiftALpha(m,p)
 %zeroLiftALpha
 %Summary: This function uses Thin Airfoil theory to calculate the zero lift
 %angle of attack
+%   Author: Thomas Dunnington
+%   Collaborators: Nolan Stevenson, Carson Kohlbrenner, Chase Rupprecht,
+%   Owen Craig
+%   Date: 4/5/2023
 %
 %INPUTS: 
 %   m = maximum camber
