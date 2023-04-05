@@ -4,7 +4,12 @@
 %the number of panels required for less than 1 percent error. Problem 2
 %Compares three different symmetric airfoils of varying thickness and
 %calculates lift with the vortex panel method and thin airfoil theory.
-%Problem 3 does the same with 
+%Problem 3 does the same with airfoils of the same thickness but different
+%camber. Problem 4 involves the PLLT function which implements the PLLT
+%equation to get the span efficiency factor. It then outputs a figure of
+%deltas with different root/tip chord ratios. Problem 5 calculates the lift
+%and drag of a cessna 150 and number of odd terms required for various
+%errors.
 %
 % Author: Thomas Dunnington
 % Collaborators: Nolan Stevenson, Owen Craig, Carson Kohlbrenner, Chase
@@ -19,12 +24,12 @@ close all; clear; clc;
 m = 0;
 p = 0;
 t = 12 / 100;
-c = 5; %Doesn't matter for CL
+c = 5; %Doesn't matter for CL calculation
 N = 1000; %Number of panels for the "true" value
 
 %Parameters
 AoA = 10; %degrees
-Vinf = 100; %Doesn't matter for CL
+Vinf = 100; %Doesn't matter for CL calculation
 
 %Calling Naca function to get the x and y coordinates of the airfoil
 [x1,y1] = NACA_Airfoils(m,p,t,c,N);
@@ -104,9 +109,10 @@ hold on;
 grid on;
 plot(AoAVec, CL_0012, 'linewidth', 2);
 plot(AoAVec, CL_0024, 'linewidth', 2);
+%Plotting the thin airfoil equivalent
 plot(AoAVec, 2*pi*pi/180 *AoAVec, 'linewidth', 2, 'linestyle', '--')
 
-title('Sectional Lift Coefficient Versus Angle of Attack');
+title('\bf{PROBLEM 1:} Sectional Lift Coefficient Versus Angle of Attack');
 xlabel('Angle of Attack ($$^{\circ}$$)');
 ylabel('Sectional Coefficient of Lift $$c_{l}$$');
 legend('NACA 0006', 'NACA 0012', 'NACA 0024', 'Thin Airfoil', 'location', 'nw')
@@ -168,7 +174,7 @@ N = numPanels;
 
 [x4412,y4412] = NACA_Airfoils(m,p,t,c,N);
 
-%Calculating the cl versus aoa
+%Calculating the cl versus aoa using the vortex panel code
 CL_2412 = zeros(length(AoAVec),1);
 CL_4412 = zeros(length(AoAVec),1);
 
@@ -183,8 +189,7 @@ alphaTA_L0_2412 = zeroLiftALpha(2/100, 4/10);
 alphaTA_L0_4412 = zeroLiftALpha(4/100, 4/10);
 
 %Plotting the cl versus angle of attack for the above airfoils
-figure()
-set(0, 'defaulttextinterpreter', 'latex');
+figure();
 plot(AoAVec, CL_0012, 'linewidth', 2, 'color', 'r');
 hold on;
 grid on;

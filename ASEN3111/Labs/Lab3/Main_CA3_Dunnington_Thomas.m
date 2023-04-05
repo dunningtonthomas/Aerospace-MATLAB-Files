@@ -24,12 +24,12 @@ close all; clear; clc;
 m = 0;
 p = 0;
 t = 12 / 100;
-c = 5; %Doesn't matter for CL
+c = 5; %Doesn't matter for CL calculation
 N = 1000; %Number of panels for the "true" value
 
 %Parameters
 AoA = 10; %degrees
-Vinf = 100; %Doesn't matter for CL
+Vinf = 100; %Doesn't matter for CL calculation
 
 %Calling Naca function to get the x and y coordinates of the airfoil
 [x1,y1] = NACA_Airfoils(m,p,t,c,N);
@@ -109,9 +109,10 @@ hold on;
 grid on;
 plot(AoAVec, CL_0012, 'linewidth', 2);
 plot(AoAVec, CL_0024, 'linewidth', 2);
+%Plotting the thin airfoil equivalent
 plot(AoAVec, 2*pi*pi/180 *AoAVec, 'linewidth', 2, 'linestyle', '--')
 
-title('Sectional Lift Coefficient Versus Angle of Attack');
+title('\bf{PROBLEM 2:} Sectional Lift Coefficient Versus Angle of Attack');
 xlabel('Angle of Attack ($$^{\circ}$$)');
 ylabel('Sectional Coefficient of Lift $$c_{l}$$');
 legend('NACA 0006', 'NACA 0012', 'NACA 0024', 'Thin Airfoil', 'location', 'nw')
@@ -173,7 +174,7 @@ N = numPanels;
 
 [x4412,y4412] = NACA_Airfoils(m,p,t,c,N);
 
-%Calculating the cl versus aoa
+%Calculating the cl versus aoa using the vortex panel code
 CL_2412 = zeros(length(AoAVec),1);
 CL_4412 = zeros(length(AoAVec),1);
 
@@ -188,8 +189,7 @@ alphaTA_L0_2412 = zeroLiftALpha(2/100, 4/10);
 alphaTA_L0_4412 = zeroLiftALpha(4/100, 4/10);
 
 %Plotting the cl versus angle of attack for the above airfoils
-figure()
-set(0, 'defaulttextinterpreter', 'latex');
+figure();
 plot(AoAVec, CL_0012, 'linewidth', 2, 'color', 'r');
 hold on;
 grid on;
@@ -203,7 +203,7 @@ plot(AoAVec, CL_4412, 'linewidth', 2, 'color', 'b');
 plot(AoAVec, 2*pi*pi/180 * (AoAVec - alphaTA_L0_4412), 'linestyle', '--', 'color', 'b');
 
 
-title('Sectional Lift Coefficient Versus Angle of Attack');
+title('\bf{PROBLEM 3:} Sectional Lift Coefficient Versus Angle of Attack');
 xlabel('Angle of Attack ($$^{\circ}$$)');
 ylabel('Sectional Coefficient of Lift $$c_{l}$$');
 legend('NACA 0012', 'Thin Airfoil', 'NACA 2412', 'Thin Airfoil', 'NACA 4412', 'Thin Airfoil', 'location', 'nw')
@@ -249,10 +249,11 @@ fprintf('\t\tZero Lift Angle of Attack (deg): %f\n', alphaTA_L0_4412)
 cr = 10;
 ct = linspace(0.01*cr, cr, 100); %Various ct/cr ratios
 
-%AR = 10, 8, 6, 4
+%AR = 10, 8, 6, 4 from Anderson figure
 ARvals = [4; 6; 8; 10];
 eVals = zeros(length(ct),length(ARvals));
 
+%Calling PLLT multiple times to get various span efficieny factors in eVals
 for j = 1:length(ARvals)
     AR = ARvals(j);
     for i = 1:length(ct)
@@ -264,7 +265,7 @@ end
 %Solving for delta given e
 delta = 1 ./ eVals - 1;
 
-%Plotting the results of delta versus taper ratio
+%Plotting the results of delta versus taper ratio for various AR values
 figure();
 plot(ct ./ cr, delta(:,1), 'linewidth', 2);
 hold on
@@ -275,36 +276,42 @@ plot(ct ./ cr, delta(:,4), 'linewidth', 2);
 xlabel('Taper Ratio, $$\frac{c_{t}}{c_{r}}$$');
 ylabel('$$\delta$$');
 legend('AR = 4', 'AR = 6', 'AR = 8', 'AR = 10');
-title('$$\delta$$ Versus Taper Ratio');
+title('\bf{PROBLEM 4:} $$\boldmath\delta$$ Versus Taper Ratio');
 
 
 %% Problem 5
 %Defining characteristics of Cessna 150 Wing
 b = 33 + 4/12;
-a0_t = coeff0012(1) * 180/pi;
+a0_t = coeff0012(1) * 180/pi; %Airfoil results from the previous section
 a0_r = coeff2412(1) * 180/pi;
 c_t = 3 + 8.5/12;
 c_r = 5 + 4/12;
-aero_t = zeroAOA_0012 * pi/180; 
+aero_t = zeroAOA_0012 * pi/180; %Airfoil results from the previous section
 aero_r = zeroAOA_2412 * pi/180; 
 geo_t = (3 + 0) * pi / 180;
 geo_r = (3 + 1) * pi / 180;
-
-%Calling vortex panel code to get lift curve slip and zeroAoA for 0012 and
-%2412
-
 
 %Calling PLLT for the Cessna
 [e,c_L,c_Di] = PLLT(b,a0_t,a0_r,c_t,c_r,aero_t,aero_r,geo_t,geo_r,100);
 
 %60 knots at 15000 ft std atmos
-rho = 0.1948; %kg/m^3
-speed = 60 * 1.94384; %m/s
+rho = 1.496e-3; %slugs/ft^3
+speed = 60 * 1.688; %ft/s
+
+%Calculating lift and induced drag
+S = b/2*(c_t + c_r); %ft^2
+lift = c_L * (0.5*rho*speed^2*S);
+drag = c_Di * (0.5*rho*speed^2*S);
+
+%Metric units
+%60 knots at 15000 ft std atmos
+rho = 0.7779; %kg/m^3
+speed = 30.8667; %m/s
 
 %Calculating lift and induced drag
 S = b/2*(c_t + c_r) * 0.3048^2; %m^2
-lift = c_L * (0.5*rho*speed^2*S);
-drag = c_Di * (0.5*rho*speed^2*S);
+lift2 = c_L * (0.5*rho*speed^2*S);
+drag2 = c_Di * (0.5*rho*speed^2*S);
 
 %Determining the number of terms to get 10, 1, and 1/10 relative error
 Nvec = 2:1:100;
@@ -347,20 +354,11 @@ cDN01 = find(cD_Error01);
 cDN01 = cDN01(1) + 1;
 
 
-%Plotting error for CL and CD
-%CL plot
-% figure();
-% plot(Nvec, cLError, 'linewidth', 2);
-% hold on
-% %CD plot
-% plot(Nvec, cDError, 'linewidth', 2, 'color', 'r');
-
-
 %Printing values to the command window
 fprintf("\n-----------Problem 5-----------\n");
 fprintf("Cessna 150 traveling 60 knots at 15,000 ft:\n")
-fprintf("\t Lift (N): %f\n", lift)
-fprintf("\t Drag (N): %f\n", drag)
+fprintf("\t Lift (lbf): %f\n", lift)
+fprintf("\t Drag (lbf): %f\n", drag)
 fprintf("Number of odd terms for less than 10 percent error:\n")
 fprintf("\t CL: %d \n", cLN10);
 fprintf("\t CDi: %d \n", cDN10);
