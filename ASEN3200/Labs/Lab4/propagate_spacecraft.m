@@ -1,0 +1,22 @@
+function [Xout, OEout] = propagate_spacecraft(X0, t0, tf, A, m)
+%ROPAGATE_SPACECRAFT 
+%Author: Thomas Dunnington
+%Date: 4/6/2023
+%Summary: Description: This function accepts an initial state, initial time, final time, SRP area, and spacecraft mass in km,
+% kg, s units and outputs the state and orbital elements at the final time.
+% Inputs:
+%   X0 - [6 by 1 ] spacecraft Cartesian state vector in the ACI frame [x, y, z,  ̇x,  ̇y,  ̇z]T at the initial time
+%   t0 - scalar, initial time in seconds
+%   tf - scalar, final time in seconds
+%   A - scalar, SRP area in km2
+%   m - scalar, spacecraft mass in kg
+% Outputs:
+%   Xout - [6 by 1 ] spacecraft Cartesian state vector in the ACI frame [x; y; z; x;̇y; z] at the final time
+%   OEout - [6 by 1 ] spacecraft orbital elements relative to the ACI frame [a; e; i; OMEGA; omega; Theta] at the final
+%   time tf in km and degrees on [−180, 180]
+
+
+
+
+end
+
