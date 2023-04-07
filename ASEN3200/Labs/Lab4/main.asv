@@ -15,7 +15,6 @@ figure();
 set(0, 'defaulttextinterpreter', 'latex');
 patch('Faces', facets, 'Vertices', vertices, 'FaceColor', 'red', 'EdgeColor', 'black', 'linewidth', 0.1);
 view(3);
-axis equal
 
 xlabel('X Coordinate');
 ylabel('Y Coordinate');
@@ -24,19 +23,17 @@ title('Bennu');
 
 
 %Testing propagate_spacecraft
-v0 = 0.1 / 1000; %km/s
-bennu_r = 0.2625;
-X0 = [0; bennu_r*2; 0; v0; 0; 0.5*v0];
+v0 = 0.1; %m/s
+bennu_r = 0.2
+X0 = [0.2625*2; 0; 0; 0; 0.002; 0];
+
+
 
 t0 = 0;
-tf = 1000000;
-A = 3.25^2;
-m = 2000;
+tf = 10000;
+A = 5;
+m = 5;
 [Xout, OEout] = propagate_spacecraft(X0, t0, tf, A, m);
-
-%Plotting orbit
-hold on
-plot3(Xout(:,1), Xout(:,2), Xout(:,3));
 
 
 

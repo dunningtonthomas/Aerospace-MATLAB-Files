@@ -18,19 +18,6 @@ function [Xout, OEout] = propagate_spacecraft(X0, t0, tf, A, m)
 %Assume bennu is located at the 0, 0, 0
 
 
-%Two body problem EOM
-%State is [x;y;z;vx;vy;vz]
-%mu is gravitational constant
-% mu = 4.892;
-%     
-% r = X0(1:3);
-% rDot = X0(4:end);
-%     
-% dr = rDot;
-% rDotDot = -1*mu*r ./ (norm(r))^3;
-%     
-% outVec = [dr; rDotDot];
-
 %Create function handle
 mu = 4.892 / 1000^3;
 funHandle = @(t, state)EOM(t, state, mu, A, m);
@@ -39,29 +26,40 @@ funHandle = @(t, state)EOM(t, state, mu, A, m);
 tspan = [t0 tf];
 
 %Call ode45 to propagate state variables
-[tout, stateOut] = ode45(funHandle, tspan, X0);
+options = odeset('RelTol',1e-12,'AbsTol',1e-12);
+[tout, stateOut] = ode45(funHandle, tspan, X0, options);
 
 %Output final state
-Xout = stateOut(end,:)';
+Xout = stateOut;
 
 %Calculating orbital elements
 OEout = 0;
 
+%Velocity
+Vout = Xout(:,4:end);
+speed = vecnorm(Vout, 2, 2); 
 
-%EOM Function
-function outVec = EOM(t, state, mu, area, mass)
-    %Two body problem EOM
-    %State is [x;y;z;vx;vy;vz]
-    %t is time
-    %mu is gravitational constant
-    
-    r = state(1:3);
-    rDot = state(4:end);
-    
-    dr = rDot;
-    rDotDot = -1*mu*r ./ (norm(r))^3;
-    
-    outVec = [dr; rDotDot];
-end
+%Distance
+Rout = Xout(:,1:3);
+distance = vecnorm(Rout, 2, 2); 
+
+%Calculate a
+energy = 0.5*speed.^2 - mu./distance;
+a = -mu / (2*energy);
+
+%Computing the specific agular momentum
+hVec = cross(Rout, Vout, 2);
+h = vecnorm(hVec, 2, 2);
+
+%Computing the eccentricity vector
+eVec = (1/mu)*cross(Vout, hVec, 2) - (1./vecnorm(Rout, 2, 2)).*Rout;
+e = vecnorm(eVec, 2, 2);
+
+%Calculating i
+hz = hVec(:,3);
+i = acos(hz ./ h);
+
+
+
 end
 
