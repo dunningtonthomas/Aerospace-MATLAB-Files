@@ -59,16 +59,18 @@ a = (mu*(T/(2*pi))^2)^(1/3);
 e = sqrt(1 - p/a);
 theta = acos(1/e * (p/rTarg -1 ));
 thetaDeg = theta * 180 / pi;
-theta2Deg = 2*(180 - thetaDeg) + thetaDeg;
+theta2Deg = (180 - thetaDeg) + 180;
 theta2 = theta2Deg * pi / 180;
 
 E1 = 2* atan(sqrt((1-e)/(1+e))*tan((pi)/2));
 E2 = 2* atan(sqrt((1-e)/(1+e))*tan(theta2/2)) + 2*pi;
+% E2 = 3.346;
+
 
 n = 2*pi / T;
 
 t2 = 1 / n * (E2 - e*sin(E2));
-delT = t2 - (T/2);
+delT = (t2 - (T/2)) / 60;
 
 
 
