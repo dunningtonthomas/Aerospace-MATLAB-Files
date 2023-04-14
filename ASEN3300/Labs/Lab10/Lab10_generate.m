@@ -77,6 +77,7 @@ L = length(y);
 P2 = abs(Y/L);
 P1 = P2(1:L/2+1);
 P1(2:end-1) = 2*P1(2:end-1);
+P1 = 20*log10(P1);
 f = Fs*(0:(L/2))/L;
 
 figure();
