@@ -20,7 +20,7 @@ function outVec = EOM(t, state, mu, area, mass)
     CR = 1.2;
     
     %Solar radiation pressure
-    aSR = -(pSR * CR * area / mass) .* rSat / 1000; %km/s^2
+    aSR = -((pSR * CR * area) ./ mass) .* rSat / 1000; %km/s^2
     
     %Final rate of change
     outVec = [dr; rDotDot + aSR];

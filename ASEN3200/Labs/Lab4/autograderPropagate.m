@@ -1,4 +1,4 @@
-function [Xout, OEout] = propagate_spacecraft(X0, t0, tf, A, m)
+function [Xout, OEout] = autograderPropagate(X0, t0, tf, A, m)
 %PROPAGATE_SPACECRAFT 
 %Author: Thomas Dunnington
 %Date: 4/6/2023
@@ -20,7 +20,7 @@ function [Xout, OEout] = propagate_spacecraft(X0, t0, tf, A, m)
 
 %Create function handle
 mu = 4.892 / 1000^3;
-A = A * 1000^2; %Convert to m^2
+A = A * 1000^2;
 funHandle = @(t, state)EOM(t, state, mu, A, m);
 
 %Define tspan
@@ -89,8 +89,8 @@ theta(tempLog) = 360 - theta(tempLog);
 
 
 %Output elements
-OEout = [a, e, i, OMEGA, omega, theta];
-
+OEout = [a(end), e(end), i(end), OMEGA(end), omega(end), theta(end)]';
+Xout = stateOut(end,:)';
 
 end
 

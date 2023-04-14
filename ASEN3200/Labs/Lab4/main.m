@@ -29,14 +29,24 @@ bennu_r = 0.2625;
 X0 = [0; bennu_r*2; 0; v0; 0; 0.5*v0];
 
 t0 = 0;
-tf = 1000000;
-A = 3.25^2;
+tf = 60*60*24*7; %1 week timespan
+A = 3.25^2 / 1000^2;
 m = 2000;
 [Xout, OEout] = propagate_spacecraft(X0, t0, tf, A, m);
 
 %Plotting orbit
 hold on
 plot3(Xout(:,1), Xout(:,2), Xout(:,3));
+
+%% Autograder Check
+[Xout, OEout] = autograderPropagate(X0, t0, tf, A, m);
+
+
+
+
+
+
+
 
 
 

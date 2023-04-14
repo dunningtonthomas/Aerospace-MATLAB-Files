@@ -1,5 +1,5 @@
 function [Xout, OEout] = propagate_spacecraft(X0, t0, tf, A, m)
-%PROPAGATE_SPACECRAFT 
+%ROPAGATE_SPACECRAFT 
 %Author: Thomas Dunnington
 %Date: 4/6/2023
 %Summary: Description: This function accepts an initial state, initial time, final time, SRP area, and spacecraft mass in km,
@@ -20,11 +20,10 @@ function [Xout, OEout] = propagate_spacecraft(X0, t0, tf, A, m)
 
 %Create function handle
 mu = 4.892 / 1000^3;
-A = A * 1000^2; %Convert to m^2
 funHandle = @(t, state)EOM(t, state, mu, A, m);
 
 %Define tspan
-tspan = t0:60:tf;
+tspan = [t0 tf];
 
 %Call ode45 to propagate state variables
 options = odeset('RelTol',1e-12,'AbsTol',1e-12);
@@ -32,6 +31,9 @@ options = odeset('RelTol',1e-12,'AbsTol',1e-12);
 
 %Output final state
 Xout = stateOut;
+
+%Calculating orbital elements
+OEout = 0;
 
 %Velocity
 Vout = Xout(:,4:end);
@@ -46,13 +48,13 @@ hVec = cross(Rout, Vout, 2);
 h = vecnorm(hVec, 2, 2);
 
 %Calculating line of nodes vector
-Zhat = [zeros(length(stateOut(:,1)), 1), zeros(length(stateOut(:,1)), 1), ones(length(stateOut(:,1)), 1)];
+Zhat = [zeros(1,length(stateOut(:,1))), zeros(1,length(stateOut(:,1))), ones(1,length(stateOut(:,1)))];
 nVec = cross(Zhat, hVec, 2);
 n = vecnorm(nVec, 2, 2);
 
 %Calculate a
 energy = 0.5*speed.^2 - mu./distance;
-a = -mu ./ (2*energy);
+a = -mu / (2*energy);
 
 %Computing the eccentricity vector
 eVec = (1/mu)*cross(Vout, hVec, 2) - (1./vecnorm(Rout, 2, 2)).*Rout;
@@ -83,13 +85,10 @@ eDotr = dot(eVec, Rout, 2) ./ (vecnorm(eVec, 2, 2) .* vecnorm(Rout, 2, 2));
 theta = acosd(eDotr);
 
 %Quadrant Check
-rDotv = dot(Rout, Vout, 2);
-tempLog = rDotv < 0;
-theta(tempLog) = 360 - theta(tempLog);
+rDotv = dot()
 
 
-%Output elements
-OEout = [a, e, i, OMEGA, omega, theta];
+
 
 
 end
