@@ -97,4 +97,47 @@ Mn1 = M1 * sin(beta);
 
 [M2n,p2op1,rho2orho1,t2ot1,deltasoR,p02op01] = shock_calc(Mn1);
 
+%% Problem 10.7
+areaRatio = 1.616;
+Me3 = nozzle_area(areaRatio);
+
+[ p0op,t0ot,rho0orho ] =isentropic(Me3);
+
+Pe = 1 / p0op;
+
+[MeReal] = isentropicFindM(1.4,1/0.947);
+[Arat] = AratFindA(1.4,MeReal);
+
+AtOAs = 1/ areaRatio * Arat;
+
+[M_sub M_sup] = nozzle(AtOAs);
+
+[ p0op,t0ot,rho0orho ] =isentropic(M_sub);
+
+Pt = 1 / p0op;
+
+%% Problem 10.9
+AR = 1.53;
+
+[M3_sub, M3_sup] = nozzle(AR);
+
+[ p0op,t0ot,rho0orho ] =isentropic( M3_sub );
+
+Pe3 = 1 / p0op;
+
+[Me_1] = isentropicFindM(1.4,1 / 0.94);
+
+[Me_2] = isentropicFindM(1.4,1 / 0.886);
+[Me_3] = isentropicFindM(1.4,1 / 0.75);
+
+
+[ p0op,t0ot,rho0orho ] =isentropic( M3_sup );
+
+Pe6 = 1 / p0op;
+
+
+
+
+
+
 
