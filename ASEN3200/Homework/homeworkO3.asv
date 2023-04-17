@@ -86,29 +86,15 @@ zComp = dot(v, -1*r) / norm(r);
 vMag = norm(v);
 xComp = sqrt(vMag^2 - zComp^2);
 
-%Flight path angle
-g = atand(eMag * sind(theta) / (1 + eMag*cosd(theta)));
-
-
 %Time passed
 T = 2*pi * sqrt(a^3 / mu);
 n = 2*pi / T;
 E0 = 2*atan(sqrt((1-eMag)/(1+eMag)) * tan(theta/2 * pi/180));
-t0 = 1 / n * (E0 - eMag*sin(E0));
-
-t1 = t0 + 3*60*60;
-
-func = @(E)(E - eMag*sin(E) - n*(t1));
-tol = 1e-2;
-
-E1 = rootSolve(func, 0, 2*pi, tol);
-theta1 = 2*atan(sqrt((1+eMag)/(1-eMag)) * tan(E1/2));
-
-p = a*(1 - eMag^2);
+t0
 
 
-rpqw1 = [p * cos(theta1) / (1 + eMag*cos(theta1)); p*sin(theta1) / (1 + eMag*cos(theta1)); 0];
-vpqw1 = [-sqrt(mu / p) * sin(theta1); sqrt(mu / p) *(eMag + cos(theta1)); 0];
+
+
 
 
 
