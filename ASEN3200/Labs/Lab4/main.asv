@@ -46,11 +46,9 @@ plot3(Xout(:,1), Xout(:,2), Xout(:,3));
 
 %Check view call
 facetNumber = 1;
-r = Xout(1,1:3)';
+r = Xout(1,1:3);
 
-%Testing facet number 1
-[observable, elevationAngle, cameraAngle] = auto_check_view(r, facetNumber, facets, vertices);
-
+[observable, elevationAngle, cameraAngle] = check_view(r, facetNumber, facets, vertices);
 
 
 

@@ -18,6 +18,61 @@ function [observable, elevationAngle, cameraAngle] = check_view(r, facetNumber, 
 %Define FOV
 FOV = pi / 9;
 
+%Get the three vectors defining the face
+face = F(facetNumber, :);
+v1 = V(face(1), :);
+vec2 = V(face(2), :);
+vec3 = V(face(3), :);
+
+v12 = vec2 - v1;
+v13 = vec3 - v1;
+
+%Defining the normal vector to the face
+n = cross(v12, v13);
+nhat = n ./ norm(n);
+
+%Define vector from the center of bennu to the center of the face
+rFace = (v1 + vec2 + vec3) ./ 3;
+
+%Defining vector from the face to the spacecraft
+rFS = r - rFace;
+
+%Finding angle between rFS and the normal of the face
+elevationAngle = pi/2 - acos(dot(rFS, nhat) / (norm(rFS) * norm(nhat)));
+
+%Finding field of view angle
+cameraAngle = acos(dot(-rFS, -r) / (norm(rFS) * norm(r)));
+
+%Determining whether or not the facet is visible
+if(elevationAngle >= 15*pi/180 && cameraAngle <= FOV)
+    observable = 1;
+else
+    observable = 0;
+end
+
+
+
+%% Testing triangulation method
+TR = triangulation(F, V);
+rFVec = incenter(TR);
+norms = faceNormal(TR);
+
+%Getting the vector to the face and the face normal
+rF = rFVec(facetNumber, :);
+n = norms(facetNumber, :);
+
+%Defining the vector from the face to the spacecraft
+rFS = r - rF;
+
+%Finding angle between rFS and the normal of the face
+elevationAngle = 90 - acosd(dot(rFS, n) / (norm(rFS) * norm(n)));
+
+%Finding field of view angle
+cameraAngle = acosd(dot(-rFS, -r) / (norm(rFS) * norm(r)));
+
+%Determining whether or not the facet is visible
+observable = elevationAngle >= 15 && cameraAngle <= FOV;
+
 
 %% Triangulation method with vectors
 TR = triangulation(F, V);
@@ -41,6 +96,10 @@ cameraAngle = acosd(dot(-1*rFS, -1*rVec, 2) ./ (vecnorm(rFS,2,2) .* vecnorm(rVec
 %Determining whether or not the facet is visible
 observable = elevationAngle >= 15 & cameraAngle <= FOV;
 
+%Autograder output
+% elevationAngle = elevationAngle(facetNumber);
+% cameraAngle = cameraAngle(facetNumber);
+% observable = observable(facetNumber);
 
 end
 
