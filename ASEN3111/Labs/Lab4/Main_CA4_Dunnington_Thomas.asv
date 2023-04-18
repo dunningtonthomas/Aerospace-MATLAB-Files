@@ -43,14 +43,8 @@ plot(0,0,'color', [0; 1; 0.5]);
 hold on
 plot(0,0,'color', [0; 0.5; 1]);
 
-%Checker to plot mach number on the plot
-checker = 1;
-
 %Plotting the rest of the mach numbers
 for i = 1:length(MVec)
-    %Flip checker to plot mach number on plot
-    checker = ~checker;
-
     %Getting rid of imaginary and negative values
     weakLog = ~imag(weakMat(:,i)) & weakMat(:,i) >= 0;
     strongLog = ~imag(strongMat(:,i)) & strongMat(:,i) >= 0;
@@ -62,26 +56,14 @@ for i = 1:length(MVec)
     plot([thetaVals(weakLog); flip(thetaVals(strongLog))], [weakMat(weakLog,i); flip(strongMat(strongLog,i))], 'color', colorPlot);
 
     %Adding number to the plot
-    thetaEnd = thetaVals(weakLog);
-    weakEnd = weakMat(weakLog,i);
-    if(weakEnd)
-        if(checker)
-            text(thetaEnd(end), weakEnd(end), num2str(MVec(i)));
-        end
-    end
+    text(thetaVals(end))
 end
 
 %Adding legend and labels
 legend('Low Mach Number', 'High Mach Number', 'location', 'se')
 xlabel('Deflection Angle $$(\theta^{\circ})$$')
 ylabel('Shock Wave Angle $$(\delta^{\circ})$$')
-title('Oblique Shock $$\theta - \beta - M$$ Relationship'
-
-
-%% Problem 2
-
-
-
+title('Oblique Shock $$\theta - \beta - M$$ Relationship')
 
 
 
