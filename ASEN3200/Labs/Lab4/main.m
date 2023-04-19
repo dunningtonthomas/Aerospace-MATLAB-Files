@@ -84,7 +84,7 @@ for i = 1:length(rOut(:,1))
 
 
         
-    %drawnow limitrate;
+    drawnow limitrate;
 end
 
 
