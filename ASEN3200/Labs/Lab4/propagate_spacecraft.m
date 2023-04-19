@@ -1,4 +1,4 @@
-function [Xout, OEout] = propagate_spacecraft(X0, t0, tf, A, m)
+function [Xout, OEout, Tout] = propagate_spacecraft(X0, t0, tf, A, m)
 %PROPAGATE_SPACECRAFT 
 %Author: Thomas Dunnington
 %Date: 4/6/2023
@@ -28,7 +28,7 @@ tspan = t0:60:tf;
 
 %Call ode45 to propagate state variables
 options = odeset('RelTol',1e-12,'AbsTol',1e-12);
-[tout, stateOut] = ode45(funHandle, tspan, X0, options);
+[Tout, stateOut] = ode45(funHandle, tspan, X0, options);
 
 %Output final state
 Xout = stateOut;
@@ -89,7 +89,7 @@ theta(tempLog) = 360 - theta(tempLog);
 
 
 %Output elements
-OEout = [a, e, i, OMEGA, omega, theta];
+OEout = [a, e, i*pi/180, OMEGA*pi/180, omega*pi/180, theta*pi/180];
 
 
 end

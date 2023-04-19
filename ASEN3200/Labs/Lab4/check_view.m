@@ -33,14 +33,13 @@ n = norms;
 rFS = rVec - rF;
 
 %Finding angle between rFS and the normal of the face
-elevationAngle = 90 - acosd(dot(rFS, n, 2) ./ (vecnorm(rFS, 2, 2) .* vecnorm(n, 2, 2)));
+elevationAngle = pi/2 - acos(dot(rFS, n, 2) ./ (vecnorm(rFS, 2, 2) .* vecnorm(n, 2, 2)));
 
 %Finding field of view angle
-cameraAngle = acosd(dot(-1*rFS, -1*rVec, 2) ./ (vecnorm(rFS,2,2) .* vecnorm(rVec,2,2)));
+cameraAngle = acos(dot(-1*rFS, -1*rVec, 2) ./ (vecnorm(rFS,2,2) .* vecnorm(rVec,2,2)));
 
 %Determining whether or not the facet is visible
-observable = elevationAngle >= 15 & cameraAngle <= FOV;
-
+observable = elevationAngle >= 15*pi/180 & cameraAngle <= FOV;
 
 end
 

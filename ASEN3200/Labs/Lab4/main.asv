@@ -81,10 +81,8 @@ for i = 1:length(rOut(:,1))
     view(3);
 
     %Plot the satellite location
+    
 
-
-        
-    %drawnow limitrate;
 end
 
 
