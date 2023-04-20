@@ -1,4 +1,4 @@
-function [observable, elevationAngle, cameraAngle] = check_view(r, facetNumber, F, V)
+function [observable, elevationAngle, cameraAngle] = check_view(r, facetNumber, F, V, N)
 %CHECK_VIEW
 %Author: Thomas Dunnington
 % Description:
@@ -10,13 +10,14 @@ function [observable, elevationAngle, cameraAngle] = check_view(r, facetNumber, 
 %   facetNumber - scalar, facet index
 %   F - [n x 3] matrix of vertices that form each face
 %   V - [m x 3] matrix of vertex locations in implied body frame
+%   N - number of satellites in the constellation
 % Outputs:
 %   observable - int, 0 for unobservable, 1 for observable
 %   elevationAngle - scalar, elevation of spacecraft relative to the facet plane in radians
 %   cameraAngle - scalar, angle of facet center relative to camera boresight
 
 %Define FOV
-FOV = pi / 9;
+FOV = pi / 9 / N;
 
 
 %% Triangulation method with vectors
