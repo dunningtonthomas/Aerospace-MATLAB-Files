@@ -119,11 +119,15 @@ for i = 10:10:length(rOut_1(:,1))
     ylim([min([rOut_1(:,2); rOut_2(:,2)]) max([rOut_1(:,2); rOut_2(:,2)])]);
     zlim([min([rOut_1(:,3); rOut_2(:,3)]) max([rOut_1(:,3); rOut_2(:,3)])]);
     
+    %Calculate the time for the title in days for the title
+    dayTime = Tout_1(i) / 24 / 3600;
+    dayString = num2str(dayTime);
+    
     %Add labels
     xlabel('X Coordinate (km)');
     ylabel('Y Coordinate (km)');
     zlabel('Z Coordinate (km)');
-    title('Bennu Satellite Constellation Animation');
+    title(strcat("Bennu Satellite Constellation (1 Day) at ", dayString, " Days"));
     legend([sc_1 sc_2 vis1 vis2 visBoth], 'Sat 1', 'Sat 2', 'Sat 1 Visibility', 'Sat 2 Visibility', 'Both Visible');
         
     drawnow limitrate;
@@ -191,11 +195,15 @@ end
 %     ylim([min([rOut_1(:,2); rOut_2(:,2)]) max([rOut_1(:,2); rOut_2(:,2)])]);
 %     zlim([min([rOut_1(:,3); rOut_2(:,3)]) max([rOut_1(:,3); rOut_2(:,3)])]);
 %     
+%     %Calculate the time for the title in days for the title
+%     dayTime = Tout_1(i) / 24 / 3600;
+%     dayString = num2str(dayTime);
+%     
 %     %Add labels
 %     xlabel('X Coordinate (km)');
 %     ylabel('Y Coordinate (km)');
 %     zlabel('Z Coordinate (km)');
-%     title('Bennu Satellite Constellation Visibility for 1 Week');
+%     title(strcat("Bennu Satellite Constellation at ", dayString, " Days"));
 %     legend([sc_1 sc_2 vis1 vis2 visBoth], 'Sat 1', 'Sat 2', 'Sat 1 Visibility', 'Sat 2 Visibility', 'Both Visible');
 %         
 %     drawnow limitrate;
@@ -210,11 +218,4 @@ end
 % open(vidWrite);
 % writeVideo(vidWrite, movieVec);
 % close(vidWrite);
-
-
-
-
-
-
-
-
+% 
