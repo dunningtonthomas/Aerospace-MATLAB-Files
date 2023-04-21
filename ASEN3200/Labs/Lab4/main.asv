@@ -274,6 +274,7 @@ for i = 10:10:length(Tout_1)
 end
 
 
+%% 
 %Getting visible angles
 facetObservability_1 = facetObservability_1 == 1;
 facetObservability_2 = facetObservability_2 == 1;
@@ -296,16 +297,16 @@ figure();
 subplot(2,1,1);
 plot(timePlot ./ 3600, facetElevationAngles_1, 'linewidth', 2);
 hold on
-scatter(Tout_1Vis ./ 360, facetElevationAngles_1Vis, 'filled', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g', 'SizeData', 5);
+scatter(Tout_1Vis ./ 3600, facetElevationAngles_1Vis, 'filled', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g', 'SizeData', 5);
 
 sgtitle('Satellite 1 Visibilty of Facet Number 69 for 1 Week');
 ylabel('Elevation Angle $$\phi$$');
 legend('\phi', 'Visibility', 'location', 'sw');
 
 subplot(2,1,2);
-plot(timePlot ./ 3600, facetCameraAngles_1, 'linewidth', 2);
+plot(Tout_1 ./ 3600, facetCameraAngles_1, 'linewidth', 2);
 hold on
-scatter(Tout_1Vis ./ 360, facetCameraAngles_1Vis, 'filled', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g', 'SizeData', 5);
+scatter(Tout_1Vis ./ 3600, facetCameraAngles_1Vis, 'filled', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g', 'SizeData', 5);
 
 xlabel('Time (h)');
 ylabel('Camera Angle $$\theta$$');
@@ -314,18 +315,18 @@ legend('\theta', 'Visibility');
 %SAT 2
 figure();
 subplot(2,1,1);
-plot(timePlot ./ 3600, facetElevationAngles_2, 'linewidth', 2);
+plot(Tout_2 ./ 3600, facetElevationAngles_2, 'linewidth', 2);
 hold on
-test = scatter(Tout_2Vis ./ 360, facetElevationAngles_2Vis, 'filled', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g', 'SizeData', 5);
+test = scatter(Tout_2Vis ./ 3600, facetElevationAngles_2Vis, 'filled', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g', 'SizeData', 5);
 
 sgtitle('Satellite 2 Visibilty of Facet Number 69 for 1 Week');
 ylabel('Elevation Angle $$\phi$$');
 legend('\phi', 'Visibility', 'location', 'sw');
 
 subplot(2,1,2);
-plot(timePlot ./ 3600, facetCameraAngles_2, 'linewidth', 2);
+plot(Tout_2 ./ 3600, facetCameraAngles_2, 'linewidth', 2);
 hold on
-scatter(Tout_2Vis ./ 360, facetCameraAngles_2Vis, 'filled', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g', 'SizeData', 5);
+scatter(Tout_2Vis ./ 3600, facetCameraAngles_2Vis, 'filled', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g', 'SizeData', 5);
 
 xlabel('Time (h)');
 ylabel('Camera Angle $$\theta$$');
@@ -404,6 +405,8 @@ title('Satellite 2 Visibility and Camera Angle For 1 Week');
 a.Label.String = 'Camera Angle (deg)';
 
 
+
+%Scatter Plot 2: Facet Numbers versus time 
 
 %% Functions
 
