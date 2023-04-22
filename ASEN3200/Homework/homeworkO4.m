@@ -69,5 +69,18 @@ T = 2*pi*sqrt(a^3 / mu);
 theta2 = 360 - acosd(dot(eVec, r2) / (e*r2M));
 eDotV = dot(eVec, v2);
 
+%Find argument of periapsis
+n = cross([0; 0; 1], h);
+omega = acos(dot(n, eVec) / (norm(n)*norm(eVec)));
 
+thetaN = 360 - theta2;
+
+E2  = 2*pi + 2*atan(sqrt((1 - e) / (1 + e)) * tand(theta2 / 2));
+
+n = 2*pi / T;
+
+t2 = 1 / n * (E2 - e*sin(E2));
+
+delT = T - t2;
+hours = delT / 3600;
 
