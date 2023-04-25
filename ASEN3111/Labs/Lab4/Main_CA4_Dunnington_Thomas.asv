@@ -87,10 +87,9 @@ M = 3;
 epsilon1 = 7.5;
 epsilon2 = 5;
 
-%Calling diamond airfoil to get cl and cd
+%Calling diamond airfoil to get 
 [c_l,c_dw] = DiamondAirfoil(M, alpha, epsilon1, epsilon2);
 
-%Checking for a bow shock
 if(c_l == 0xDEADBEEF && c_dw == 0xDEADBEEF) %Bow shock condition
     fprintf("The flow produces a bow shock.\n");
 end
@@ -99,9 +98,6 @@ end
 fprintf("Coefficient of Lift and Wave Drag: \n")
 fprintf("\t cl: %f \n", c_l);
 fprintf("\t cdw: %f \n", c_dw);
-
-
-%% Problem 3
 
 
 

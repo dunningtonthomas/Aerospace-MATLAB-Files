@@ -1,5 +1,4 @@
 function [c_l,c_dw] = DiamondAirfoil(M, alpha, epsilon1, epsilon2)
-%AUTHOR: Thomas Dunnington
 %DIAMONDAIRFOIL Summary of this function goes here
 %SUMMARY:
 %INPUTS:
@@ -9,15 +8,6 @@ function [c_l,c_dw] = DiamondAirfoil(M, alpha, epsilon1, epsilon2)
 %     (B)\/(D)
 
 
-%Test if the airfoil creates a bow shock
-maxAngle = abs(alpha) + epsilon1; %Maximum angle to produce a shock
-[Betad] = ObliqueShockBeta(M,maxAngle,1.4,'Weak');
-
-if(imag(Betad) ~= 0 || Betad < 0) %Condition for bow shock
-    c_l = 0xDEADBEEF; %Return error code
-    c_dw = 0xDEADBEEF;
-    return;
-end
 
 
 %Conditions for fan on the top surface and shock on bottom
@@ -216,9 +206,10 @@ L1oC = sind(epsilon2) / sind(180 - epsilon1 - epsilon1);
 L2oC = sind(epsilon1) / sind(180 - epsilon1 - epsilon1);
 
 
-%Coefficent calculations
-c_l = 1 / (1.4 / 2 * M^2) * (pB*L1oC*cosd(epsilon1 + alpha) + pD*L2oC*cosd(alpha - epsilon2) - pA*L1oC*cosd(alpha - epsilon1) - pC*L2oC*cosd(alpha + epsilon2));
-c_dw = 1 / (1.4 / 2 * M^2) * (pB*L1oC*sind(epsilon1 + alpha) + pD*L2oC*sind(alpha - epsilon2) - pA*L1oC*sind(alpha - epsilon1) - pC*L2oC*sind(alpha + epsilon2));
+
+
+c_l = 1 / (1.4 / 2 * M^2) * (pB*L1oC*cosd(epsilon1 + alpha) + pD*L2oC*cosd(alpha - epsilon2) - pA*L1oC*cosd(alpha - epsilon1) - pC*L2oC);
+c_dw = 0;
 
 
 end
