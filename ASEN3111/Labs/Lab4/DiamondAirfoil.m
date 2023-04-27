@@ -1,11 +1,22 @@
 function [c_l,c_dw] = DiamondAirfoil(M, alpha, epsilon1, epsilon2)
 %AUTHOR: Thomas Dunnington
-%DIAMONDAIRFOIL Summary of this function goes here
-%SUMMARY:
+%COLLABORATORS: Nolan Stevenson, Owen Craig, Carson Kohlbrenner, Chase Rupprecht
+%DATE: 4/26/2023
+%DIAMONDAIRFOIL 
+%SUMMARY: This function uses shock expansion theory to calculate the
+%coefficient of lift and wave drag for a diamond airfoil with given angles
 %INPUTS:
+%   M = freestream mach number
+%   alpha = angle of attack
+%   epsilon1 = leading edge angle of diamond airfoil
+%   epsilon2 = trailing edge angle of diamond airfoil
 %OUTPUTS:
-%REGIONS:
+%   c_l = coefficient of lift
+%   c_dw = coefficient of drag (wave drag)
+%REGION NOMENCLATURE:
 %     (A)/\(C)
+%       /  \
+%       \  / 
 %     (B)\/(D)
 
 
@@ -219,7 +230,6 @@ L2oC = sind(epsilon1) / sind(180 - epsilon1 - epsilon1);
 %Coefficent calculations
 c_l = 1 / (1.4 / 2 * M^2) * (pB*L1oC*cosd(epsilon1 + alpha) + pD*L2oC*cosd(alpha - epsilon2) - pA*L1oC*cosd(alpha - epsilon1) - pC*L2oC*cosd(alpha + epsilon2));
 c_dw = 1 / (1.4 / 2 * M^2) * (pB*L1oC*sind(epsilon1 + alpha) + pD*L2oC*sind(alpha - epsilon2) - pA*L1oC*sind(alpha - epsilon1) - pC*L2oC*sind(alpha + epsilon2));
-
 
 end
 
