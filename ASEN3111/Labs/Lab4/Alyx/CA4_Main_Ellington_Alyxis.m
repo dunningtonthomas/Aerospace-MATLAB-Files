@@ -13,7 +13,7 @@
 % Collaborators: Jake Spagnolli
 % Date: 12/4/22
 
-clear all; clc; close all;
+% clear all; clc; close all;
 
 %% Problem 1
 

@@ -15,7 +15,7 @@ function [c_l,c_dw] = DiamondAirfoil(M, alpha, epsilon1, epsilon2)
 %   c_dw = coefficient of drag (wave drag)
 %REGION NOMENCLATURE:
 %     (A)/\(C)
-%       /  \
+%  (1)  /  \
 %       \  / 
 %     (B)\/(D)
 
@@ -30,6 +30,9 @@ if(imag(Betad) ~= 0 || Betad < 0) %Condition for bow shock
     return;
 end
 
+%Calculate the static upstream pressure over the stagnation pressure
+[~,~,p1oP01,~,~] = flowisentropic(1.4,M, 'mach');
+
 
 %Conditions for fan on the top surface and shock on bottom
 if(alpha - epsilon1 > 0)
@@ -42,7 +45,10 @@ if(alpha - epsilon1 > 0)
     [MA,~,~] = flowprandtlmeyer(1.4,nuA,'nu');
 
     %Use isentropic relations to get the pressure in region A
-    [~,~,pA,~,~] = flowisentropic(1.4,MA, 'mach');
+    [~,~,pAoP01,~,~] = flowisentropic(1.4,MA, 'mach');
+
+    %Solve for pAoP1
+    pAoP1 = pAoP01 / p1oP01;
 
     %%%%REGION B
     %Find the shock in region B
@@ -53,7 +59,10 @@ if(alpha - epsilon1 > 0)
     Mn = M * sind(Betad);
 
     %Call the normal shock equation
-    [~,~,pB,~,MBn,~,~] = flownormalshock(1.4,Mn,'mach');
+    %pBoP1 is the static pressure ratio
+    %p0BoP01 is the total pressure ratio to be used in the next expansion
+    %fan
+    [~,~,pBoP1,~,MBn,p0BoP01,~] = flownormalshock(1.4,Mn,'mach');
 
     %Find MB
     MB = MBn / sind(Betad - Thetad);
@@ -67,7 +76,10 @@ if(alpha - epsilon1 > 0)
     [MC,~,~] = flowprandtlmeyer(1.4,nuC,'nu');
 
     %Use isentropic relations to get the pressure in region C
-    [~,~,pC,~,~] = flowisentropic(1.4,MC, 'mach');
+    [~,~,pCoP01,~,~] = flowisentropic(1.4,MC, 'mach');
+
+    %Solve for static pressure ratio
+    pCoP1 = pCoP01 / p1oP01;
 
     %%%%REGION D
     %Expansion fan turned by epsilon1 + epsilon2
@@ -78,7 +90,11 @@ if(alpha - epsilon1 > 0)
     [MD,~,~] = flowprandtlmeyer(1.4,nuD,'nu');
 
     %Use isentropic relations to get the pressure in region D
-    [~,~,pD,~,~] = flowisentropic(1.4,MD, 'mach');
+    [~,~,pDoP0B,~,~] = flowisentropic(1.4,MD, 'mach');
+    pDoP01 = pDoP0B * p0BoP01; %Pressure in region D relative to freestream stagnation pressure
+
+    %Solve for pressure relative to freestream static pressure
+    pDoP1 = pDoP01 / p1oP01;
 
 elseif(-alpha - epsilon1 > 0) %Condition for fan on bottom and shock on top
 
@@ -91,7 +107,7 @@ elseif(-alpha - epsilon1 > 0) %Condition for fan on bottom and shock on top
     Mn = M * sind(Betad);
 
     %Call the normal shock equation
-    [~,~,pA,~,MAn,~,~] = flownormalshock(1.4,Mn,'mach');
+    [~,~,pAoP1,~,MAn,p0AoP01,~] = flownormalshock(1.4,Mn,'mach');
 
     %Find MB
     MA = MAn / sind(Betad - Thetad);
@@ -104,7 +120,10 @@ elseif(-alpha - epsilon1 > 0) %Condition for fan on bottom and shock on top
     [MB,~,~] = flowprandtlmeyer(1.4,nuB,'nu');
 
     %Use isentropic relations to get the pressure in region B
-    [~,~,pB,~,~] = flowisentropic(1.4,MB, 'mach');
+    [~,~,pBoP01,~,~] = flowisentropic(1.4,MB, 'mach');
+
+    %Solve for pressure relative to freestream static pressure
+    pBoP1 = pBoP01 / p1oP01;
 
     %%%%REGION C
     %Expansion fan turned by epsilon1 + epsilon2
@@ -115,7 +134,11 @@ elseif(-alpha - epsilon1 > 0) %Condition for fan on bottom and shock on top
     [MC,~,~] = flowprandtlmeyer(1.4,nuC,'nu');
 
     %Use isentropic relations to get the pressure in region C
-    [~,~,pC,~,~] = flowisentropic(1.4,MC, 'mach');
+    [~,~,pCoP0A,~,~] = flowisentropic(1.4,MC, 'mach');
+    pCoP01 = pCoP0A * p0AoP01; %Get relative to freestream stag pressure
+
+    %Solve for pressure relative to freestream static
+    pCoP1 = pCoP01 / p1oP01;
 
     %%%%REGION D
     %Expansion fan turned by epsilon1 + epsilon2
@@ -126,14 +149,18 @@ elseif(-alpha - epsilon1 > 0) %Condition for fan on bottom and shock on top
     [MD,~,~] = flowprandtlmeyer(1.4,nuD,'nu');
 
     %Use isentropic relations to get the pressure in region D
-    [~,~,pD,~,~] = flowisentropic(1.4,MD, 'mach');
+    [~,~,pDoP01,~,~] = flowisentropic(1.4,MD, 'mach');
 
-else %Shock on top and bottom could be bow shock
+    %Solve for pressure relative to freestream static
+    pDoP1 = pDoP01 / p1oP01;
+
+else %Shock on top and bottom
     %Conditions for no fan or shock when alpha == epsilon
     if(alpha == epsilon1)
         %%%%REGION A
-        pA = 1;
+        pAoP1 = 1;
         MA = M;
+        p0AoP01 = 1;
 
         %%%%REGION B
         %Find the shock in region B
@@ -144,7 +171,7 @@ else %Shock on top and bottom could be bow shock
         Mn = M * sind(Betad);
     
         %Call the normal shock equation
-        [~,~,pB,~,MBn,~,~] = flownormalshock(1.4,Mn,'mach');
+        [~,~,pBoP1,~,MBn,p0BoP01,~] = flownormalshock(1.4,Mn,'mach');
     
         %Find MB
         MB = MBn / sind(Betad - Thetad);
@@ -159,14 +186,16 @@ else %Shock on top and bottom could be bow shock
         Mn = M * sind(Betad);
     
         %Call the normal shock equation
-        [~,~,pA,~,MAn,~,~] = flownormalshock(1.4,Mn,'mach');
+        [~,~,pAoP1,~,MAn,p0AoP01,~] = flownormalshock(1.4,Mn,'mach');
     
         %Find MA
         MA = MAn / sind(Betad - Thetad);
 
         %%%%REGION B
-        pB = 1;
+        pBoP1 = 1;
         MB = M;
+        p0BoP01 = 1;
+
     else %Case where there is a shock in region A and B
         %%%%REGION A
         %Compute shock on top surface Region A
@@ -177,7 +206,7 @@ else %Shock on top and bottom could be bow shock
         Mn = M * sind(Betad);
     
         %Call the normal shock equation
-        [~,~,pA,~,MAn,~,~] = flownormalshock(1.4,Mn,'mach');
+        [~,~,pAoP1,~,MAn,p0AoP01,~] = flownormalshock(1.4,Mn,'mach');
     
         %Find MA
         MA = MAn / sind(Betad - Thetad);
@@ -191,7 +220,7 @@ else %Shock on top and bottom could be bow shock
         Mn = M * sind(Betad);
     
         %Call the normal shock equation
-        [~,~,pB,~,MBn,~,~] = flownormalshock(1.4,Mn,'mach');
+        [~,~,pBoP1,~,MBn,p0BoP01,~] = flownormalshock(1.4,Mn,'mach');
     
         %Find MB
         MB = MBn / sind(Betad - Thetad);
@@ -206,7 +235,11 @@ else %Shock on top and bottom could be bow shock
     [MC,~,~] = flowprandtlmeyer(1.4,nuC,'nu');
 
     %Use isentropic relations to get the pressure in region C
-    [~,~,pC,~,~] = flowisentropic(1.4,MC, 'mach');
+    [~,~,pCoP0A,~,~] = flowisentropic(1.4,MC, 'mach');
+    pCoP01 = pCoP0A * p0AoP01;
+
+    %Pressure relative to freestream static
+    pCoP1 = pCoP01 / p1oP01;
 
     %%%%REGION D
     %Expansion fan turned by epsilon1 + epsilon2
@@ -217,19 +250,21 @@ else %Shock on top and bottom could be bow shock
     [MD,~,~] = flowprandtlmeyer(1.4,nuD,'nu');
 
     %Use isentropic relations to get the pressure in region D
-    [~,~,pD,~,~] = flowisentropic(1.4,MD, 'mach');
+    [~,~,pDoP0B,~,~] = flowisentropic(1.4,MD, 'mach');
+    pDoP01 = pDoP0B * p0BoP01;
+    pDoP1 = pDoP01 / p1oP01;
 end
 
 
 %Calculate the coefficient of lift and drag using the pressures
 %Define length 1 over c and length 2 over c using law of sines
-L1oC = sind(epsilon2) / sind(180 - epsilon1 - epsilon1);
-L2oC = sind(epsilon1) / sind(180 - epsilon1 - epsilon1);
+L1oC = sind(epsilon2) / sind(180 - epsilon1 - epsilon2);
+L2oC = sind(epsilon1) / sind(180 - epsilon1 - epsilon2);
 
 
 %Coefficent calculations
-c_l = 1 / (1.4 / 2 * M^2) * (pB*L1oC*cosd(epsilon1 + alpha) + pD*L2oC*cosd(alpha - epsilon2) - pA*L1oC*cosd(alpha - epsilon1) - pC*L2oC*cosd(alpha + epsilon2));
-c_dw = 1 / (1.4 / 2 * M^2) * (pB*L1oC*sind(epsilon1 + alpha) + pD*L2oC*sind(alpha - epsilon2) - pA*L1oC*sind(alpha - epsilon1) - pC*L2oC*sind(alpha + epsilon2));
+c_l = 1 / (1.4 / 2 * M^2) * (pBoP1*L1oC*cosd(epsilon1 + alpha) + pDoP1*L2oC*cosd(alpha - epsilon2) - pAoP1*L1oC*cosd(alpha - epsilon1) - pCoP1*L2oC*cosd(alpha + epsilon2));
+c_dw = 1 / (1.4 / 2 * M^2) * (pBoP1*L1oC*sind(epsilon1 + alpha) + pDoP1*L2oC*sind(alpha - epsilon2) - pAoP1*L1oC*sind(alpha - epsilon1) - pCoP1*L2oC*sind(alpha + epsilon2));
 
 end
 
