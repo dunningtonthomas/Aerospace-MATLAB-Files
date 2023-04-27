@@ -112,7 +112,7 @@ if(c_l == 0xDEADBEEF && c_dw == 0xDEADBEEF) %Bow shock error condition returned 
     
 else
     %Outputting to the terminal
-    fprintf("Coefficient of Lift and Wave Drag: \n")
+    fprintf("Coefficients of Lift and Wave Drag: \n")
     fprintf("\t cl: %f \n", c_l);
     fprintf("\t cdw: %f \n", c_dw);
 end
