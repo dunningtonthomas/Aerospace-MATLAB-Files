@@ -34,8 +34,25 @@ load('Target_list.mat');
 %Number of spacecraft
 N = 3;
 
+%Declare spacecrafts
+spacecrafts(1:3,1) = struct();
+sat_1.Xout = rOut_1;
+sat_1.t = Tout_1;
+sat_2.Xout = rOut_2;
+sat_3.Xout = rOut_3;
+spacecrafts(1).satNum = sat_1;
+spacecrafts(2).satNum = sat_2;
+spacecrafts(3).satNum = sat_3;
+
+%Function call
+visibilityTimeSeries(spacecrafts, vertices, facets, targets);
+
+
+
+%%
 
 %Looping through every position of the constellation
+warning('off');
 figure();
 for i = 30:30:length(rOut_1(:,1))
 
@@ -70,6 +87,11 @@ xlabel('Time (s)');
 ylabel('Target Facet Index');
 title('Target Facet Visibility For 1 Week');
 a.Label.String = 'Number of Satellites Visible';
+
+
+%% Function
+
+
 
 
 
