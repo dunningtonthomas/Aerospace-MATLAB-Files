@@ -49,7 +49,7 @@ rOut_3 = Xout_3(:,1:3);
 sat1.pos = rOut_1;
 sat2.pos = rOut_2;
 sat3.pos = rOut_3;
-save('satellites.mat', 'sat1', 'sat2', 'sat3');
+save('satellites.mat', 'sat1', 'sat2', 'sat3', 'Tout_1');
 
 
 %Create vector of rotation of the vertices due to bennu's rotation

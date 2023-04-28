@@ -1,0 +1,44 @@
+%Time series of the number of spacecraft in view of the targets at any
+% given time during the one week time period
+%Create a scatter plot similar to part 1 with time on x, target facet index
+%on y axis, colorbar indicates the number of spacecraft that can see the
+%facet
+%% Clean Up
+close all; clear; clc;
+
+%% 
+%load Data
+load('Target_list.mat');
+
+
+%SAT1
+%Looping through every position of the constellation
+figure();
+
+for i = 30:30:length(Tout_1)
+
+    %Rotate Bennu vertices
+    rotMat = [cos(thetaVec(i)), -sin(thetaVec(i)), 0; sin(thetaVec(i)), cos(thetaVec(i)), 0; 0, 0, 1];
+    for j = 1:length(vertices(:,1))
+        vRotated(j,:) = (rotMat * vertices(j,:)')'; 
+    end
+
+    %Call check view for spacecraft one and two
+    [observable_1, elevationAngle_1, cameraAngle_1] = check_view(rOut_1(i,:), 0xDEADBEEF, facets, vRotated, 2);
+
+
+    %Get observable targets
+    indices = find(observable_1(targets)')';
+    cameraTargets = cameraAngle_1(targets);
+    cameraTargets = cameraTargets(indices);
+
+    scatter(Tout_1(i) *ones(length(indices),1), indices, [], cameraTargets * 180/pi, 'filled', 'SizeData', 10);
+    hold on;
+    a = colorbar;
+end
+
+%Add labels
+xlabel('Time (s)');
+ylabel('Target Facet Number');
+title('Satellite 1 Visibility and Camera Angle For 1 Week');
+a.Label.String = 'Camera Angle (deg)';
