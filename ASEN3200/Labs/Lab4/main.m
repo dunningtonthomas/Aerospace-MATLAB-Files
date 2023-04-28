@@ -29,14 +29,27 @@ v0 = 0.1 / 1000; %km/s
 bennu_r = 0.2625;
 X0_2 = [0; bennu_r*2; 0; -v0; 0; 0.5*v0];
 
+%Initialize satellite with circular orbit at inclination of 30 degrees
+mu = 4.892 / 1000^3;
+v0 = sqrt(mu / (2*bennu_r));
+X0_3 = [0; bennu_r*2; 0; v0*cosd(45); 0; v0*sind(45)];
+
 
 %Propogate the spacecraft position
 [Xout_1, OEout_1, Tout_1] = propagate_spacecraft(X0_1, t0, tf, A, m);
 [Xout_2, OEout_2, Tout_2] = propagate_spacecraft(X0_2, t0, tf, A, m);
+[Xout_3, OEout_3, Tout_3] = propagate_spacecraft(X0_3, t0, tf, A, m);
 
 %Rout for the spacecraft
 rOut_1 = Xout_1(:,1:3);
 rOut_2 = Xout_2(:,1:3);
+rOut_3 = Xout_3(:,1:3);
+
+%Save satellite propagations
+sat1.pos = rOut_1;
+sat2.pos = rOut_2;
+sat3.pos = rOut_3;
+save('satellites.mat', 'sat1', 'sat2', 'sat3');
 
 
 %Create vector of rotation of the vertices due to bennu's rotation
@@ -55,6 +68,7 @@ hold on
 grid on
 s1 = plot3(Xout_1(:,1), Xout_1(:,2), Xout_1(:,3)); %Sat 1
 s2 = plot3(Xout_2(:,1), Xout_2(:,2), Xout_2(:,3)); %Sat 2
+s3 = plot3(Xout_3(:,1), Xout_3(:,2), Xout_3(:,3)); %Sat 2
 
 axis equal
 xlabel('X Coordinate (km)');
