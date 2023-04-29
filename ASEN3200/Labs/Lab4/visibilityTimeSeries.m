@@ -27,6 +27,9 @@ N = length(spacecrafts);
 %Get time 
 time = spacecrafts(1).satNum.t;
 
+%Preallocate memory for color matrix
+colorMat = zeros(length(targets), length(time));
+
 %Looping through every position of the constellation
 warning('off');
 figure();
@@ -51,12 +54,19 @@ for i = 30:30:length(time)
         observable_total = observable_total + observable(:,j);
     end
 
- 
+
+   
     if(sum(observable_all) > 0) %Plot if there is at least one visible
         %Get indicies where it is visible
         indices = find(observable_all')';
+
+        %Get a matrix C with color values 
+        colorMat(:,i-29:i+29) = observable_total .* ones(length(targets),length([i-29:i+29]));
+
+        %Get only the visible times
         observable_total = observable_total(indices);
-    
+
+        %Plot visibility points as a scatter plot
         scatter(time(i) *ones(length(indices),1), indices, [], observable_total, 'filled', 'SizeData', 15);
         hold on;
         a = colorbar;
@@ -68,6 +78,11 @@ xlabel('Time (s)');
 ylabel('Target Facet Index');
 title('Target Facet Visibility For 1 Week');
 a.Label.String = 'Number of Satellites Visible';
+
+%Test imagesc
+figure();
+imagesc(colorMat);
+colorbar;
 
 
 

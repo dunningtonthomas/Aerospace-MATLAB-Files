@@ -49,47 +49,7 @@ visibilityTimeSeries(spacecrafts, vertices, facets, targets);
 
 
 
-%%
 
-%Looping through every position of the constellation
-warning('off');
-figure();
-for i = 30:30:length(rOut_1(:,1))
-
-    %Rotate Bennu vertices
-    rotMat = [cos(thetaVec(i)), -sin(thetaVec(i)), 0; sin(thetaVec(i)), cos(thetaVec(i)), 0; 0, 0, 1];
-    for j = 1:length(vertices(:,1))
-        vRotated(j,:) = (rotMat * vertices(j,:)')'; 
-    end
-
-    %Call check view for spacecraft one and two
-    [observable_1, ~, ~] = checkView2(rOut_1(i,:), targets, facets, vRotated, N);
-    [observable_2, ~, ~] = checkView2(rOut_2(i,:), targets, facets, vRotated, N);
-    [observable_3, ~, ~] = checkView2(rOut_3(i,:), targets, facets, vRotated, N);
-
-    %Total observability
-    observable_all = observable_1 | observable_2 | observable_3; %used for scatter point
-    observable_total = observable_1 + observable_2 + observable_3; %used for scatter color
-
-    if(sum(observable_all) > 0) %Plot if there is at least one visible
-        %Get indicies where it is visible
-        indices = find(observable_all')';
-        observable_total = observable_total(indices);
-    
-        scatter(Tout_1(i) *ones(length(indices),1), indices, [], observable_total, 'filled', 'SizeData', 15);
-        hold on;
-        a = colorbar;
-    end
-end
-
-%Add labels
-xlabel('Time (s)');
-ylabel('Target Facet Index');
-title('Target Facet Visibility For 1 Week');
-a.Label.String = 'Number of Satellites Visible';
-
-
-%% Function
 
 
 
