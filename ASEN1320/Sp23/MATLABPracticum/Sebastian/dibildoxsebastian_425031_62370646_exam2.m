@@ -30,7 +30,7 @@ title("Numerical Integration")
 xlabel("t")
 ylabel("y")
 
-m=[tout, dyres,yout]
+m=[tout, dyres',yout]
 
 dlmwrite("output",m)
 

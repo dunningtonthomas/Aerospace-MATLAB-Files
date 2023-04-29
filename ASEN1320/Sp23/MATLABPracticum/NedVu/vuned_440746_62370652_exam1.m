@@ -11,7 +11,7 @@ m = 0;
 while ( l > m )
     f = 1 - (1/n);
     m = f^n;
-    n = n + 1:
+    n = n + 1;
 end
 
 fprintf("n: %d Approximation: %d Actual %d", n, m, l);

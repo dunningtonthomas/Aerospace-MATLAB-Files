@@ -17,6 +17,7 @@ else
 
 end
 
-fprintf('n','%.5f', ' Approximation:','%.5f',' Actual:', '%.5f', index, Approximation, Actual)
+fprintf('n %.5f Approximation: %.5f Actual: %.5f', index, Approximation, Actual)
+% fprintf('n','%.5f', ' Approximation:','%.5f',' Actual:', '%.5f', index, Approximation, Actual)
 
 

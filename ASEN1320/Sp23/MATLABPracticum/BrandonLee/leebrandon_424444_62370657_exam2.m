@@ -21,6 +21,6 @@ xlabel('t');
 ylabel('dy/dt');
 title('Rate of Change');
 
-output = [Tout; dydt; Yout;];
+output = [Tout; dydt'; Yout;];
 
 writematrix(output, 'output.csv');

@@ -10,7 +10,7 @@ F = @(t, y)func2(t, y, a, b);
 %%
 
 [T, Y] = ode45(F, tspan, y);
-f = F(T,y);
+f = F(T,Y);
 
 %%
 figure()
@@ -20,7 +20,7 @@ ylabel("y")
 title("Numerical Integrateion")
 
 figure()
-plot(f,Y)
+plot(T,f)
 xlabel("t")
 ylabel("dydt")
 title("Rate of Change")

@@ -6,7 +6,7 @@ tspan= linspace(0,6.5);
 y0=0;
 
 [odetspan, integratedy]= ode45(dy, tspan, y0);
-roc= dy(odetspan,integratedy)
+roc= dy(odetspan,integratedy);
 
 
 figure(1)

@@ -7,7 +7,8 @@ F = @(t,y)func2(t,y,a,b);
 [tyout, yout] = ode45(F,tspan,y0);
 
 figure();
-plot(yout,tspan);
+% plot(yout,tspan);
+plot(tyout,yout);
 xlabel('t');
 ylabel('dy/dt');
 title('Rate of Change');

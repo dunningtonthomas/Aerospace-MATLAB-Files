@@ -18,3 +18,22 @@ n+1;
 end
 
 
+%% 
+
+accuracy=input("Enter Accuracy:");
+
+difference = 0;
+
+while accuracy <0.001
+   accuracy=input("Enter Accuracy:");
+end
+n=1;
+
+
+while accuracy>difference
+
+difference = (1/exp(1))-(1-(1/n))^n;
+n = n + 1;
+end
+
+

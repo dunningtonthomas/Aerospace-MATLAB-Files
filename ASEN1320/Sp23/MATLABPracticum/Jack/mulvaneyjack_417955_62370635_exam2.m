@@ -6,6 +6,7 @@ a = 11.2;
 b = 1.2;
 
 f = @func2.m;
+% f = @(t,y)func2(t, y, a, b);
 
 [tout, yout] = ode45(f, t, 0);
 

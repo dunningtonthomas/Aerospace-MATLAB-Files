@@ -21,3 +21,12 @@ actual= (1/exp(1));
 n=n
 approx=approx
 actual=actual
+
+
+%% 
+
+
+
+
+
+
