@@ -49,15 +49,17 @@ lattitude = elevation * 180/pi;
 
 %Plot the result
 figure();
+set(0, 'defaulttextinterpreter', 'latex')
 plot(0,0,'b', 'linewidth', 3); %Used for legend
 hold on
+grid on
 scatter(targLong, targLat, 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'r', 'SizeData', 8);
 plot(longitude, lattitude, '.b');
 
 xlim([-180 180]);
 ylim([-90 90]);
-xlabel('Longitude (deg)');
-ylabel('Lattitude (deg)');
+xlabel('Longitude ($$^{\circ}$$)');
+ylabel('Lattitude ($$^{\circ}$$)');
 title(strcat(sat, ' Ground Tracks'));
 legend('Ground Track', 'Target Facet', 'location', 'ne');
 
