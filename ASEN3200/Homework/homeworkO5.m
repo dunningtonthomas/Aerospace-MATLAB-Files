@@ -26,5 +26,105 @@ delV = abs(delV1) + abs(delV2);
 Tt = 2*pi*sqrt(a^3 / mu);
 t = 1/2 * Tt;
 
+%% Problem 2
+mu = 1.327e11;
+Re = 1.496e8;
+Rm = 2.279e8;
+
+a = 0.5*(Re + Rm);
+Tt = 2*pi*sqrt(a^3 / mu);
+time = 0.5*Tt;
+daysTime = time / 3600 / 24;
+
+Tm = 2*pi *sqrt(Rm^3 / mu);
+n = 2*pi / Tm;
+delAlpha = n * time;
+alpha = pi - delAlpha;
+alphaDeg = alpha * 180 / pi;
+
+
+%% Problem 3
+mu = 398600;
+R = 350 + 6378;
+thetaS = 600 / R;
+
+thetaA = 2*pi - thetaS;
+T = 2*pi*sqrt(R^3 / mu);
+n = 2*pi / T;
+Ta = thetaA / n;
+TaMin = Ta / 60;
+
+
+thetaB = 2*pi + thetaS;
+Tb = thetaB / n;
+Tbmin = Tb / 60;
+
+vcirc = sqrt(mu / R);
+
+aA = ((Ta / (2*pi))^2 * mu)^(1/3);
+vA = sqrt(2*mu / R - mu / aA);
+
+delVA = (vA - vcirc) * 1000;
+
+
+aB = ((Tb / (2*pi))^2 * mu)^(1/3);
+vB = sqrt(2*mu / R - mu / aB);
+
+delVB = (vB - vcirc) * 1000;
+
+
+%% Problem 4
+mu = 398600;
+h = 60000;
+e = 0.3;
+
+a = h^2 / (mu * (1 - e^2));
+ra = a*(1 + e);
+va = sqrt(2*mu/ra - mu/a);
+delV = 2*va*sind(45);
+
+%% Problem 5
+
+n = 2*pi / (90 * 60);
+t = 15 * 60;
+x0 = [1;0;0];
+xdot0 = [0;10/1000;0];
+phi_RR = [4 - 3*cos(n*t), 0, 0; 6*(sin(n*t)-n*t), 1, 0; 0, 0, cos(n*t)];
+phi_RV = [1/n * sin(n*t), 2/n * (1 - cos(n*t)), 0; 2/n * (cos(n*t) - 1), 4/n *sin(n*t) - 3*t, 0; 0, 0, 1/n *sin(n*t)];
+rVec =  phi_RR * x0 + phi_RV* xdot0;
+dist = norm(rVec);
+
+%% Problem 6
+R = 6600;
+mu = 398600;
+T = 2*pi*sqrt(R^3 / mu);
+n = 2*pi / T;
+tf = 1/3 * T;
+t = tf;
+
+r0 = [1;1;1];
+
+
+phi_RR = [4 - 3*cos(n*tf), 0, 0; 6*(sin(n*tf)-n*tf), 1, 0; 0, 0, cos(n*tf)];
+phi_RV = [1/n * sin(n*tf), 2/n * (1 - cos(n*tf)), 0; 2/n * (cos(n*tf) - 1), 4/n *sin(n*tf) - 3*tf, 0; 0, 0, 1/n *sin(n*tf)];
+phi_VR = [3*n*sin(n*t), 0, 0; 6*n*(cos(n*t) - 1), 0, 0; 0, 0, -n*sin(n*t)];
+phi_VV = [cos(n*t), 2*sin(n*t), 0; -2*sin(n*t), 4*cos(n*t) - 3, 0; 0, 0, cos(n*t)];
+
+
+
+v0P = -1000*inv(phi_RV) * phi_RR * r0;
+v0pMag = norm(v0P);
+
+
+phiTilde = phi_VR - phi_VV * inv(phi_RV) * phi_RR;
+vfN = 1000.*(phiTilde * r0);
+vfNmag = norm(vfN);
+
+v0M = [0; 0; 5];
+delV0 = v0P - v0M;
+delVf = -vfN;
+
+totalV = norm(delV0) + norm(delVf);
+
 
 
