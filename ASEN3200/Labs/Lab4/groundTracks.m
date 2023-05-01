@@ -59,7 +59,7 @@ plot(longitude, lattitude, '.b');
 xlim([-180 180]);
 ylim([-90 90]);
 xlabel('Longitude ($$^{\circ}$$)');
-ylabel('Lattitude ($$^{\circ}$$)');
+ylabel('Latitude ($$^{\circ}$$)');
 title(strcat(sat, ' Ground Tracks'));
 legend('Ground Track', 'Target Facet', 'location', 'ne');
 

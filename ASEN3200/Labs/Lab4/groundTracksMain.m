@@ -53,9 +53,11 @@ rOut_5 = Xout_5(:,1:3);
 
 %% Ground Tracks Animation
 %Call animation
-movieVec = groundTrackAnimate(rOut_1, facets, vertices, targets, 'Sat 1');
-
-
+movieVec1 = groundTrackAnimate(rOut_1, facets, vertices, targets, 'Sat 1');
+movieVec2 = groundTrackAnimate(rOut_2, facets, vertices, targets, 'Sat 2');
+movieVec3 = groundTrackAnimate(rOut_3, facets, vertices, targets, 'Sat 3');
+movieVec4 = groundTrackAnimate(rOut_4, facets, vertices, targets, 'Sat 4');
+movieVec5 = groundTrackAnimate(rOut_5, facets, vertices, targets, 'Sat 5');
 
 
 %% Save Animations to a file
@@ -64,7 +66,39 @@ vidWrite = VideoWriter('GroundTrackSat1', 'MPEG-4');
 vidWrite.FrameRate = 60;
 
 open(vidWrite);
-writeVideo(vidWrite, movieVec);
+writeVideo(vidWrite, movieVec1);
+close(vidWrite);
+
+%2
+vidWrite = VideoWriter('GroundTrackSat2', 'MPEG-4');
+vidWrite.FrameRate = 60;
+
+open(vidWrite);
+writeVideo(vidWrite, movieVec2);
+close(vidWrite);
+
+%3
+vidWrite = VideoWriter('GroundTrackSat3', 'MPEG-4');
+vidWrite.FrameRate = 60;
+
+open(vidWrite);
+writeVideo(vidWrite, movieVec3);
+close(vidWrite);
+
+%4
+vidWrite = VideoWriter('GroundTrackSat4', 'MPEG-4');
+vidWrite.FrameRate = 60;
+
+open(vidWrite);
+writeVideo(vidWrite, movieVec4);
+close(vidWrite);
+
+%5
+vidWrite = VideoWriter('GroundTrackSat5', 'MPEG-4');
+vidWrite.FrameRate = 60;
+
+open(vidWrite);
+writeVideo(vidWrite, movieVec5);
 close(vidWrite);
 
 

@@ -27,13 +27,11 @@ N = length(spacecrafts);
 %Get time 
 time = spacecrafts(1).satNum.t;
 
-%Preallocate memory for color matrix
-colorMat = zeros(length(targets), length(time));
 
 %Looping through every position of the constellation
 warning('off');
 figure();
-for i = 30:30:length(time)
+for i = 10:10:length(time)
 
     %Rotate Bennu vertices
     rotMat = [cos(thetaVec(i)), -sin(thetaVec(i)), 0; sin(thetaVec(i)), cos(thetaVec(i)), 0; 0, 0, 1];
@@ -60,9 +58,6 @@ for i = 30:30:length(time)
         %Get indicies where it is visible
         indices = find(observable_all')';
 
-        %Get a matrix C with color values 
-        colorMat(:,i-29:i+29) = observable_total .* ones(length(targets),length([i-29:i+29]));
-
         %Get only the visible times
         observable_total = observable_total(indices);
 
@@ -78,12 +73,6 @@ xlabel('Time (s)');
 ylabel('Target Facet Index');
 title('Target Facet Visibility For 1 Week');
 a.Label.String = 'Number of Satellites Visible';
-
-%Test imagesc
-figure();
-imagesc(colorMat);
-colorbar;
-
 
 
 end

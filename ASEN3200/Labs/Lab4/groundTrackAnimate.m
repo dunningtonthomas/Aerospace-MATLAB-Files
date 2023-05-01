@@ -55,7 +55,7 @@ hold on
 grid on
 redB = scatter(targLong, targLat, 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'r', 'SizeData', 8);
 
-for i = 1:length(lattitude)/5
+for i = 1:length(lattitude)/30
     %Plot the point
     plot(longitude(5*i - 4), lattitude(5*i - 4), '.b');
     plot(longitude(5*i - 3), lattitude(5*i - 3), '.b');
@@ -72,7 +72,7 @@ for i = 1:length(lattitude)/5
         xlim([-180 180]);
         ylim([-90 90]);
         xlabel('Longitude ($$^{\circ}$$)');
-        ylabel('Lattitude ($$^{\circ}$$)');
+        ylabel('Latitude ($$^{\circ}$$)');
         title(strcat(sat, ' Ground Tracks'));
         legend([orbit redB greenB], 'Ground Track', 'Targets', 'Observed', 'location', 'ne');
 
