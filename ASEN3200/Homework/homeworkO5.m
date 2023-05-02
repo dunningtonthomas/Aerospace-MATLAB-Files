@@ -179,5 +179,5 @@ vCJ = sqrt(muJ / 286000);
 
 delV2 = vPHJ - vCJ;
 
-
+delVtot = delV + delV2;
 
