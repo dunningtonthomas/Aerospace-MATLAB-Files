@@ -126,5 +126,58 @@ delVf = -vfN;
 
 totalV = norm(delV0) + norm(delVf);
 
+%% Problem 7
+mu = 6.319e10;
+R4 = 4.286e7;
+R7 = 1.434e8;
+
+vInit = sqrt(mu / R4);
+vT0 = [0; vInit; 0] + [-1.5; 9; 0];
+R4Vec = [R4; 0; 0];
+vT0Mag = norm(vT0);
+
+h = cross(R4Vec, vT0);
+E = 0.5*vT0Mag^2 - mu / R4;
+a = -mu / (2*E);
+
+e = sqrt(1 + 2*norm(h)^2*E / mu^2);
+eVec = cross(vT0, h) / mu - R4Vec / R4;
+gamma = atand(vT0(1) / vT0(2));
+ra = a*(1 + e);
+
+%% Problem 8
+muS = 132712440018;
+RE = 149.6e6;
+RJ = 778.6e6;
+
+aT = 0.5*(RE + RJ);
+T = 2*pi*sqrt(a^3 / muS);
+tof = 0.5*T;
+tofDays = tof / 3600 / 24;
+
+vDep = sqrt(2*muS / RE - muS/aT);
+vAr = sqrt(2*muS / RJ - muS/aT);
+
+vES = sqrt(muS / RE);
+vInfE = vDep - vES;
+
+vLEO = sqrt(398600 / (6378 + 180));
+
+vPH = sqrt(2*(0.5*vInfE^2 + 398600/(6378 + 180)));
+delV = vPH - vLEO;
+
+
+vJS = sqrt(muS / RJ);
+
+vInfJ = vAr - vJS;
+
+
+muJ = 126686534;
+vPHJ = sqrt(2*(0.5*vInfJ^2 + muJ/(286000)));
+
+vCJ = sqrt(muJ / 286000);
+
+delV2 = vPHJ - vCJ;
+
 
 

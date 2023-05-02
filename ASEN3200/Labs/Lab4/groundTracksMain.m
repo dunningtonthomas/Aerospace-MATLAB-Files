@@ -17,7 +17,7 @@ load('Target_list.mat');
 
 %Define parameters
 N = 5;
-m = 1000 / (1.05*N);
+m = 10000 / (1.05*N);
 A = (5-(1/5)*(N - 1)) / 1000^2;
 t0 = 0;
 tf = 60*60*24*7; %1 week timespan
