@@ -142,6 +142,7 @@ a = -mu / (2*E);
 
 e = sqrt(1 + 2*norm(h)^2*E / mu^2);
 eVec = cross(vT0, h) / mu - R4Vec / R4;
+theta = 360 - acosd(dot(eVec, R4Vec) / (norm(eVec)*norm(R4Vec)));
 gamma = atand(vT0(1) / vT0(2));
 ra = a*(1 + e);
 
@@ -175,7 +176,8 @@ vInfJ = vAr - vJS;
 muJ = 126686534;
 vPHJ = sqrt(2*(0.5*vInfJ^2 + muJ/(286000)));
 
-vCJ = sqrt(muJ / 286000);
+aJ = 286000 / (1 - 0.97);
+vCJ = sqrt(2*muJ / 286000 - muJ / aJ);
 
 delV2 = vPHJ - vCJ;
 
