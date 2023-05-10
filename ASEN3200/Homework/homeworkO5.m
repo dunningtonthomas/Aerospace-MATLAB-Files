@@ -152,7 +152,7 @@ RE = 149.6e6;
 RJ = 778.6e6;
 
 aT = 0.5*(RE + RJ);
-T = 2*pi*sqrt(a^3 / muS);
+T = 2*pi*sqrt(aT^3 / muS);
 tof = 0.5*T;
 tofDays = tof / 3600 / 24;
 
