@@ -10,7 +10,7 @@
 ;			  References code written by Ruben Hinojosa Torres			      
 ;
 ;	Updated By: Thomas Dunningon (thomas.dunnington@colorado.edu)    
-;	Modified: 11-SEP-23   
+;	Modified: 18-SEP-23   
 ;	
 ;    
 ;	This file provides a basic assembly programming template
@@ -297,7 +297,9 @@ loop:
     BTG LATD,2,a		; Toggle pin, to support measuring loop time
     INCF WREG		; Increment the working register by 1
     ADDWF WREG, w, a	; Add the value in WREG to the WREG and store in WREG
+    ;DAW		; Used for BCD conversion
     NEGF WREG		; Negate the value in WREG
+    ;RLNCF WREG, w, a	; Rotate the bits to the left and don't use the carry bit
     RLCF WREG, w, a	; Rotate the bits to the left and use the carry bit for lsb
     MOVWF count, a	; Move the result in the WREG to the count variable
     BRA	loop

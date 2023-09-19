@@ -1,6 +1,6 @@
-# 1 "C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm"
+# 1 "C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm"
 # 1 "<built-in>" 1
-# 1 "C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm" 2
+# 1 "C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm" 2
 ;;;;;;; Lab 2 template for ASEN 4067/5067 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Created: Scott Palo (scott.palo@colorado.edu)
@@ -13,7 +13,7 @@
 ; References code written by Ruben Hinojosa Torres
 ;
 ; Updated By: Thomas Dunningon (thomas.dunnington@colorado.edu)
-; Modified: 11-SEP-23
+; Modified: 18-SEP-23
 ;
 ;
 ; This file provides a basic assembly programming template
@@ -30,7 +30,7 @@
 ; Additional options:
 ; -Wl,-presetVec=0h,-pHiPriISR_Vec=0008h,-pLoPriISR_Vec=0018h
 ;;;;;;;;;;;;;;;;;;;;;;;;; Hardware Notes ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-# 123 "C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm"
+# 123 "C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm"
 ;;;;;;;;;;;;;;;;;;;;;;;;; Assembler Directives ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Processor Definition
@@ -11008,7 +11008,7 @@ stk_offset SET 0
 auto_size SET 0
 ENDM
 # 5 "C:\\Program Files\\Microchip\\xc8\\v2.32\\pic\\include\\xc.inc" 2 3
-# 144 "C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm" 2
+# 144 "C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm" 2
 
 
 
@@ -11165,13 +11165,11 @@ loop:
     BTG LATD,2,a ; Toggle pin, to support measuring loop time
     INCF WREG ; Increment the working register by 1
     ADDWF WREG, w, a ; Add the value in WREG to the WREG and store in WREG
+    ;DAW ; Used for BCD conversion
     NEGF WREG ; Negate the value in WREG
+    ;RLNCF WREG, w, a ; Rotate the bits to the left and don't use the carry bit
     RLCF WREG, w, a ; Rotate the bits to the left and use the carry bit for lsb
     MOVWF count, a ; Move the result in the WREG to the count variable
-
-    MOVLW 0x89
-    ADDLW 0x77
-
     BRA loop
 
 ;;;;;;; Initial subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

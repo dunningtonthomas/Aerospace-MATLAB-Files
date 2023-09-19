@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm
+SOURCEFILES_QUOTED_IF_SPACED=C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/1119009208/lab2_dunnington.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/1119009208/lab2_dunnington.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/1119009208/Dunnington_Thomas_Lab2.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/1119009208/Dunnington_Thomas_Lab2.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/1119009208/lab2_dunnington.o
+OBJECTFILES=${OBJECTDIR}/_ext/1119009208/Dunnington_Thomas_Lab2.o
 
 # Source Files
-SOURCEFILES=C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm
+SOURCEFILES=C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm
 
 
 
@@ -94,21 +94,21 @@ MP_PROCESSOR_OPTION=PIC18F87K22
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: pic-as-assembler
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/_ext/1119009208/lab2_dunnington.o: C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm  nbproject/Makefile-${CND_CONF}.mk 
+${OBJECTDIR}/_ext/1119009208/Dunnington_Thomas_Lab2.o: C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/_ext/1119009208" 
-	@${RM} ${OBJECTDIR}/_ext/1119009208/lab2_dunnington.o 
+	@${RM} ${OBJECTDIR}/_ext/1119009208/Dunnington_Thomas_Lab2.o 
 	${MP_AS} -mcpu=PIC18F87K22 -c \
-	-o ${OBJECTDIR}/_ext/1119009208/lab2_dunnington.o \
-	C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm \
+	-o ${OBJECTDIR}/_ext/1119009208/Dunnington_Thomas_Lab2.o \
+	C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm \
 	 -misa=std -msummary=+mem,-psect,-class,-hex,-file,-sha1,-sha256,-xml,-xmlfull -fmax-errors=20 -mwarn=0 -xassembler-with-cpp -Wl,-presetVec=0h,-pHiPriISR_Vec=0008h,-pLoPriISR_Vec=0018h
 	
 else
-${OBJECTDIR}/_ext/1119009208/lab2_dunnington.o: C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm  nbproject/Makefile-${CND_CONF}.mk 
+${OBJECTDIR}/_ext/1119009208/Dunnington_Thomas_Lab2.o: C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/_ext/1119009208" 
-	@${RM} ${OBJECTDIR}/_ext/1119009208/lab2_dunnington.o 
+	@${RM} ${OBJECTDIR}/_ext/1119009208/Dunnington_Thomas_Lab2.o 
 	${MP_AS} -mcpu=PIC18F87K22 -c \
-	-o ${OBJECTDIR}/_ext/1119009208/lab2_dunnington.o \
-	C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm \
+	-o ${OBJECTDIR}/_ext/1119009208/Dunnington_Thomas_Lab2.o \
+	C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/Dunnington_Thomas_Lab2.asm \
 	 -misa=std -msummary=+mem,-psect,-class,-hex,-file,-sha1,-sha256,-xml,-xmlfull -fmax-errors=20 -mwarn=0 -xassembler-with-cpp -Wl,-presetVec=0h,-pHiPriISR_Vec=0008h,-pLoPriISR_Vec=0018h
 	
 endif
