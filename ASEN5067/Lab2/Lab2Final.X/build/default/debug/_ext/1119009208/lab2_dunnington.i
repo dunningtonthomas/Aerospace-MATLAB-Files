@@ -11168,6 +11168,10 @@ loop:
     NEGF WREG ; Negate the value in WREG
     RLCF WREG, w, a ; Rotate the bits to the left and use the carry bit for lsb
     MOVWF count, a ; Move the result in the WREG to the count variable
+
+    MOVLW 0x89
+    ADDLW 0x77
+
     BRA loop
 
 ;;;;;;; Initial subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

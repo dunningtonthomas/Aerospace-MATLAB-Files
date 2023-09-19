@@ -1,4 +1,4 @@
-__S0 36 0 ABS 0
+__S0 3A 0 ABS 0
 __S1 101 0 ABS 0
 __S3 0 0 ABS 0
 __Hudata_bank10 1C 0 ABS 0
@@ -39,7 +39,7 @@ __Hudata 1C 0 ABS 0
 __Ludata 1C 0 ABS 0
 __Hudata_bank1 1C 0 ABS 0
 __Ludata_bank1 1C 0 ABS 0
-__Hspace_0 36 0 ABS 0
+__Hspace_0 3A 0 ABS 0
 __Lspace_0 0 0 ABS 0
 __Hspace_1 101 0 ABS 0
 __Lspace_1 0 0 ABS 0
@@ -64,7 +64,7 @@ __Ludata_bank9 1C 0 ABS 0
 %segments
 resetVec 0 5 CODE 0 0
 HiPriISR_Vec 8 B CODE 8 0
-LoPriISR_Vec 18 35 CODE 18 0
+LoPriISR_Vec 18 39 CODE 18 0
 udata_acs 0 1 COMRAM 0 1
 udata_bank1 100 100 BANK1 100 1
 %locals
@@ -78,12 +78,14 @@ C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm
 300 24 0 CODE 0
 301 26 0 CODE 0
 302 28 0 CODE 0
-303 2A 0 CODE 0
-309 2C 0 CODE 0
-310 2E 0 CODE 0
-311 30 0 CODE 0
-312 32 0 CODE 0
-313 34 0 CODE 0
+304 2A 0 CODE 0
+305 2C 0 CODE 0
+307 2E 0 CODE 0
+313 30 0 CODE 0
+314 32 0 CODE 0
+315 34 0 CODE 0
+316 36 0 CODE 0
+317 38 0 CODE 0
 C:/Users/Thomas/Documents/MATLAB/GitHub/AERO/ASEN5067/Lab2/lab2_dunnington.asm
 265 0 0 CODE 0
 266 2 0 CODE 0
