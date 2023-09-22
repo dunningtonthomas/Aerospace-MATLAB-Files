@@ -50,5 +50,20 @@ for i = 1:length(Mvals)
 end
 
 
+%% Problem 3.33
+ToTstar = 0.692339;
+[Mach] = TOverTStar(ToTstar);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
