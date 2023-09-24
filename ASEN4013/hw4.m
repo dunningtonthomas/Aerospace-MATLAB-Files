@@ -93,4 +93,42 @@ Pt2 = PtOPtStar2* 1/PtOPtStar * 600;
 
 
 
+%% Problem 5.9
+M0 = 2.1;
+g = 1.4;
+cp = 1.004;
+T0 = 220;
+Tt4 = 1700;
+
+
+%Calculate tauR which is the total temperature ratio
+tr = 1 + (g-1)/2 * M0^2;
+Tt0 = T0*tr;
+
+%Burner to ambient enthalpy ratio
+tlambda = Tt4 / T0;
+
+
+%Optimal compressor pressure ratio
+tcMax = sqrt(tlambda / tr);
+tcMaxThrust = sqrt(tlambda) / tr;
+piC = tcMax^(g/(g-1));
+
+%Turbing temperature ratio
+tt = 1 - tr / tlambda * (tcMax - 1);
+
+
+%Speed of sound
+R = cp - cp/g;
+a0 = sqrt(g*R*1000*220);
+
+%Specific thrust
+F = a0*(sqrt(2/(g-1)*tlambda/tr/tcMax * (tr*tcMax*tt - 1)) - M0);
+
+%Fuel consumption
+f = cp*220 / 42800 * (tlambda - tr*tcMax);
+s = f / F;
+sHr = s * 3600;
+
+
 
