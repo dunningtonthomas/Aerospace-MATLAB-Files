@@ -274,6 +274,7 @@ count1:	DS  1	; 1 byte for count1
 count2: DS  1	; 1 byte for count2
 count3: DS  1	; 1 byte for count3
 count4: DS  1	; 1 byte for count4
+switch1: DS 1	; 1 byte for the switch state
     
 ; Objects to be defined in Bank 1
 PSECT	udata_bank1
@@ -303,45 +304,38 @@ PSECT	code
 main:
     RCALL    Initial	; Call to Initial Routine
 loop:
-   ; PUT YOUR CODE HERE
-   ;MOVLF			; Add operand to finish the use of this macro 
+    MOVLF 00010000B, LATD, a	    ;Turn RD4 on
+    RCALL Wait1sec		    ;Wait 1 second, check RPG is nested in Wait1msRPG
+    CLRF LATD, a		    ;Turn RD4 off
+    RCALL Wait1sec		    ;Wait 1 second    
     BRA	    loop
 
 ;;;;;;;;;;;;;;;;;;;;;; Initialization Routine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Initial:
-    ; Initialization
+    CLRF switch1, a			; Set switch variable to all zeros
+    MOVLF 00001000B, TRISE, a		; Set RE3 pin as an input RE2 is an output
     MOVLF 00000011B, TRISD, a		; Set TRISD as outputs, RD0 and RD1 are inputs
-					; Set TRISJ
-    MOVLF 00000000B, LATD, a		; Turn off all LEDS
-    RCALL Wait1ms
-    RCALL Wait100ms
-    RCALL Wait1sec
-    NOP ; call subroutine to wait 1 second
-		; Turn ON RD5
-		; call subroutine to wait 1 second
-		; Turn OFF RD5
-		; Turn ON RD6
-		; call subroutine to wait 1 second
-		; Turn OFF RD6
-		; Turn ON RD7
-		; call subroutine to wait 1 second
-		; Turn OFF RD7
-    RETURN			    ; Return to Mainline code
+    CLRF LATD, a			; Turn all of the LEDS off
+    MOVLF 11110011B, TRISJ, a		; Set TRISJ, RJ2 and RJ3 are outputs
+    RCALL Wait1sec			; call subroutine to wait 1 second
+    MOVLF 00100000B, LATD, a		; Turn ON RD5
+    RCALL Wait1sec			; call subroutine to wait 1 second
+    CLRF LATD, a			; Turn OFF RD5
+    MOVLF 01000000B, LATD, a		; Turn ON RD6
+    RCALL Wait1sec			; call subroutine to wait 1 second
+    CLRF LATD, a			; Turn OFF RD6
+    MOVLF 10000000B, LATD, a		; Turn ON RD7
+    RCALL Wait1sec			; call subroutine to wait 1 second
+    CLRF LATD, a			; Turn OFF RD7
+    RETURN				; Return to Mainline code
 
-;;;;;;; WaitXXXms subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-; Subroutine to wait XXX ms
-; NOTE - STUDENTS replace XXX with some value of your choosing
-; Choose a suitable value to decrement a counter in a loop structure and 
-; not using an excessive amount of program memory - i.e. don't use 100 nop's
-    
-    
+;;;;;;; Wait1ms subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Subroutine to wait 1 ms
 ; Currently this subroutine takes 4002 instructions
 Wait1ms:
-    MOVLF 54, count2, a		;Move literal value of 40 into count2    
+    MOVLF 54, count2, a		;Move literal value of 54 into count2    
 loopOuter:
-    MOVLF 23, count1, a		;Move literal value of 32 into the count1 variable
+    MOVLF 23, count1, a		;Move literal value of 23 into the count1 variable
 loopInner:
 	DECF count1, f, a	;Decrement the variable, store in itself
 	BNZ loopInner		;LoopInner if not zero yet
@@ -349,17 +343,36 @@ loopInner:
     DECF count2, f, a		;Decrement count2 for the outter loop
     BNZ loopOuter		;Branch to outerloop
     
-    RETURN	
+    RETURN
+    
+;;;;;;; Wait1msRPG subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Subroutine to wait 1 ms and also check the value of the RPG
+Wait1msRPG:
+    MOVLF 54, count2, a		;Move literal value of 54 into count2    
+loopOuterRPG:
+    MOVLF 23, count1, a		;Move literal value of 23 into the count1 variable
+loopInnerRPG:
+	DECF count1, f, a	;Decrement the variable, store in itself
+	BNZ loopInnerRPG		;LoopInner if not zero yet
+	
+    DECF count2, f, a		;Decrement count2 for the outter loop
+    BNZ loopOuterRPG		;Branch to outerloop
+    
+    RCALL Check_RPG		;Check the value of the RPG, this takes 8 instructions
+    RCALL Check_SW1		;Call the check switch routine to toggle the LED
+    RETURN
     
 
+;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;This subroutine currently takes 400506 instructions
 Wait100ms:
     MOVLF 100, count3, a	; Move 100 into count3 to iterate over
 loopW100:
-    RCALL Wait1ms		;Call 1 ms 100 times
+    RCALL Wait1msRPG		;Call 1 ms 100 times
     DECF count3, f, a
     BNZ loopW100
     RETURN	
+    
 ;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Subroutine to wait 1 sec based on calling WaitXXXms YYY times or up to 3 nested loops
@@ -380,15 +393,30 @@ loopW1000:
 ; Subroutine to check the status of RD3 button and change RD2 (ASEN5067 ONLY)
 				
 Check_SW1:
-		; Add code here
+    MOVF PORTE, w, a		;Read the current value of PORTE into WREG
+    XORWF switch1, w, a		;Check if the state of the button has changed
+    ANDWF switch1, f, a		;The previous state needs to be high for a release
+    RRNCF switch1, f, a		;Rotate right to get the RE3 to line up with RE2
+    MOVF PORTE, w, a		;Read the current value of PORTE into WREG for RE2 LED state
+    XORWF switch1, w, a		;XOR turns the LED on or off depending on its previous state
+    MOVWF LATE, a		;Move WREG to the LEDs
+    
+    MOVF PORTE, w, a		;Read the state of the pins for the next iteration of the subroutine
+    MOVWF switch1, a		;Save the value of RE3 to the switch1 variable   
+    
     RETURN	
 
+    
 ;;;;;;; Check_RPG subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Subroutine to read the values of the RPG and display on RJ2 and RJ3
 				
 Check_RPG:
-		; Add code here
+    MOVF PORTD, w, a	;Move the contents of PORTD into the working register
+    RLNCF WREG, w, a	;Rotate left twice to get in the 2 and 3 bit positions
+    RLNCF WREG, w, a
+    ANDLW 00001100B	;Bit mask so only RJ2 and RJ3 are affected
+    MOVWF LATJ, a	;Write the working register to RJ2 and RJ3
     RETURN	 
 		
     END     resetVec		    ; End program, return to reset vector ;;;;;;; ASEN 4-5067 Lab3 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
