@@ -1,8 +1,0 @@
-function [PtoPtStar, TtoTtStar, ToTstar, ] = RayleighStar(M, g)
-%RAYLEIGHMACH This function calculates the star ratios given a mach number
-%and gamma
-
-
-
-end
-
