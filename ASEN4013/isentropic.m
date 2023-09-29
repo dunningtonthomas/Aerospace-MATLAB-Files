@@ -1,4 +1,4 @@
-function [ p0op,t0ot,rho0orho ] =isentropic( M )
+function [p0op,t0ot,rho0orho] =isentropic(M)
 
 g=1.4;
 p0op=(1+(g-1)/2*M^2)^(g/(g-1));

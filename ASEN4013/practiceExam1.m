@@ -82,3 +82,34 @@ T9 = 1/Tt9oT9 * Tt9;
 V9 = M9*sqrt(g*R * T9);
 
 F = 0.3 * V9;
+
+
+%% 2020
+g = 1.4;
+M0 = 0.85;
+tlam = 7;
+cp = 0.24 * 778.16;
+gc = 32.174;
+T0 = 394.1;
+hpr = 18400 * 778.16;
+
+
+tr = 1 + (g-1)/2 * M0^2;
+
+tc = sqrt(tlam / tr);
+
+pic = tc ^ (g/(g-1));
+
+tt = 1 - tr/tlam * (tc - 1);
+R = cp*(1 - 1/g);
+
+a0 = sqrt(g*R*gc*T0);
+
+Fm0 = a0/gc * (sqrt(2/(g-1) * tlam/(tr*tc) * (tr*tc*tt - 1)) - M0);
+
+f = cp*T0/hpr *(tlam - tr*tc);
+s = f / Fm0;
+s = s*3600;
+
+
+

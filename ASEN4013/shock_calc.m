@@ -1,5 +1,4 @@
-function [ M2n,p2op1,rho2orho1,t2ot1,deltasoR,p02op01 ] =...
-    shock_calc( M1 )
+function [M2n,p2op1,rho2orho1,t2ot1,deltasoR,p02op01] = shock_calc(M1)
 
 g=1.4;
 M2n=sqrt((1+(g-1)/2*M1^2)/(g*M1^2-(g-1)/2));
