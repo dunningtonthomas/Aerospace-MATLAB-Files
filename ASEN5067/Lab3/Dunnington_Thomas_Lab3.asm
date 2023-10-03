@@ -307,7 +307,7 @@ main:
     RCALL    Initial	; Call to Initial Routine
 loop:
     BTG LATD, 4, a	;Toggle the state of RD4
-    MOVLF 4, mainCount2, a	;250*4 is 1000 which gets us 1000ms
+    MOVLF 4, mainCount2, a	;250*4 is 1000 which gets us 1000ms, outer loop count
 slowLoop:
     MOVLF 250, mainCount1, a	;Rest the value of the mainCount1
 fastLoop:
@@ -352,32 +352,16 @@ loopInner:
 	BNZ loopInner		;LoopInner if not zero yet
     DECF count2, f, a		;Decrement count2 for the outter loop
     BNZ loopOuter		;Branch to outerloop
-    RETURN
-    
-;;;;;;; Wait1msRPG subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Subroutine to wait 1 ms and also check the value of the RPG
-Wait1msRPG:
-    MOVLF 54, count2, a		;Move literal value of 54 into count2    
-loopOuterRPG:
-    MOVLF 23, count1, a		;Move literal value of 23 into the count1 variable
-loopInnerRPG:
-	DECF count1, f, a	;Decrement the variable, store in itself
-	BNZ loopInnerRPG		;LoopInner if not zero yet
-    DECF count2, f, a		;Decrement count2 for the outter loop
-    BNZ loopOuterRPG		;Branch to outerloop
-    RCALL Check_RPG		;Check the value of the RPG, this takes 8 instructions
-    RCALL Check_SW1		;Call the check switch routine to toggle the LED
-    RETURN
-    
+    RETURN    
 
 ;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;This subroutine currently takes 400506 instructions
 Wait100ms:
     MOVLF 100, count3, a	; Move 100 into count3 to iterate over
 loopW100:
-    RCALL Wait1msRPG		;Call 1 ms 100 times
-    DECF count3, f, a
-    BNZ loopW100
+    RCALL Wait1ms		;Call 1 ms 100 times
+    DECF count3, f, a		;Decrement count variable
+    BNZ loopW100		;Branch if not zero
     RETURN	
     
 ;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -389,8 +373,8 @@ Wait1sec:
     MOVLF 10, count4, a	; Move 10 into count4 to iterate over
 loopW1000:
     RCALL Wait100ms	    ;Call 100 ms 10 times 
-    DECF count4, f, a
-    BNZ loopW1000
+    DECF count4, f, a	    ;Decrement count variable
+    BNZ loopW1000	    ;Branch if not zero
     RETURN	
 
     
