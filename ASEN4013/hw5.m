@@ -109,6 +109,55 @@ piAB = Pt7/Pt6;
 tAB = Tt7/Tt6;
 
 
+%% Problem 6.13
+Pt13 = 47.5;
+Pt2 = 14.7;
+Tt13 = 307 + 459.7;
+Tt2 = 59 + 459.7;
+gf = 1.4;
+gt = 1.3;
+
+pif = Pt13/Pt2;
+tf = Tt13/Tt2;
+
+ef = 1/gf * (log(pif^(gf-1)) / log(tf));
+
+%High pressure compressor
+Pt3 = 387.7;
+Tt3 = 1459.7;
+Pt25 = 47.5;
+Tt25 = 307 + 459.7;
+
+pihc = Pt3/Pt25;
+thc = Tt3/Tt25;
+
+ec = 1/gf * (log(pihc^(gf-1)) / log(thc));
 
 
+%Turbine
+Pt5 = 44.8;
+Pt4 = 350.5;
+Tt5 = 1362+459.7;
+Tt4 = 2739;
 
+pit = Pt5/Pt4;
+tt = Tt5/Tt4;
+
+et = 1/(gt-1) * (log(tt^gt) / log(pit));
+
+%Power
+m0 = 228;
+alpha = 0.63;
+
+mc = m0/(1+alpha);
+mb = alpha*mc;
+
+cp = 0.24*778.16;
+
+wc = mc*cp*(Tt3 - Tt25);
+wf = mb*cp*(Tt13 - Tt2);
+
+wcB = wc/778.16;
+wfB = wf/778.16;
+
+wt = mc*cp*(Tt5 - Tt4)/778.16;
