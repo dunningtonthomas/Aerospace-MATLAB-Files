@@ -46,6 +46,18 @@ s = s * 3600;
 
 
 
+%Turbojet
+tt = 1 - tr/tlam * (tc - 1);
+
+v9oa0 = sqrt(2/(g-1) * tlam/(tr*tc)*(tr*tc*tt-1));
+
+F0m0 = a0/gc * (v9oa0 - M0);
+FomoTest = a0 / gc * (sqrt(2/(g-1) * tlam/(tr*tc) * (tr*tc*tt - 1)) - M0);
+
+f = cp*T0/hpr * (tlam - tr*tc);
+
+s = f / F0m0 * 3600;
+
 %% Problem 6.7
 g = 1.4;
 T0 = 15 + 273;
