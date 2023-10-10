@@ -1,22 +1,30 @@
 
+# numpy provides import array and linear algebra utilities
+import numpy as np
 
 import roboticstoolbox as rtb
-robot = rtb.models.Panda()
-print(robot)
+
+# Use sys to read command line arguments
+import sys
 
 
-from spatialmath import SE3
+# Read the command line
+output5 = sys.argv
 
-Tep = SE3.Trans(0.6, -0.3, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-sol = robot.ik_LM(Tep)         # solve IK
-print(sol)
+# Parse command line
+qArr = []
+first = True
+for i in output5:
+    if first:
+        first = False
+        continue
+    qArr.append(float(i))
+
+# Convert to numpy array
+q = np.array(qArr)
 
 
-q_pickup = sol[0]
-print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
-
-
-qt = rtb.jtraj(robot.qr, q_pickup, 50)
-robot.plot(qt.q, backend='pyplot', movie='panda1.gif')
-
+# Visualize the result
+pandaCheck = rtb.models.DH.Panda()
+pandaCheck.plot(q, block=True)
 
