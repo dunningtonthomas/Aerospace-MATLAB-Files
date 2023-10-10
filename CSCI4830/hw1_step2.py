@@ -1,5 +1,5 @@
 ## Author: Thomas Dunnington
-## Date Modified: 10/4/2023
+## Date: 10/9/2023
 
 
 # numpy provides import array and linear algebra utilities
@@ -13,6 +13,29 @@ import spatialmath as sm
 
 # Use sys to read command line arguments
 import sys
+
+# CHeck
+pandaCheck = rtb.models.DH.Panda()
+
+# %% DH Panda Class
+
+
+
+
+# %% Functions 
+# This function returns the DH matrix given the four parameters
+def DH_Matrix(d, theta, a, alpha):
+    DH_mat = [[np.cos(theta), -1*np.cos(alpha) * np.sin(theta), np.sin(alpha)*np.sin(theta), a*np.cos(theta)],
+              [np.sin(theta), np.cos(alpha)*np.cos(theta), -1*np.sin(alpha)*np.cos(theta), a*np.sin(theta)],
+              [0, np.sin(alpha), np.cos(alpha), d],
+              [0, 0, 0, 1]]
+    
+    return DH_mat
+    
+
+
+
+# %% Main Code
 
 # Read the command line
 output5 = sys.argv
@@ -62,9 +85,8 @@ print(output)
 
 
 
-
-
-
+# DH Formulation
+T12 = DH_Matrix(0.333, q[0], 0, 0)
 
 
 
