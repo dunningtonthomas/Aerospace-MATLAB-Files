@@ -8,8 +8,6 @@ import numpy as np
 # the robotics toolbox provides robotics specific functionality
 import roboticstoolbox as rtb
 
-# spatial math provides objects for representing transformations
-import spatialmath as sm
 
 # Use sys to read command line arguments
 import sys
