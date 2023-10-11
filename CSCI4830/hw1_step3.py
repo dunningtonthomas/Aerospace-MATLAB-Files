@@ -1,3 +1,5 @@
+# Author: Thomas Dunnington
+# Last Modified: 10/10/2023
 
 # numpy provides import array and linear algebra utilities
 import numpy as np
