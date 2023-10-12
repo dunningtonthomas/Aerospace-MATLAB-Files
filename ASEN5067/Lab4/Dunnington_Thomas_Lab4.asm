@@ -279,8 +279,10 @@ CONFIG  EBRTB = OFF           ; Table Read Protect Boot (Disabled)
 PSECT	udata_acs
 CNT:	DS  1	; Reserve 1 byte for CNT in access bank at 0x000 (literal or file location)
 VAL1:   DS  1   ; Reserve 1 byte for VAL1 in access bank at 0x001 (literal or file location)
-count1:	DS  1	; 1 byte for count1
+switch1: DS  1	; 1 byte for the previous state of the button press
+switchCount: DS	1 ; Variable for tracking the button press
 pwmHigh: DS 1   ; High byte for the pwm
+pwmLow: DS  1	; Low byte for the pwm
     
     
 ; Objects to be defined in Bank 1
@@ -315,51 +317,70 @@ PSECT	code
 	; Use timer0 for the initialization routine
 	; Reconfigure timer0 to use it for the alive LED
 	; Some of the timers are not in the access bank, may need to set the BSR
+; Definitions:
+; switchCount:
+	; 0000 0001 -> 1 ms pulse width
+	; 0000 0010 -> 1.2 ms pulse width
+	; 0000 0100 -> 1.4 ms pulse width
+	; 0000 1000 -> 1.6 ms pulse width
+	; 0001 0000 -> 1.8 ms pulse width
+	; 0010 0000 -> 2 ms pulse width
 
-pwmNum EQU 65536 - 40000	; Number of instructions for 20 ms delay with prescaler of 2
-pwm1ms EQU 65536 - 4000		; Instructions for 1 ms delay
-Bignum EQU 65536 - 62500	; Number to get the 1 second delay and 250 ms
+Bignum	EQU 65536 - 62500	; Number to get the 1 second delay and 250 ms
+pwm20ms	EQU 65536 - 40000	; Number of instructions for 20 ms delay with prescaler of 2
+pwm1ms	EQU 65536 - 4000	; Instructions for 1 ms delay
+pwm12ms EQU 65536 - 4800	; Instructions for 1.2 ms delay
+pwm14ms EQU 65536 - 5600	; Instructions for 1.4 ms delay
+pwm16ms EQU 65536 - 6400	; Instructions for 1.6 ms delay
+pwm18ms EQU 65536 - 7200	; Instructions for 1.8 ms delay
+pwm2ms	EQU 65536 - 8000	; Instructions for 2 ms delay
+
 
 main:
     RCALL    Initial	; Call to Initial Routine
 loop:
-    RCALL BlinkAlive	; Call blink alive subroutine
-    RCALL pwmSet	; Call the pwmSet subroutine to turn on the pulse
-    BRA loop
+    RCALL   BlinkAlive	; Call blink alive subroutine
+    RCALL   Check_SW1	; Check the switch state and change the width 
+    RCALL   pwmSet	; Call the pwmSet subroutine to turn on the pulse
+    BRA	    loop
 
     
 ;;;;;;;;;;;;;;;;;;;;;; Initialization Routine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Initial: 
-    CLRF INTCON, a			; Clear the flags in INTCON
+    CLRF    INTCON, a			; Clear the flags in INTCON
     MOVLF   00000101B, T0CON, a		; Set up Timer0 for a delay of 1 s, 64 prescaler
     MOVLF   high Bignum, TMR0H, a	; Writing binary 3036 to TMR0H / TMR0L
     MOVLF   low Bignum, TMR0L, a	; Write high byte first, then low
     BSF     T0CON, 7, a			; Turn on Timer0
     
-    CLRF TRISE, a			; Set all pins on PORTE as outputs
-    CLRF TRISC, a			; Set all pins on PORTC as outputs
-    CLRF LATE, a			; Turn all of the LEDS off
-    RCALL Wait1sec			; Wait 1 second and start initialization routine
-    BSF LATE, 5, a			; Turn ON RE5
-    RCALL Wait1sec			; Wait 1 second
-    CLRF LATE, a			; Turn OFF RE5
-    BSF LATE, 6, a			; Turn ON RE6
-    RCALL Wait1sec			; Wait 1 second
-    CLRF LATE, a			; Turn OFF RE6
-    BSF LATE, 7, a			; Turn ON RE7
-    RCALL Wait1sec			; Wait 1 second
-    CLRF LATE, a			; Turn OFF RD7
-    BCF T0CON, 7, a			; Turn off the initialization timer
+    MOVLF   high pwm1ms, pwmHigh, a	; Set the pwm to 1 ms at first
+    MOVLF   low pwm1ms, pwmLow, a		; Low byte
+    MOVLF   00000001B, switchCount, a	; Start the PWM at 1 ms with 0000 0001
+    CLRF    switch1, a			; Clear the values of the switch varaible
+    MOVLF   00001000B, TRISE, a		; Outputs on PORTE, RE3 is an input
+    CLRF    TRISC, a			; Set all pins on PORTC as outputs
+    CLRF    LATE, a			; Turn all of the LEDS off
+    RCALL   Wait1sec			; Wait 1 second and start initialization routine
+    BSF	    LATE, 5, a			; Turn ON RE5
+    RCALL   Wait1sec			; Wait 1 second
+    CLRF    LATE, a			; Turn OFF RE5
+    BSF	    LATE, 6, a			; Turn ON RE6
+    RCALL   Wait1sec			; Wait 1 second
+    CLRF    LATE, a			; Turn OFF RE6
+    BSF	    LATE, 7, a			; Turn ON RE7
+    RCALL   Wait1sec			; Wait 1 second
+    CLRF    LATE, a			; Turn OFF RD7
+    BCF	    T0CON, 7, a			; Turn off the initialization timer
     
     MOVLF   00000011B, T0CON, a		; Set up Timer0 for a delay of 250 ms, 16 prescaler
     MOVLF   high Bignum, TMR0H, a	; Writing binary 3036 to TMR0H / TMR0L
     MOVLF   low Bignum, TMR0L, a	; Write high byte first, then low
     
     MOVLF   00010000B, T1CON, a		; Configure the timer 1 for a 20 ms delay
-    MOVLF   high pwmNum, TMR1H, a	; Move the high byte
-    MOVLF   low pwmNum, TMR1L, a	; Move the low byte
+    MOVLF   high pwm20ms, TMR1H, a	; Move the high byte
+    MOVLF   low pwm20ms, TMR1L, a	; Move the low byte
     
-    MOVLF 00000000B, T3CON, a		; Confiugre timer3 for between a 1 and 2 ms delay
+    MOVLF   00000000B, T3CON, a		; Confiugre timer3 for between a 1 and 2 ms delay
     
     BSF     T0CON, 7, a			; Turn on Timer0
     BSF	    T1CON, 0, a			; Turn on Timer1
@@ -369,8 +390,6 @@ Initial:
 ;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Uses Wait10ms by Scott Palo and Trudy Schwartz as a template
 ; Uses Timer0 to delay for 1 second
-
-  
 Wait1sec:
         BTFSS 	INTCON, 2, a		    ; Read Timer0 TMR0IF rollover flag
         BRA     Wait1sec		    ; Loop if timer has not rolled over
@@ -381,7 +400,7 @@ Wait1sec:
 	
 ;;;;;;; pwmSet subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; This subroutine checks the 20 ms timer and sets the output on RC2 to high
-; It also checks the timer3 and turns the LED off
+; It also checks the timer3 and turns the LED off depending on the pulse width at the time
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 pwmSet:
@@ -389,29 +408,84 @@ pwmSet:
     BRA	    pwmOff		    ; Check if the output needs to be turned off
     BSF	    LATC, 2, a		    ; Pulse high output on RC2
     
-    MOVLF   high pwm1ms, TMR3H, a   ; Set timer3 for 1ms delay
-    MOVLF   low pwm1ms, TMR3L, a
+    MOVFF   pwmHigh, TMR3H	    ; Set timer3 for Xms delay
+    MOVFF   pwmLow, TMR3L	    ; Low Byte
     BSF	    T3CON, 0, a		    ; Turn timer3 on 
     
-    MOVLF   high pwmNum, TMR1H, a   ; Reset the timer1 to count 20 ms again
-    MOVLF   low pwmNum, TMR1L, a    ; Move the low byte
+    MOVLF   high pwm20ms, TMR1H, a   ; Reset the timer1 to count 20 ms again
+    MOVLF   low pwm20ms, TMR1L, a    ; Move the low byte
     BCF	    PIR1, 0, a		    ; Clear the rollover bit
 pwmOff:
     BTFSS   PIR2, 1, a		    ; Check if the rollover for timer3 is set
     BRA	    pwmEnd		    ; Return if the rollover is not set
     BCF	    LATC, 2, a		    ; Turn the output off
     BCF	    PIR2, 1, a		    ; Clear the rollover bit
-    BCF	    T3CON, 0, a		    ; Turn the 1ms timer off
+    BCF	    T3CON, 0, a		    ; Turn the Xms timer off
 pwmEnd:
     RETURN
     
-;;;;;;; setTimer subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; This sets the configuration for timer3  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+    
+;;;;;;; Check_SW1 subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Subroutine to check the status of RE3 button and change the pwm width
+				
+Check_SW1:
+    MOVF    PORTE, w, a		; Read the current value of PORTE into WREG
+    XORWF   switch1, w, a		; Check if the state of the button has changed
+    ANDWF   switch1, f, a		; The previous state needs to be high for a release
+    BTFSS   switch1, 3, a		; Skip next if the bit is set
+    BRA	    EndSw			; Return if the bit is not set
+    
+    RLNCF   switchCount, f, a	; Rotate the bits to the left to update the width setting
     
     
+    ;Control flow for moving the value of the timer depending on the switchCount variable
+    BTFSC   switchCount, 0, a	; Condition for 1 ms
+    BRA	    set1Ms
+    BTFSC   switchCount, 1, a	; Condition for 1.2 ms
+    BRA	    set12Ms
+    BTFSC   switchCount, 2, a	; Condition for 1.4 ms
+    BRA	    set14Ms
+    BTFSC   switchCount, 3, a	; Condition for 1.6 ms
+    BRA	    set16Ms
+    BTFSC   switchCount, 4, a	; Condition for 1.8 ms
+    BRA	    set18Ms
+    BTFSC   switchCount, 5, a	; Condition for 2 ms
+    BRA	    set2Ms
+    BTFSC   switchCount, 6, a	; Condition for reset
+    BRA	    set1Ms		; Set 1 ms for the timer, reset the value
+    BRA	    EndSw		; Else return
     
+set1Ms:
+    MOVLF   00000001B, switchCount, a	; Reset the switchCount
+    MOVLF   high pwm1ms, pwmHigh, a	; High byte
+    MOVLF   low pwm1ms, pwmLow, a	; Low byte
+    BRA	    EndSw
+set12Ms:
+    MOVLF   high pwm12ms, pwmHigh, a	; High byte
+    MOVLF   low pwm12ms, pwmLow, a	; Low byte
+    BRA	    EndSw
+set14Ms:
+    MOVLF   high pwm14ms, pwmHigh, a	; High byte
+    MOVLF   low pwm14ms, pwmLow, a	; Low byte
+    BRA	    EndSw
+set16Ms:
+    MOVLF   high pwm16ms, pwmHigh, a	; High byte
+    MOVLF   low pwm16ms, pwmLow, a	; Low byte
+    BRA	    EndSw
+set18Ms:
+    MOVLF   high pwm18ms, pwmHigh, a	; High byte
+    MOVLF   low pwm18ms, pwmLow, a	; Low byte
+    BRA	    EndSw
+set2Ms:  
+    MOVLF   high pwm2ms, pwmHigh, a	; High byte
+    MOVLF   low pwm2ms, pwmLow, a	; Low byte
+    BRA	    EndSw
+    
+EndSw:
+    MOVF    PORTE, w, a		;Read the current value of PORTE into WREG 
+    MOVWF   switch1, a		;Save the value of RE3 to the switch1 variable, this is the previous state  
+    RETURN	
 	
 	
 	
@@ -421,12 +495,12 @@ pwmEnd:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BlinkAlive:
-	BTFSS INTCON, 2, a	    ; Read Timer0 TMR0IF rollover flag
-	BRA END1		    ; Return if the timer flag has not rolled over
-        BTG LATE, 4, a			    ; Toggle LED RE4
-	MOVLF high Bignum, TMR0H, a	    ; Then write the timer values into
-        MOVLF low Bignum, TMR0L, a	    ; the timer high and low registers
-        BCF INTCON, 2, a		    ; Clear Timer0 TMR0IF rollover flag
+	BTFSS	INTCON, 2, a	    ; Read Timer0 TMR0IF rollover flag
+	BRA	END1		    ; Return if the timer flag has not rolled over
+        BTG	LATE, 4, a			    ; Toggle LED RE4
+	MOVLF	high Bignum, TMR0H, a	    ; Then write the timer values into
+        MOVLF	low Bignum, TMR0L, a	    ; the timer high and low registers
+        BCF	INTCON, 2, a		    ; Clear Timer0 TMR0IF rollover flag
 END1:
         RETURN
 	
