@@ -280,9 +280,7 @@ PSECT	udata_acs
 CNT:	DS  1	; Reserve 1 byte for CNT in access bank at 0x000 (literal or file location)
 VAL1:   DS  1   ; Reserve 1 byte for VAL1 in access bank at 0x001 (literal or file location)
 count1:	DS  1	; 1 byte for count1
-count2: DS  1	; 1 byte for count2
-count3: DS  1	; 1 byte for count3
-count4: DS  1	; 1 byte for count4
+pwmHigh: DS 1   ; High byte for the pwm
     
     
 ; Objects to be defined in Bank 1
@@ -317,11 +315,16 @@ PSECT	code
 	; Use timer0 for the initialization routine
 	; Reconfigure timer0 to use it for the alive LED
 	; Some of the timers are not in the access bank, may need to set the BSR
-	
+
+pwmNum EQU 65536 - 40000	; Number of instructions for 20 ms delay with prescaler of 2
+pwm1ms EQU 65536 - 4000		; Instructions for 1 ms delay
+Bignum EQU 65536 - 62500	; Number to get the 1 second delay and 250 ms
 
 main:
     RCALL    Initial	; Call to Initial Routine
 loop:
+    RCALL BlinkAlive	; Call blink alive subroutine
+    RCALL pwmSet	; Call the pwmSet subroutine to turn on the pulse
     BRA loop
 
     
@@ -334,6 +337,7 @@ Initial:
     BSF     T0CON, 7, a			; Turn on Timer0
     
     CLRF TRISE, a			; Set all pins on PORTE as outputs
+    CLRF TRISC, a			; Set all pins on PORTC as outputs
     CLRF LATE, a			; Turn all of the LEDS off
     RCALL Wait1sec			; Wait 1 second and start initialization routine
     BSF LATE, 5, a			; Turn ON RE5
@@ -345,41 +349,27 @@ Initial:
     BSF LATE, 7, a			; Turn ON RE7
     RCALL Wait1sec			; Wait 1 second
     CLRF LATE, a			; Turn OFF RD7
+    BCF T0CON, 7, a			; Turn off the initialization timer
     
     MOVLF   00000011B, T0CON, a		; Set up Timer0 for a delay of 250 ms, 16 prescaler
     MOVLF   high Bignum, TMR0H, a	; Writing binary 3036 to TMR0H / TMR0L
     MOVLF   low Bignum, TMR0L, a	; Write high byte first, then low
+    
+    MOVLF   00010000B, T1CON, a		; Configure the timer 1 for a 20 ms delay
+    MOVLF   high pwmNum, TMR1H, a	; Move the high byte
+    MOVLF   low pwmNum, TMR1L, a	; Move the low byte
+    
+    MOVLF 00000000B, T3CON, a		; Confiugre timer3 for between a 1 and 2 ms delay
+    
     BSF     T0CON, 7, a			; Turn on Timer0
+    BSF	    T1CON, 0, a			; Turn on Timer1
     RETURN				; Return to Mainline code
-
-;;;;;;; Wait1ms subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Subroutine to wait 1 ms
-; Currently this subroutine takes 4002 instructions
-Wait1ms:
-    MOVLF 54, count2, a		;Move literal value of 54 into count2    
-loopOuter:
-    MOVLF 23, count1, a		;Move literal value of 23 into the count1 variable
-loopInner:
-	DECF count1, f, a	;Decrement the variable, store in itself
-	BNZ loopInner		;LoopInner if not zero yet
-    DECF count2, f, a		;Decrement count2 for the outter loop
-    BNZ loopOuter		;Branch to outerloop
-    RETURN    
-
-;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;This subroutine currently takes 400506 instructions
-Wait100ms:
-    MOVLF 100, count3, a	; Move 100 into count3 to iterate over
-loopW100:
-    RCALL Wait1ms		;Call 1 ms 100 times
-    DECF count3, f, a		;Decrement count variable
-    BNZ loopW100		;Branch if not zero
-    RETURN	
+    
     
 ;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Uses Wait10ms by Scott Palo and Trudy Schwartz as a template
 ; Uses Timer0 to delay for 1 second
-Bignum  equ     65536-62500	; Number to get the 1 second delay
+
   
 Wait1sec:
         BTFSS 	INTCON, 2, a		    ; Read Timer0 TMR0IF rollover flag
@@ -387,6 +377,57 @@ Wait1sec:
         MOVLF  	high Bignum, TMR0H, a	    ; Then write the timer values into
         MOVLF  	low Bignum, TMR0L, a	    ; the timer high and low registers
         BCF  	INTCON, 2, a		    ; Clear Timer0 TMR0IF rollover flag
+        RETURN
+	
+;;;;;;; pwmSet subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; This subroutine checks the 20 ms timer and sets the output on RC2 to high
+; It also checks the timer3 and turns the LED off
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	
+pwmSet:
+    BTFSS   PIR1, 0, a		    ; Read the rollover flag and skip if set
+    BRA	    pwmOff		    ; Check if the output needs to be turned off
+    BSF	    LATC, 2, a		    ; Pulse high output on RC2
+    
+    MOVLF   high pwm1ms, TMR3H, a   ; Set timer3 for 1ms delay
+    MOVLF   low pwm1ms, TMR3L, a
+    BSF	    T3CON, 0, a		    ; Turn timer3 on 
+    
+    MOVLF   high pwmNum, TMR1H, a   ; Reset the timer1 to count 20 ms again
+    MOVLF   low pwmNum, TMR1L, a    ; Move the low byte
+    BCF	    PIR1, 0, a		    ; Clear the rollover bit
+pwmOff:
+    BTFSS   PIR2, 1, a		    ; Check if the rollover for timer3 is set
+    BRA	    pwmEnd		    ; Return if the rollover is not set
+    BCF	    LATC, 2, a		    ; Turn the output off
+    BCF	    PIR2, 1, a		    ; Clear the rollover bit
+    BCF	    T3CON, 0, a		    ; Turn the 1ms timer off
+pwmEnd:
+    RETURN
+    
+;;;;;;; setTimer subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; This sets the configuration for timer3  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    
+    
+    
+	
+	
+	
+;;;;;;; BlinkAlive subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Uses BlinkAlive by Scott Palo and Trudy Schwartz as a template
+; This subroutine briefly blinks the LED RE4 every 250 ms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+BlinkAlive:
+	BTFSS INTCON, 2, a	    ; Read Timer0 TMR0IF rollover flag
+	BRA END1		    ; Return if the timer flag has not rolled over
+        BTG LATE, 4, a			    ; Toggle LED RE4
+	MOVLF high Bignum, TMR0H, a	    ; Then write the timer values into
+        MOVLF low Bignum, TMR0L, a	    ; the timer high and low registers
+        BCF INTCON, 2, a		    ; Clear Timer0 TMR0IF rollover flag
+END1:
         RETURN
 	
 ;;;;;;; End of Program ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
