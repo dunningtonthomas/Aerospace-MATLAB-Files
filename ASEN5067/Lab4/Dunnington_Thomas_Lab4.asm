@@ -342,8 +342,10 @@ PSECT	code
 // </editor-fold>
 	
 	
+; Thank you to Scott Palo and Trudy Schwartz for providing helpful starter code for programming the LCD
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; Mainline Code ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Definitions:
+	
 ; switchCount:
 	; 0000 0001 -> 1 ms pulse width
 	; 0000 0010 -> 1.2 ms pulse width
@@ -373,21 +375,22 @@ loop:
     
 ;;;;;;;;;;;;;;;;;;;;;; Initialization Routine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Initial: 
+    CLRF    switch1, a			; Clear the values of the switch varaible
+    MOVLF   00001000B, TRISE, a		; Outputs on PORTE, RE3 is an input
+    CLRF    TRISC, a			; Set all pins on PORTC as outputs
+    CLRF    TRISB, a			; Set all pins on PORTB as outputs for the LCD
+    CLRF    LATE, a			; Turn all of the LEDS off
+    
+    MOVLF   high pwm1ms, pwmHigh, a	; Set the pwm to 1 ms at first
+    MOVLF   low pwm1ms, pwmLow, a	; Low byte
+    MOVLF   00000001B, switchCount, a	; Start the PWM at 1 ms with 0000 0001
+    RCALL   InitLCD			; Initialize the LCD
+    
     CLRF    INTCON, a			; Clear the flags in INTCON
     MOVLF   00000101B, T0CON, a		; Set up Timer0 for a delay of 1 s, 64 prescaler
     MOVLF   high Bignum, TMR0H, a	; Writing binary 3036 to TMR0H / TMR0L
     MOVLF   low Bignum, TMR0L, a	; Write high byte first, then low
     BSF     T0CON, 7, a			; Turn on Timer0
-    
-    MOVLF   high pwm1ms, pwmHigh, a	; Set the pwm to 1 ms at first
-    MOVLF   low pwm1ms, pwmLow, a	; Low byte
-    MOVLF   00000001B, switchCount, a	; Start the PWM at 1 ms with 0000 0001
-    CLRF    switch1, a			; Clear the values of the switch varaible
-    MOVLF   00001000B, TRISE, a		; Outputs on PORTE, RE3 is an input
-    CLRF    TRISC, a			; Set all pins on PORTC as outputs
-    CLRF    LATE, a			; Turn all of the LEDS off
-    
-    RCALL   InitLCD			; Initialize the LCD
     
     RCALL   Wait1sec			; Wait 1 second and start initialization routine
     BSF	    LATE, 5, a			; Turn ON RE5
@@ -413,24 +416,13 @@ Initial:
     
     POINT LCDs				; ASEN5067
     RCALL DisplayC			; Display characters
-    POINT LCDsPw1			; PW=1.00
+    POINT LCDsPw1			; PW=1.00ms
     RCALL DisplayC			; Display characters
     
     BSF     T0CON, 7, a			; Turn on Timer0
     BSF	    T1CON, 0, a			; Turn on Timer1
     RETURN				; Return to Mainline code
     
-    
-;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Uses Wait10ms by Scott Palo and Trudy Schwartz as a template
-; Uses Timer0 to delay for 1 second
-Wait1sec:
-        BTFSS 	INTCON, 2, a		    ; Read Timer0 TMR0IF rollover flag
-        BRA     Wait1sec		    ; Loop if timer has not rolled over
-        MOVLF  	high Bignum, TMR0H, a	    ; Then write the timer values into
-        MOVLF  	low Bignum, TMR0L, a	    ; the timer high and low registers
-        BCF  	INTCON, 2, a		    ; Clear Timer0 TMR0IF rollover flag
-        RETURN
 	
 ;;;;;;; pwmSet subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; This subroutine checks the 20 ms timer and sets the output on RC2 to high
@@ -565,7 +557,7 @@ END1:
 	
 	
 ;;;;;;; InitLCD subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
+; From Scott Palo and Trudy Schwartz:
 ; InitLCD - modified version of subroutine in Reference: Peatman CH7 LCD
 ; Initialize the LCD.
 ; First wait for 0.1 second, to get past display's power-on reset time.
@@ -605,7 +597,7 @@ Loop4:
         RETURN
 	
 ;;;;;;;;DisplayC subroutine;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; 
+; From Scott Palo and Trudy Schwartz:
 ; DisplayC taken from Reference: Peatman CH7 LCD
 ; This subroutine is called with TBLPTR containing the address of a constant
 ; display string.  It sends the bytes of the string to the LCD.  The first
@@ -648,6 +640,17 @@ Loop5:
         BNZ	Loop5
         RETURN
 	
+;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Uses Wait10ms by Scott Palo and Trudy Schwartz as a template
+; Uses Timer0 to delay for 1 second
+Wait1sec:
+        BTFSS 	INTCON, 2, a		    ; Read Timer0 TMR0IF rollover flag
+        BRA     Wait1sec		    ; Loop if timer has not rolled over
+        MOVLF  	high Bignum, TMR0H, a	    ; Then write the timer values into
+        MOVLF  	low Bignum, TMR0L, a	    ; the timer high and low registers
+        BCF  	INTCON, 2, a		    ; Clear Timer0 TMR0IF rollover flag
+        RETURN
+	
 ;;;;;;; Wait1ms subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Subroutine to wait 1 ms
 ; Uses a manual delay loop
@@ -674,7 +677,7 @@ loopW100:
     RETURN	
     
 ;;;;;;; T50 subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
+; From Scott Palo and Trudy Schwartz:
 ; T50 modified version of T40 taken from Reference: Peatman CH 7 LCD
 ; Pause for 50 microseconds or 50/0.25 = 200 instruction cycles.
 ; Assumes 16/4 = 4 MHz internal instruction rate (250 ns)
