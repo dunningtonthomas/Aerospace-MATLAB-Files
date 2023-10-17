@@ -283,6 +283,10 @@ switch1: DS  1	; 1 byte for the previous state of the button press
 switchCount: DS	1 ; Variable for tracking the button press
 pwmHigh: DS 1   ; High byte for the pwm
 pwmLow: DS  1	; Low byte for the pwm
+count1: DS 1	; 1 byte for count var in wait1ms
+count2: DS 1	; count var is wait1ms
+count3: DS 1    ; count var in wait10ms
+count: DS 1	; count var in initLCD
     
     
 ; Objects to be defined in Bank 1
@@ -307,16 +311,38 @@ LoPriISR_Vec:
     GOTO    $	; Return to current Program Counter (For Now - no code here yet)
 
 
+;;;;;;; Constant Strings (Program Memory) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+PSECT romData, space = 0, class = CONST  
+LCDstr:  
+    DB  0x33,0x32,0x28,0x01,0x0C,0x06,0x00  ;Initialization string for LCD
+    
+LCDs:
+    DB 0x80,'A','S','E','N',0x35, 0x30, 0x36, 0x37, 0x00    ;Write "ASEN5067" to first line of LCD
+    
+LCDsPw1:
+    DB 0xC0, 'P', 'W', 0x3D, 0x31, 0x2E, 0x30, 0x30, 0x6D, 0x73, 0x00   ;PW=1.00ms
+    
+LCDsPw12:
+    DB 0xC0, 'P', 'W', 0x3D, 0x31, 0x2E, 0x32, 0x30, 0x6D, 0x73, 0x00   ;PW=1.20ms
+    
+LCDsPw14:
+    DB 0xC0, 'P', 'W', 0x3D, 0x31, 0x2E, 0x34, 0x30, 0x6D, 0x73, 0x00   ;PW=1.40ms
+    
+LCDsPw16:
+    DB 0xC0, 'P', 'W', 0x3D, 0x31, 0x2E, 0x36, 0x30, 0x6D, 0x73, 0x00   ;PW=1.60ms
+    
+LCDsPw18:
+    DB 0xC0, 'P', 'W', 0x3D, 0x31, 0x2E, 0x38, 0x30, 0x6D, 0x73, 0x00   ;PW=1.80ms
+    
+LCDsPw2:
+    DB 0xC0, 'P', 'W', 0x3D, 0x32, 0x2E, 0x30, 0x30, 0x6D, 0x73, 0x00   ;PW=2.00ms
+	
 ; Program Section: All Code Starts here
 PSECT	code
 // </editor-fold>
 	
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; Mainline Code ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	; TIPS:
-	; Use timer0 for the initialization routine
-	; Reconfigure timer0 to use it for the alive LED
-	; Some of the timers are not in the access bank, may need to set the BSR
 ; Definitions:
 ; switchCount:
 	; 0000 0001 -> 1 ms pulse width
@@ -340,7 +366,7 @@ main:
     RCALL    Initial	; Call to Initial Routine
 loop:
     RCALL   BlinkAlive	; Call blink alive subroutine
-    RCALL   Check_SW1	; Check the switch state and change the width 
+    RCALL   Check_SW1	; Check the switch state and change the width, update LCD
     RCALL   pwmSet	; Call the pwmSet subroutine to turn on the pulse
     BRA	    loop
 
@@ -354,12 +380,15 @@ Initial:
     BSF     T0CON, 7, a			; Turn on Timer0
     
     MOVLF   high pwm1ms, pwmHigh, a	; Set the pwm to 1 ms at first
-    MOVLF   low pwm1ms, pwmLow, a		; Low byte
+    MOVLF   low pwm1ms, pwmLow, a	; Low byte
     MOVLF   00000001B, switchCount, a	; Start the PWM at 1 ms with 0000 0001
     CLRF    switch1, a			; Clear the values of the switch varaible
     MOVLF   00001000B, TRISE, a		; Outputs on PORTE, RE3 is an input
     CLRF    TRISC, a			; Set all pins on PORTC as outputs
     CLRF    LATE, a			; Turn all of the LEDS off
+    
+    RCALL   InitLCD			; Initialize the LCD
+    
     RCALL   Wait1sec			; Wait 1 second and start initialization routine
     BSF	    LATE, 5, a			; Turn ON RE5
     RCALL   Wait1sec			; Wait 1 second
@@ -381,6 +410,11 @@ Initial:
     MOVLF   low pwm20ms, TMR1L, a	; Move the low byte
     
     MOVLF   00000000B, T3CON, a		; Confiugre timer3 for between a 1 and 2 ms delay
+    
+    POINT LCDs				; ASEN5067
+    RCALL DisplayC			; Display characters
+    POINT LCDsPw1			; PW=1.00
+    RCALL DisplayC			; Display characters
     
     BSF     T0CON, 7, a			; Turn on Timer0
     BSF	    T1CON, 0, a			; Turn on Timer1
@@ -428,16 +462,19 @@ pwmEnd:
 ;;;;;;; Check_SW1 subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Subroutine to check the status of RE3 button and change the pwm width
+; This also updates the LCD with the updated values of the pulse width when the switch is pressed
 				
 Check_SW1:
     MOVF    PORTE, w, a		; Read the current value of PORTE into WREG
-    XORWF   switch1, w, a		; Check if the state of the button has changed
-    ANDWF   switch1, f, a		; The previous state needs to be high for a release
-    BTFSS   switch1, 3, a		; Skip next if the bit is set
-    BRA	    EndSw			; Return if the bit is not set
+    XORWF   switch1, w, a	; Check if the state of the button has changed
+    ANDWF   switch1, f, a	; The previous state needs to be high for a release
+    BTFSS   switch1, 3, a	; Skip next if the bit is set
+    BRA	    EndSw		; Return if the bit is not set
+    RCALL   Debounce		; Call the debounce routine if the bit was set
+    BTFSS   switch1, 3, a	; Check the value of switch again to make sure the button was pressed
+    BRA	    EndSw		; Return if the bit is not set
     
     RLNCF   switchCount, f, a	; Rotate the bits to the left to update the width setting
-    
     
     ;Control flow for moving the value of the timer depending on the switchCount variable
     BTFSC   switchCount, 0, a	; Condition for 1 ms
@@ -460,33 +497,55 @@ set1Ms:
     MOVLF   00000001B, switchCount, a	; Reset the switchCount
     MOVLF   high pwm1ms, pwmHigh, a	; High byte
     MOVLF   low pwm1ms, pwmLow, a	; Low byte
+    POINT LCDsPw1			; PW=1.00
+    RCALL DisplayC			; Display characters
     BRA	    EndSw
 set12Ms:
     MOVLF   high pwm12ms, pwmHigh, a	; High byte
     MOVLF   low pwm12ms, pwmLow, a	; Low byte
+    POINT LCDsPw12			; PW=1.20
+    RCALL DisplayC			; Display characters
     BRA	    EndSw
 set14Ms:
     MOVLF   high pwm14ms, pwmHigh, a	; High byte
     MOVLF   low pwm14ms, pwmLow, a	; Low byte
+    POINT LCDsPw14			; PW=1.40
+    RCALL DisplayC			; Display characters
     BRA	    EndSw
 set16Ms:
     MOVLF   high pwm16ms, pwmHigh, a	; High byte
     MOVLF   low pwm16ms, pwmLow, a	; Low byte
+    POINT LCDsPw16			; PW=1.60
+    RCALL DisplayC			; Display characters
     BRA	    EndSw
 set18Ms:
     MOVLF   high pwm18ms, pwmHigh, a	; High byte
     MOVLF   low pwm18ms, pwmLow, a	; Low byte
+    POINT LCDsPw18			; PW=1.80
+    RCALL DisplayC			; Display characters
     BRA	    EndSw
 set2Ms:  
     MOVLF   high pwm2ms, pwmHigh, a	; High byte
     MOVLF   low pwm2ms, pwmLow, a	; Low byte
+    POINT LCDsPw2			; PW=2.00
+    RCALL DisplayC			; Display characters
     BRA	    EndSw
-    
 EndSw:
     MOVF    PORTE, w, a		;Read the current value of PORTE into WREG 
     MOVWF   switch1, a		;Save the value of RE3 to the switch1 variable, this is the previous state  
     RETURN	
 	
+;;;;;;; Debounce subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; This subroutine just waits a ms for the debounce routine and then returns back to the
+; check switch subroutine to validate the switch was pressed
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Debounce:
+    RCALL Wait1ms		; Wait for the bounce to stop
+    MOVF    PORTE, w, a		; Read the current value of PORTE into WREG
+    XORWF   switch1, w, a	; Check if the state of the button has changed
+    ANDWF   switch1, f, a	; The previous state needs to be high for a release
+    RETURN
+    
 	
 	
 ;;;;;;; BlinkAlive subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -502,6 +561,133 @@ BlinkAlive:
         MOVLF	low Bignum, TMR0L, a	    ; the timer high and low registers
         BCF	INTCON, 2, a		    ; Clear Timer0 TMR0IF rollover flag
 END1:
+        RETURN
+	
+	
+;;;;;;; InitLCD subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; InitLCD - modified version of subroutine in Reference: Peatman CH7 LCD
+; Initialize the LCD.
+; First wait for 0.1 second, to get past display's power-on reset time.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        
+InitLCD:
+        MOVLF  10,count,A	    ; Wait 0.1 second for LCD to power up
+Loop3:
+        RCALL  Wait10ms		    ; Call wait10ms 10 times to 0.1 second
+        DECF  count,F,A
+        BNZ	Loop3
+        BCF     LATB,4,A	    ; RS=0 for command mode to LCD
+        POINT   LCDstr		    ; Set up table pointer to initialization string
+        TBLRD*			    ; Get first byte from string into TABLAT
+Loop4:
+	CLRF LATB,A		    ; First set LATB to all zero	
+        BSF   LATB,5,A		    ; Drive E high - enable LCD
+	MOVF TABLAT,W,A		    ; Move byte from program memory into working register
+	ANDLW 0xF0		    ; Mask to get only upper nibble
+	SWAPF WREG,W,A		    ; Swap so that upper nibble is in right position to move to LATB (RB0:RB3)
+	IORWF PORTB,W,A		    ; Mask with the rest of PORTB to retain existing RB7:RB4 states
+	MOVWF LATB,A		    ; Update LATB to send upper nibble
+        BCF   LATB,5,A		    ; Drive E low so LCD will process input
+        RCALL Wait10ms		    ; Wait ten milliseconds
+	
+	CLRF LATB,A		    ; Reset LATB to all zero	    
+        BSF  LATB,5,A		    ; Drive E high
+        MOVF TABLAT,W,A		    ; Move byte from program memory into working register
+	ANDLW 0x0F		    ; Mask to get only lower nibble
+	IORWF PORTB,W,A		    ; Mask lower nibble with the rest of PORTB
+	MOVWF LATB,A		    ; Update LATB to send lower nibble
+        BCF   LATB,5,A		    ; Drive E low so LCD will process input
+        RCALL Wait10ms		    ; Wait ten milliseconds
+        TBLRD+*			    ; Increment pointer and get next byte
+        MOVF  TABLAT,F,A	    ; Check if we are done, is it zero?
+        BNZ	Loop4
+        RETURN
+	
+;;;;;;;;DisplayC subroutine;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; 
+; DisplayC taken from Reference: Peatman CH7 LCD
+; This subroutine is called with TBLPTR containing the address of a constant
+; display string.  It sends the bytes of the string to the LCD.  The first
+; byte sets the cursor position.  The remaining bytes are displayed, beginning
+; at that position hex to ASCII.
+; This subroutine expects a normal one-byte cursor-positioning code, 0xhh, and
+; a null byte at the end of the string 0x00
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DisplayC:
+        BCF   LATB,4,A		    ;Drive RS pin low for cursor positioning code
+        TBLRD*			    ;Get byte from string into TABLAT
+        MOVF  TABLAT,F,A	    ;Check for leading zero byte
+        BNZ	Loop5
+        TBLRD+*			    ;If zero, get next byte
+Loop5:
+	MOVLW 0xF0
+	ANDWF LATB,F,A		    ;Clear RB0:RB3, which are used to send LCD data
+        BSF   LATB,5,A		    ;Drive E pin high
+        MOVF TABLAT,W,A		    ;Move byte from table latch to working register
+	ANDLW 0xF0		    ;Mask to get only upper nibble
+	SWAPF WREG,W,A		    ;swap so that upper nibble is in right position to move to LATB (RB0:RB3)
+	IORWF PORTB,W,A		    ;Mask to include the rest of PORTB
+	MOVWF LATB,A		    ;Send upper nibble out to LATB
+        BCF   LATB,5,A		    ;Drive E pin low so LCD will accept nibble
+	
+	MOVLW 0xF0
+	ANDWF LATB,F,A		    ;Clear RB0:RB3, which are used to send LCD data
+        BSF   LATB,5,A		    ;Drive E pin high again
+        MOVF TABLAT,W,A		    ;Move byte from table latch to working register
+	ANDLW 0x0F		    ;Mask to get only lower nibble
+	IORWF PORTB,W,A		    ;Mask to include the rest of PORTB
+	MOVWF LATB,A		    ;Send lower nibble out to LATB
+        BCF   LATB,5,A		    ;Drive E pin low so LCD will accept nibble
+        RCALL T50		    ;Wait 50 usec so LCD can process
+	
+        BSF   LATB,4,A		    ;Drive RS pin high for displayable characters
+        TBLRD+*			    ;Increment pointer, then get next byte
+        MOVF  TABLAT,F,A	    ;Is it zero?
+        BNZ	Loop5
+        RETURN
+	
+;;;;;;; Wait1ms subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Subroutine to wait 1 ms
+; Uses a manual delay loop
+Wait1ms:
+    MOVLF 54, count2, a		;Move literal value of 54 into count2    
+loopOuter:
+    MOVLF 23, count1, a		;Move literal value of 23 into the count1 variable
+loopInner:
+	DECF count1, f, a	;Decrement the variable, store in itself
+	BNZ loopInner		;LoopInner if not zero yet
+    DECF count2, f, a		;Decrement count2 for the outter loop
+    BNZ loopOuter		;Branch to outerloop
+    RETURN   
+    
+    
+;;;;;;; Wait1sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Manual timing loop to wait 10 ms
+Wait10ms:
+    MOVLF 10, count3, a	; Move 10 into count3 to iterate over
+loopW100:
+    RCALL Wait1ms		;Call 1 ms 100 times
+    DECF count3, f, a		;Decrement count variable
+    BNZ loopW100		;Branch if not zero
+    RETURN	
+    
+;;;;;;; T50 subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; T50 modified version of T40 taken from Reference: Peatman CH 7 LCD
+; Pause for 50 microseconds or 50/0.25 = 200 instruction cycles.
+; Assumes 16/4 = 4 MHz internal instruction rate (250 ns)
+; rcall(2) + movlw(1) + movwf(1) + COUNT*3 - lastBNZ(1) + return(2) = 200 
+; Then COUNT = 195/3
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        
+T50:
+        MOVLW  195/3          ;Each loop L4 takes 3 ins cycles
+        MOVWF  count,A		    
+L4:
+        DECF  count,F,A
+        BNZ	L4
         RETURN
 	
 ;;;;;;; End of Program ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
