@@ -319,6 +319,9 @@ CCPR1X:		DS	1   ; Eight-bit extension to CCPR1
 DTIMEX:		DS	1   ; Delta time variable of half period of square wave
 DTIMEH:		DS	1   ; Will copy HalfPeriod constant into these 3 registers
 DTIMEL:		DS	1
+DTIME2X:	DS	1   ; Delta time for 800 ms, extension
+DTIME2H:	DS	1   ; High byte
+DTIME2L:	DS	1   ; Low byte
 DIR_RPG:	DS	1   ; Direction of RPG
 RPG_TEMP:	DS	1   ; Temp variable used for RPG state
 OLDPORTD:	DS	1   ; Used to hold previous state of RPG
@@ -347,10 +350,9 @@ LCDsPw1:
 PSECT	code	
 
 ;;;;;;;;;;;;;;;;;;;;;; Definitions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-HalfPeriod  EQU	    200000  ; Number of 250 ns instruction cycles in 0.05 sec 
-			    ; (Half of 10 Hz)
-			    ; Only for example, not useful directly for Lab 5
-Bignum	EQU 65536 - 62500   ; Number to get the 1 second delay and 250 ms
+HalfPeriod  EQU	    800000	    ; Number of instructions in 200 ms
+OffPeriod   EQU	    3200000	    ; Number of instructions in 800 ms
+Bignum	    EQU	    65536 - 62500   ; Number to get the 1 second delay and 250 ms
 
 ;;;;;;; Mainline program ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 main:
@@ -366,7 +368,6 @@ L1:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Initial:
     ;Flash LEDs init
-    CLRF    TRISD, a			; Set PORTD as output
     CLRF    INTCON, a			; Clear the flags in INTCON
     MOVLF   00000100B, T0CON, a		; Set up Timer0 for a delay of 0.5 s, 32 prescaler
     MOVLF   high Bignum, TMR0H, a	; Writing binary 3036 to TMR0H / TMR0L
@@ -386,6 +387,7 @@ Initial:
     BCF	    T0CON, 7, a			; Turn off the initialization timer
     ;END Blink LED sequence    
     
+    CLRF    TRISD, a			; Set PORTD as output
     RCALL   InitLCD			; Initialize the LCD
     POINT   LCDs			; ASEN5067
     RCALL   DisplayC			; Display characters
@@ -394,9 +396,13 @@ Initial:
     ;END LCD Init
     
     
-    MOVLF   low HalfPeriod, DTIMEL, a	; Load DTIME with HalfPeriod constant
+    MOVLF   low HalfPeriod, DTIMEL, a	; Load DTIME with 200 ms
     MOVLF   high HalfPeriod, DTIMEH, a
     MOVLF   low highword HalfPeriod, DTIMEX, a
+    
+    MOVLF   low OffPeriod, DTIME2L, a	; Load DTIME2 with 800 ms
+    MOVLF   high OffPeriod, DTIME2H, a
+    MOVLF   low highword OffPeriod, DTIME2X, a
     
     CLRF    TRISC, a		    ; Set I/O for PORTC
     CLRF    LATC, a		    ; Clear lines on PORTC
@@ -486,7 +492,7 @@ L4:
         RETFIE			; Return from interrupt, reenabling GIEL
 	
 ;;;;;;;; CCP Handler ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-CCP1handler:			; First must test of TMR1IF occurred at the same time
+CCP1handler:			; First must test if TMR1IF occurred at the same time
         BTFSS	PIR1, 0, a	; If TMR1's overflow flag is set? skip to test CCP bit7
         BRA	L5		; If TMR1F was clear, branch to check extension bytes
         BTFSC	CCPR1H, 7, a	; Is bit 7 a 0? Then TMR1/CCP just rolled over, need to inc TMR1X
@@ -498,13 +504,24 @@ L5:
         MOVF	TMR1X, w, a	; Check whether extensions are equal
         SUBWF	CCPR1X, w, a	; by subtracting TMR1X and CCPR1X, check if 0
         BNZ	L7		; If not, branch to return
-        BTG	LATC, 2, a	; Manually toggle RC2
-	MOVF	DTIMEL, w, a	; and add half period to CCPR1 to add more pulse time
+        BTG	LATD, 4, a	; Manually toggle RD4
+	BTFSS	LATD, 4, a	; Skip if the LED is on
+	BRA	L6		; The LED is off, load 800 ms case
+	
+	MOVF	DTIMEL, w, a	; and add half period to CCPR1 to add more pulse time 200 ms
         ADDWF	CCPR1L, f, a
         MOVF	DTIMEH, w, a	; Add to each of the 3 bytes to get 24 bit CCP
         ADDWFC	CCPR1H, f, a
         MOVF	DTIMEX, w, a
         ADDWFC	CCPR1X, f, a
+	BRA	L7		; Return
+L6:
+	MOVF	DTIME2L, w, a	; and add half period to CCPR1 to add more pulse time 800 ms
+        ADDWF	CCPR1L, f, a
+        MOVF	DTIME2H, w, a	; Add to each of the 3 bytes to get 24 bit CCP
+        ADDWFC	CCPR1H, f, a
+        MOVF	DTIME2X, w, a
+        ADDWFC	CCPR1X, f, a	
 L7:
         BCF	PIR3, 1, a	; Clear the CCP1IF bit <1> interrupt flag
         RETURN
