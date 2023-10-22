@@ -18,41 +18,46 @@ import sys
 
 # %% DH Panda Class
 
-class DH:
-    def denavMatrix(self, d, theta, a, alpha):
-        DH_mat = [[np.cos(theta), -1*np.cos(alpha) * np.sin(theta), np.sin(alpha)*np.sin(theta), a*np.cos(theta)],
-                  [np.sin(theta), np.cos(alpha)*np.cos(theta), -1*np.sin(alpha)*np.cos(theta), a*np.sin(theta)],
-                  [0, np.sin(alpha), np.cos(alpha), d],
-                  [0, 0, 0, 1]]
+class DH_Link:
+    #Variable for transformation matrix for a given link
+    transMat = []
+    def denavMatrix(self, d, theta, a, alpha):       
+        #Define the transformations involved
+        # rotX = [[1, 0, 0, 0],
+        #         [0, np.cos(alpha), -1*np.sin(alpha), 0],
+        #         [0, np.sin(alpha), np.cos(alpha), 0],
+        #         [0, 0, 0, 1]]
         
+        # transX = [[1, 0, 0, a], 
+        #           [0, 1, 0, 0],
+        #           [0, 0, 1, 0],
+        #           [0, 0, 0, 1]]
         
-        DH_mat = [[np.cos(theta), -1*np.sin(alpha), 0, a],
-                  [np.sin(theta) * np.cos(alpha), np.cos(alpha)*np.cos(theta), -1*np.sin(alpha), -1*np.sin(theta) * d],
+        # rotZ = [[np.cos(theta), -1*np.sin(theta), 0, 0],
+        #         [np.sin(theta), np.cos(theta), 0, 0],
+        #         [0, 0, 1, 0],
+        #         [0, 0, 0, 1]]
+        
+        # transZ = [[1, 0, 0, 0], 
+        #           [0, 1, 0, 0],
+        #           [0, 0, 1, d],
+        #           [0, 0, 0, 1]]
+        
+        # #Calculate the transformation matrix
+        # xMat = np.matmul(rotX, transX)
+        # zMat = np.matmul(rotZ, transZ)
+        # DH_mat = np.matmul(xMat, zMat)
+        
+        # Directly use the result of the transformations in one 
+        # Can also use the method shown above using the elementary transforms
+        DH_mat = [[np.cos(theta), -1*np.sin(theta), 0, a],
+                  [np.sin(theta) * np.cos(alpha), np.cos(alpha)*np.cos(theta), -1*np.sin(alpha), -1*np.sin(alpha) * d],
                   [np.sin(theta) * np.sin(alpha), np.cos(theta) * np.sin(alpha), np.cos(alpha), np.cos(alpha) * d],
                   [0, 0, 0, 1]]
+        
         return DH_mat
+        
     
-    def eval_dh(self, q):
-        # q is a vector of the joint angles
-        T01 = self.denavMatrix(0.333, q[0], 0, 0)
-        T12 = self.denavMatrix(0, q[1], 0, -1*np.pi/2)
-        T23 = self.denavMatrix(0.316, q[2], 0, np.pi/2)
-        T34 = self.denavMatrix(0, q[3], 0.0825, np.pi/2)
-        T45 = self.denavMatrix(0.384, q[4], -0.0825, -1*np.pi/2)
-        T56 = self.denavMatrix(0, q[5], 0, np.pi/2)
-        T67 = self.denavMatrix(0.107, q[6], 0.088, np.pi/2)
-        
-        # Matrix multiplication
-        T02 = np.matmul(T01, T12)
-        T03 = np.matmul(T02, T23)
-        T04 = np.matmul(T03, T34)
-        T05 = np.matmul(T04, T45)
-        T06 = np.matmul(T05, T56)
-        T07 = np.matmul(T06, T67)
-        
-        return T07
-        
-        
 class DH2:
     def eval_dh(self, q):        
         #Order goes tx -> rx -> tz -> rz
@@ -91,8 +96,6 @@ class DH2:
         E19 = rtb.ET.tz(0.107)
         E20 = rtb.ET.Rz()
         
-        
-        
 
         
         # Combine the elementary transforms
@@ -120,7 +123,7 @@ for i in output5:
 # Convert to numpy array
 q = np.array(qArr)
 
-q = np.array([0, -0.3, 0, -2.2, 0, 2, 0.79])
+q = np.array([1, 1, 1, -1, 1, 1, 1])
 
 # Franka Emika Panda Example
 
@@ -152,15 +155,40 @@ output = pandaETS.eval(q)
 print(output)
 
 
-# DH 1
-# panda = DH()
-# finalOut = panda.eval_dh(q)
-# print(finalOut)
+# Instantiate the classes
+link1 = DH_Link()
+link2 = DH_Link()
+link3 = DH_Link()
+link4 = DH_Link()
+link5 = DH_Link()
+link6 = DH_Link()
+link7 = DH_Link()
 
-# DH 2
-panda2 = DH2()
-finalOut2 = panda2.eval_dh(q)
-print(finalOut2)
+#Create the transformation matrices using the modified DH parameters
+link1.transMat = link1.denavMatrix(0.333, q[0], 0, 0)
+link2.transMat = link2.denavMatrix(0, q[1], 0, -1*np.pi/2)
+link3.transMat = link3.denavMatrix(0.316, q[2], 0, np.pi/2)
+link4.transMat = link4.denavMatrix(0, q[3], 0.0825, np.pi/2)
+link5.transMat = link5.denavMatrix(0.384, q[4], -0.0825, -1*np.pi/2)
+link6.transMat = link6.denavMatrix(0, q[5], 0, np.pi/2)
+link7.transMat = link7.denavMatrix(0.107, q[6], 0.088, np.pi/2)
+
+# Matrix multiplication
+T02 = np.matmul(link1.transMat, link2.transMat)
+T03 = np.matmul(T02, link3.transMat)
+T04 = np.matmul(T03, link4.transMat)
+T05 = np.matmul(T04, link5.transMat)
+T06 = np.matmul(T05, link6.transMat)
+T07 = np.matmul(T06, link7.transMat)
+
+#Output
+print(T07)
+
+
+
+
+
+
 
 
 
