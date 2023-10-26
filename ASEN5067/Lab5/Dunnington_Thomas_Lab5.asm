@@ -315,13 +315,23 @@ WREG_TEMP:	DS	1   ; Temp variables used in Low Pri ISR
 STATUS_TEMP:	DS	1
 BSR_TEMP:	DS	1    
 TMR1X:		DS	1   ; Eight-bit extension to TMR1
+TMR3X:		DS	1   ; Extentsion to TMR3
 CCPR1X:		DS	1   ; Eight-bit extension to CCPR1
+CCPR2X:		DS	1   ; Extension to CCPR2
 DTIMEX:		DS	1   ; Delta time variable of half period of square wave
-DTIMEH:		DS	1   ; Will copy HalfPeriod constant into these 3 registers
+DTIMEH:		DS	1   ; Will copy OnPeriod constant into these 3 registers
 DTIMEL:		DS	1
 DTIME2X:	DS	1   ; Delta time for 800 ms, extension
 DTIME2H:	DS	1   ; High byte
 DTIME2L:	DS	1   ; Low byte
+    
+DTIME3X:	DS	1   ; Delta time for 1 ms, extension
+DTIME3H:	DS	1
+DTIME3L:	DS	1
+DTIME4X:	DS	1   ; Delta time for 19 ms, extension
+DTIME4H:	DS	1  
+DTIME4L:	DS	1   
+    
 DIR_RPG:	DS	1   ; Direction of RPG
 RPG_TEMP:	DS	1   ; Temp variable used for RPG state
 OLDPORTD:	DS	1   ; Used to hold previous state of RPG
@@ -350,15 +360,18 @@ LCDsPw1:
 PSECT	code	
 
 ;;;;;;;;;;;;;;;;;;;;;; Definitions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-HalfPeriod  EQU	    800000	    ; Number of instructions in 200 ms
+OnPeriod    EQU	    800000	    ; Number of instructions in 200 ms
 OffPeriod   EQU	    3200000	    ; Number of instructions in 800 ms
 Bignum	    EQU	    65536 - 62500   ; Number to get the 1 second delay and 250 ms
+pw1	    EQU	    4000	    ; Instructions for 1 ms
+pw19	    EQU	    72000	    ; Instructions for 19 ms
 
 ;;;;;;; Mainline program ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 main:
     RCALL   Initial			; Initialize everything
-L1:
-    BRA	    L1
+loop:
+    RCALL   Check_RPG
+    BRA	    loop
 
 ;;;;;;; Initial subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -367,6 +380,16 @@ L1:
 ; specific code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Initial:
+    ; LCD initialization output
+    CLRF    TRISD, a			; Set PORTD as output
+    MOVLF   00000011B, TRISD, a		; 1 and 0 for input from rpg
+    RCALL   InitLCD			; Initialize the LCD
+    POINT   LCDs			; ASEN5067
+    RCALL   DisplayC			; Display characters
+    POINT   LCDsPw1			; PW1.00ms
+    RCALL   DisplayC			; Display characters
+    ;END LCD Init
+    
     ;Flash LEDs init
     CLRF    INTCON, a			; Clear the flags in INTCON
     MOVLF   00000100B, T0CON, a		; Set up Timer0 for a delay of 0.5 s, 32 prescaler
@@ -387,42 +410,59 @@ Initial:
     BCF	    T0CON, 7, a			; Turn off the initialization timer
     ;END Blink LED sequence    
     
-    CLRF    TRISD, a			; Set PORTD as output
-    RCALL   InitLCD			; Initialize the LCD
-    POINT   LCDs			; ASEN5067
-    RCALL   DisplayC			; Display characters
-    POINT   LCDsPw1			; PW1.00ms
-    RCALL   DisplayC			; Display characters
-    ;END LCD Init
-    
-    
-    MOVLF   low HalfPeriod, DTIMEL, a	; Load DTIME with 200 ms
-    MOVLF   high HalfPeriod, DTIMEH, a
-    MOVLF   low highword HalfPeriod, DTIMEX, a
+   
+    ; Load values for the alive LED
+    MOVLF   low OnPeriod, DTIMEL, a	; Load DTIME with 200 ms
+    MOVLF   high OnPeriod, DTIMEH, a
+    MOVLF   low highword OnPeriod, DTIMEX, a
     
     MOVLF   low OffPeriod, DTIME2L, a	; Load DTIME2 with 800 ms
     MOVLF   high OffPeriod, DTIME2H, a
     MOVLF   low highword OffPeriod, DTIME2X, a
     
-    CLRF    TRISC, a		    ; Set I/O for PORTC
-    CLRF    LATC, a		    ; Clear lines on PORTC
+    ; Set up the CCP and timer for the blink alive LED
     MOVLF   00000010B, T1CON, a	    ; 16 bit timer, buffer H/L registers
     MOVLF   00001010B, CCP1CON, a   ; Select compare mode, software interrupt only
     MOVLB   0x0F		    ; Set BSR to bank F for SFRs outside of access bank				
-    MOVLF   00000000B, CCPTMRS0, b  ; Set TMR1 for use with ECCP1, Using BSR!
+    MOVLF   00001000B, CCPTMRS0, b  ; Set TMR1 for use with ECCP1, and TMR3 for use with ECCP2
     BSF	    RCON, 7, a		    ; Set IPEN bit <7> enables priority levels
     BCF	    IPR1, 0, a		    ; TMR1IP bit <0> assigns low priority to TMR1 interrupts
     BCF	    IPR3, 1, a		    ; CCP1IP bit<1> assign low pri to ECCP1 interrupts
     CLRF    TMR1X, a		    ; Clear TMR1X extension
-    MOVLF   low highword HalfPeriod, CCPR1X, a	; Make first 24-bit compare 
+    MOVLF   low highword OnPeriod, CCPR1X, a	; Make first 24-bit compare 
 						; occur quickly 16bit+8bit ext 
 						; Note: 200000 (= 0x30D40)
     BSF	    PIE3, 1, a	    ; CCP1IE bit <1> enables ECCP1 interrupts
     BSF	    PIE1, 0, a	    ; TMR1IE bit <0> enables TMR1 interrupts
     BSF	    INTCON, 6, a    ; GIEL bit <6> enable low-priority interrupts to CPU
-    BSF	    INTCON, 7, a    ; GIEH bit <7> enable all interrupts
+    BSF	    INTCON, 7, a    ; GIEH bit <7> enable all interrupts    
+    
+    ; Load values for the PWM
+    MOVLF   low pw1, DTIME3L, a	; Load DTIM3 with 1 ms
+    MOVLF   high pw1, DTIME3H, a
+    MOVLF   low highword pw1, DTIME3X, a
+    
+    MOVLF   low pw19, DTIME4L, a	; Load DTIME4 with 19 ms
+    MOVLF   high pw19, DTIME4H, a
+    MOVLF   low highword pw19, DTIME4X, a
+    
+    MOVLF   low highword pw19, CCPR2X, a	; Make first 24-bit compare 
+    
+    ; Set up Timer 3 and ECCP2 for the PWM
+    CLRF    TRISC, a		    ; Set I/O for PORTC
+    CLRF    LATC, a		    ; Clear lines on PORTC
+    MOVLF   00000010B, T3CON, a	    ; 16 bit timer, buffer H/L registers
+    MOVLF   00001010B, CCP2CON, b   ; Select compare mode, software interrupt only for ECCP2
+    BSF	    IPR2, 1, a		    ; TMR3IP bit <1> assigns high priority to TMR3 interrupts
+    BSF	    IPR3, 2, a		    ; CCP1IP bit<1> assign High pri to ECCP2 interrupts
+    CLRF    TMR3X, a		    ; Clear TMR3X extension
+    BSF	    PIE2, 1, a		    ; TMR3IE bit <1> enables TMR3 interrupts
+    BSF	    PIE3, 2, a		    ; CCP1IE bit <1> enables ECCP2 interrupts
+    
+    ; Turn the timers on
     BSF	    T1CON, 0, a	    ; TMR1ON bit <0> turn on timer1
-
+    BSF	    T3CON, 0, a	    ; TMR3ON bit <0> turn on timer3
+    
     RETURN
     
 ;;;;;;; RPG subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -438,37 +478,178 @@ RPG:
         MOVWF	RPG_TEMP, a	;  and RPG_TEMP.
         XORWF	OLDPORTD, w, a	; Check for any change?
         ANDLW	00000011B	; Masks just the RPG pins          
-        BZ  L8		; If zero, RPG has not moved, ->return
-			; But if the two bits have changed then...
+        BZ  RP8			; If zero, RPG has not moved, ->return
+				; But if the two bits have changed then...
 	; Form what a CCW change would produce.          	
 	RRCF	OLDPORTD, w, a	; Rotate right once into carry bit   
-	BNC	L9	; If no carry, then bit 0 was a 0 -> branch to L9
+	BNC	RP9		; If no carry, then bit 0 was a 0 -> branch to L9
         BCF	WREG, 1, a	; Otherwise, bit 0 was a 1. Then clear bit 1
 				; to simulate what a CCW change would produce
-        BRA	L10	; Branch to compare if RPG actually matches new CCW pattern in WREG
-L9:
-        BSF	WREG, 1, a  ; Set bit 1 since there was no carry
-			    ; again to simulate what CCW would produce
-L10:			    ; Test direction of RPG
+        BRA	RP10		; Branch to compare if RPG actually matches new CCW pattern in WREG
+RP9:
+        BSF	WREG, 1, a	; Set bit 1 since there was no carry
+				; again to simulate what CCW would produce
+RP10:				; Test direction of RPG
         XORWF	RPG_TEMP, w, a	; Did the RPG actually change to this output?
         ANDLW	00000011B	; Masks the RPG pins
-        BNZ	L11		; If not zero, then branch to L11 for CW case
+        BNZ	RP11		; If not zero, then branch to L11 for CW case
         DECF	DIR_RPG, f, a	; If zero then change DIR_RPG to -1, must be CCW. 
-        BRA	L8		; Done so branch to return
-L11:	; CW case 
+        BRA	RP8		; Done so branch to return
+RP11:	; CW case 
         INCF	DIR_RPG, f, a	; Change DIR_RPG to +1 for CW.
-L8:
+RP8:
         MOVFF	RPG_TEMP, OLDPORTD  ; Save current RPG state as OLDPORTD
         RETURN
+	
+;;;;;;; Check_RPG subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; This function calls the RPG function to get a direction and changes 
+; the values of the pulse width by 40 instructions
+	
+Check_RPG:
+    RCALL   RPG		    ; Determine if there is a change
+    BTFSC   DIR_RPG, 7, a   ; Skip if the 7th bit is clear --> 0 or 1 case, other wise:
+    BRA	    CCW		    ; Counter-clockwise case when the 7th bit is set
+    BTFSS   DIR_RPG, 0, a   ; Skip if the first bit is set --> 1 case
+    BRA	    CRP_End	    ; Return if 0
+CW:
+    ;Check if we are at 2 ms
+    MOVLW   01000000B	    ; Low byte for 2 ms
+    CPFSEQ  DTIME3L, a	    ; Check if the low byte is at the condition for 2 ms
+    BRA	    CW2		    ; Not at 2 ms, decrement the pulse width
+    MOVLW   00011111B	    ; High byte for 2 ms
+    CPFSEQ  DTIME3H, a	    ; Check if the low byte is at the condition for 2 ms
+    BRA	    CW2		    ; Not at 2 ms, decrement the pulse width
+    BRA	    CRP_End	    ; Return if we are already at 2 ms
+CW2:
+    MOVLW   40		    ; Load the value into the WREG
+    ADDWF   DTIME3L, f, a   ; Add to the low byte
+    MOVLW   0		    ; High and upper are zero to add
+    ADDWFC  DTIME3H, f, a   ; Add with carry
+    ADDWFC  DTIME3X, f, a   ; Add with carry
+    
+    MOVLW   40		    ; Load value to subtract
+    SUBWF   DTIME4L, f, a   ; Subtract from the low byte
+    MOVLW   0		    ; Zero
+    SUBWFB  DTIME4H, f, a   ; Subtract with carry
+    SUBWFB  DTIME4X, f, a   ; Subtract with carry
+    BRA	    CRP_End	    ; Return
 
+CCW:
+    ;Check if we are at 1 ms
+    MOVLW   10100000B	    ; Low byte for 1 ms
+    CPFSEQ  DTIME3L, a	    ; Check if the low byte is at the condition for 1 ms
+    BRA	    CCW2	    ; Not at 1 ms, decrement the pulse width
+    MOVLW   00001111B	    ; High byte for 1 ms
+    CPFSEQ  DTIME3H, a	    ; Check if the low byte is at the condition for 1 ms
+    BRA	    CCW2	    ; Not at 1 ms, decrement the pulse width
+    BRA	    CRP_End	    ; Return if we are already at 1 ms
+    
+CCW2:
+    MOVLW   40		    ; Load value to subtract
+    SUBWF   DTIME3L, f, a   ; Subtract from the low byte
+    MOVLW   0		    ; Zero
+    SUBWFB  DTIME3H, f, a   ; Subtract with carry
+    SUBWFB  DTIME3X, f, a   ; Subtract with carry
+    BRA	    CRP_End	    ; Return
+    
+    MOVLW   40		    ; Load the value into the WREG
+    ADDWF   DTIME4L, f, a   ; Add to the low byte
+    MOVLW   0		    ; High and upper are zero to add
+    ADDWFC  DTIME4H, f, a   ; Add with carry
+    ADDWFC  DTIME4X, f, a   ; Add with carry
+   
+CRP_End:
+    RETURN
+    
+    
+;CW:			    ; This adds 40 to the on portion of the PWM
+;    MOVLW   40		    ; Load 40 into WREG
+;    ADDWF   DTIME3L, f, a   ; Add to the low byte
+;    BTFSC   STATUS, 0, a    ; Check if the carry bit is set, skip if not
+;    INCF    DTIME3H, f, a   ; Increment the next byte
+;    BTFSC   STATUS, 0, a    ; Check if the carry bit is set, skip if not
+;    INCF    DTIME3X, f, a   ; Increment the extension
+;CW2:			    ; This subtracts 40 from the off portion of the PWM
+;    MOVLW   40		    ; Move 40 into WREG
+;    CPFSGT  DTIME4L, a	    ; Skip if the file register is greater than the working, just subtract like normal
+;    BRA	    CW_Carry	    ; Condition to borrow from the next byte
+;    SUBWF   DTIME4L, f, a   ; Subtract 40 from the low byte
+;    BRA	    CRP_End	    ; Return
+;    
+;CW_Carry:   
+;    MOVF   DTIME4H, w, a    ; Move the byte to the WREG
+;    ANDLW   11111111B	    ; And with the WREG
+    
+
+	
 ;;;;;;; HiPriISR interrupt service routine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 HiPriISR:                        ; High-priority interrupt service routine
 ;       <execute the handler for interrupt source, write your code here if needed>
 ;       <clear that source's interrupt flag>
-        RETFIE  1	    ; Return and restore STATUS, WREG, and BSR
-			    ; from shadow registers
+	MOVFF	STATUS, STATUS_TEMP	; Set aside STATUS and WREG
+        MOVWF	WREG_TEMP, a
+	MOVFF	BSR, BSR_TEMP
+H2:
+        BTFSS	PIR3, 2, a	; Test CCP2IF bit <2> for this interrupt
+        BRA	H3
+        RCALL	CCP2handler	; Call CCP1handler for generating RD4 LED output
+        BRA	H2
+H3:
+        BTFSS	PIR2, 1, a	; Test TMR3IF bit <1> for this interrupt
+        BRA	H4
+        RCALL	TMR3handler	; Call TMR1handler for timing with CCP1
+        BRA	H2
+H4:
+	MOVF	WREG_TEMP, w, a	    ; Restore WREG and STATUS
+        MOVFF	STATUS_TEMP, STATUS
+	MOVFF	BSR_TEMP, BSR        
+        RETFIE			; Return from interrupt, reenabling GIEL and restore values from shadow registers
 
+;;;;;;; CCP2 Handler ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CCP2handler:
+    
+	;; NEED TO MODIFY ALL OF THE FOLLOWING for ccp2/tmr3
+        BTFSS	PIR2, 1, a	; If TMR3's overflow flag is set? skip to test CCP bit7
+        BRA	H5		; If TMR1F was clear, branch to check extension bytes
+        BTFSC	CCPR2H, 7, b	; Is bit 7 a 0? Then TMR3/CCP2 just rolled over, need to inc TMR3X
+        BRA	H5		; Is bit 7 a 1? Then let TMR3handler inc TMR3X 
+        INCF	TMR3X, f, a	; TMR1/CCP just rolled over, must increment TMR1 extension
+        BCF	PIR2, 1, a	; and clear TMR3IF bit <1> flag 
+				;(Since TMR3 handler was unable to and arrived here first!)
+H5:
+        MOVF	TMR3X, w, a	; Check whether extensions are equal
+        SUBWF	CCPR2X, w, a	; by subtracting TMR1X and CCPR1X, check if 0
+        BNZ	H7		; If not, branch to return
+        BTG	LATC, 2, a	; Manually toggle RC2
+	BTFSS	LATC, 2, a	; Skip if the RC2 output is high
+	BRA	H6		; RC2 is low, load 19 ms case
+	
+	MOVF	DTIME3L, w, a	; RC2 is high, load the 1 ms case
+        ADDWF	CCPR2L, f, b
+        MOVF	DTIME3H, w, a	; Add to each of the 3 bytes to get 24 bit CCP
+        ADDWFC	CCPR2H, f, b
+        MOVF	DTIME3X, w, a
+        ADDWFC	CCPR2X, f, a
+	BRA	H7		; Return
+H6:
+	MOVF	DTIME4L, w, a	; RC2 is low, load the 19 ms case
+        ADDWF	CCPR2L, f, b
+        MOVF	DTIME4H, w, a	; Add to each of the 3 bytes to get 24 bit CCP
+        ADDWFC	CCPR2H, f, b
+        MOVF	DTIME4X, w, a
+        ADDWFC	CCPR2X, f, a		
+H7:
+	BCF	PIR3, 2, a	; Clear the CCP2IF bit <2> interrupt flag
+        RETURN
+
+;;;;;;; TIMER3 Handler  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+TMR3handler:
+	INCF	TMR3X, f, a	;Increment Timer3 extension
+        BCF	PIR2, 1, a	;Clear TMR3IF flag and return to service routine
+	RETURN
+
+	
 ;;;;;;; LoPriISR interrupt service routine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoPriISR:				; Low-priority interrupt service routine
@@ -478,7 +659,7 @@ LoPriISR:				; Low-priority interrupt service routine
 L2:
         BTFSS	PIR3, 1, a	; Test CCP1IF bit <1> for this interrupt
         BRA	L3
-        RCALL	CCP1handler	; Call CCP1handler for generating RC2 output
+        RCALL	CCP1handler	; Call CCP1handler for generating RD4 LED output
         BRA	L2
 L3:
         BTFSS	PIR1, 0, a	; Test TMR1IF bit <0> for this interrupt
@@ -491,7 +672,7 @@ L4:
 	MOVFF	BSR_TEMP, BSR        
         RETFIE			; Return from interrupt, reenabling GIEL
 	
-;;;;;;;; CCP Handler ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;; CCP1 Handler ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CCP1handler:			; First must test if TMR1IF occurred at the same time
         BTFSS	PIR1, 0, a	; If TMR1's overflow flag is set? skip to test CCP bit7
         BRA	L5		; If TMR1F was clear, branch to check extension bytes
@@ -508,7 +689,7 @@ L5:
 	BTFSS	LATD, 4, a	; Skip if the LED is on
 	BRA	L6		; The LED is off, load 800 ms case
 	
-	MOVF	DTIMEL, w, a	; and add half period to CCPR1 to add more pulse time 200 ms
+	MOVF	DTIMEL, w, a	; The LED is on, load the 200 ms case
         ADDWF	CCPR1L, f, a
         MOVF	DTIMEH, w, a	; Add to each of the 3 bytes to get 24 bit CCP
         ADDWFC	CCPR1H, f, a
@@ -516,7 +697,7 @@ L5:
         ADDWFC	CCPR1X, f, a
 	BRA	L7		; Return
 L6:
-	MOVF	DTIME2L, w, a	; and add half period to CCPR1 to add more pulse time 800 ms
+	MOVF	DTIME2L, w, a	; The LED was just turned off, load the 800 ms case
         ADDWF	CCPR1L, f, a
         MOVF	DTIME2H, w, a	; Add to each of the 3 bytes to get 24 bit CCP
         ADDWFC	CCPR1H, f, a
@@ -526,11 +707,14 @@ L7:
         BCF	PIR3, 1, a	; Clear the CCP1IF bit <1> interrupt flag
         RETURN
 
-;;;;;;;; TMR Handler ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	
+;;;;;;;; TMR1 Handler ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 TMR1handler:
         INCF	TMR1X, f, a	;Increment Timer1 extension
         BCF	PIR1, 0, a	;Clear TMR1IF flag and return to service routine
         RETURN
+	
+	
 	
 	
 ;;;;;;; InitLCD subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
