@@ -364,7 +364,7 @@ OnPeriod    EQU	    800000	    ; Number of instructions in 200 ms
 OffPeriod   EQU	    3200000	    ; Number of instructions in 800 ms
 Bignum	    EQU	    65536 - 62500   ; Number to get the 1 second delay and 250 ms
 pw1	    EQU	    4000	    ; Instructions for 1 ms
-pw19	    EQU	    72000	    ; Instructions for 19 ms
+pw19	    EQU	    76000	    ; Instructions for 19 ms
 
 ;;;;;;; Mainline program ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 main:
@@ -382,12 +382,12 @@ loop:
 Initial:
     ; LCD initialization output
     CLRF    TRISD, a			; Set PORTD as output
-    MOVLF   00000011B, TRISD, a		; 1 and 0 for input from rpg
     RCALL   InitLCD			; Initialize the LCD
     POINT   LCDs			; ASEN5067
     RCALL   DisplayC			; Display characters
     POINT   LCDsPw1			; PW1.00ms
     RCALL   DisplayC			; Display characters
+    MOVLF   00000011B, TRISD, a		; 1 and 0 for input from rpg, the rest is output for the LCD
     ;END LCD Init
     
     ;Flash LEDs init
@@ -438,11 +438,11 @@ Initial:
     BSF	    INTCON, 7, a    ; GIEH bit <7> enable all interrupts    
     
     ; Load values for the PWM
-    MOVLF   low pw1, DTIME3L, a	; Load DTIM3 with 1 ms
+    MOVLF   low pw1, DTIME3L, a	; Load DTIM3 with 1 ms, DTIME3 is the shorter period with the pulse high
     MOVLF   high pw1, DTIME3H, a
     MOVLF   low highword pw1, DTIME3X, a
     
-    MOVLF   low pw19, DTIME4L, a	; Load DTIME4 with 19 ms
+    MOVLF   low pw19, DTIME4L, a	; Load DTIME4 with 19 ms, DTIME4 is the longer period with the pulse low
     MOVLF   high pw19, DTIME4H, a
     MOVLF   low highword pw19, DTIME4X, a
     
@@ -482,7 +482,7 @@ RPG:
 				; But if the two bits have changed then...
 	; Form what a CCW change would produce.          	
 	RRCF	OLDPORTD, w, a	; Rotate right once into carry bit   
-	BNC	RP9		; If no carry, then bit 0 was a 0 -> branch to L9
+	BNC	RP9		; If no carry, then bit 0 was a 0 -> branch to RP9
         BCF	WREG, 1, a	; Otherwise, bit 0 was a 1. Then clear bit 1
 				; to simulate what a CCW change would produce
         BRA	RP10		; Branch to compare if RPG actually matches new CCW pattern in WREG
@@ -492,7 +492,7 @@ RP9:
 RP10:				; Test direction of RPG
         XORWF	RPG_TEMP, w, a	; Did the RPG actually change to this output?
         ANDLW	00000011B	; Masks the RPG pins
-        BNZ	RP11		; If not zero, then branch to L11 for CW case
+        BNZ	RP11		; If not zero, then branch to RP11 for CW case
         DECF	DIR_RPG, f, a	; If zero then change DIR_RPG to -1, must be CCW. 
         BRA	RP8		; Done so branch to return
 RP11:	; CW case 
@@ -507,37 +507,40 @@ RP8:
 ; which corresponds to the rotation of 1/64 of the RPG
 	
 Check_RPG:
-    RCALL   RPG		    ; Determine if there is a change
-    BTFSC   DIR_RPG, 7, a   ; Skip if the 7th bit is clear --> 0 or 1 case, other wise:
+    RCALL   RPG		    ; Determine if there is a change    
+    MOVF    DIR_RPG, w, a   ; Move into WREG
+    ANDLW   11111111B	    ; Check if it is non-zero
+    BZ	    CRP_End	    ; Return if the RPG hasn't moved
+    BTFSC   DIR_RPG, 7, a   ; Skip if the 7th bit is clear --> 0 or 1 case, other wise it is the negative 1 case
     BRA	    CCW		    ; Counter-clockwise case when the 7th bit is set
     BTFSS   DIR_RPG, 0, a   ; Skip if the first bit is set --> 1 case
-    BRA	    CRP_End	    ; Return if 0
+    BRA	    CRP_End	    ; Return if 0, shouldn't get to this point
 CW:
     ;Check if we are at 2 ms
-    MOVLW   01000000B	    ; Low byte for 2 ms
-    CPFSEQ  DTIME3L, a	    ; Check if the low byte is at the condition for 2 ms
-    BRA	    CW2		    ; Not at 2 ms, decrement the pulse width
-    MOVLW   00011111B	    ; High byte for 2 ms
-    CPFSEQ  DTIME3H, a	    ; Check if the low byte is at the condition for 2 ms
-    BRA	    CW2		    ; Not at 2 ms, decrement the pulse width
-    BRA	    CRP_End	    ; Return if we are already at 2 ms
+    MOVLW   01000000B	    ; Low byte for 2 ms, 8000 instructions
+    CPFSEQ  DTIME3L, a	    ; Check if the low byte is at the condition for 2 ms, skip if it is
+    BRA	    CW2		    ; Not at 2 ms, increment the pulse width
+    MOVLW   00011111B	    ; High byte for 2 ms, 8000 instructions
+    CPFSEQ  DTIME3H, a	    ; Check if the high byte is at the condition for 2 ms
+    BRA	    CW2		    ; Not at 2 ms, increment the pulse width
+    BRA	    CRP_End	    ; Return if we are already at 2 ms, can't go any higher
 CW2:
-    MOVLW   40		    ; Load the value into the WREG
+    MOVLW   00101000B	    ; Load the value into the WREG, 40 instructions for 0.01 ms change
     ADDWF   DTIME3L, f, a   ; Add to the low byte
-    MOVLW   0		    ; High and upper are zero to add
+    MOVLW   00000000B	    ; High and upper are zero to add
     ADDWFC  DTIME3H, f, a   ; Add with carry
     ADDWFC  DTIME3X, f, a   ; Add with carry
     
-    MOVLW   40		    ; Load value to subtract
+    MOVLW   00101000B	    ; Load value to subtract
     SUBWF   DTIME4L, f, a   ; Subtract from the low byte
-    MOVLW   0		    ; Zero
+    MOVLW   00000000B	    ; Zero
     SUBWFB  DTIME4H, f, a   ; Subtract with carry
     SUBWFB  DTIME4X, f, a   ; Subtract with carry
     BRA	    CRP_End	    ; Return
 
 CCW:
     ;Check if we are at 1 ms
-    MOVLW   10100000B	    ; Low byte for 1 ms
+    MOVLW   10100000B	    ; Low byte for 1 ms, 4000 instructions
     CPFSEQ  DTIME3L, a	    ; Check if the low byte is at the condition for 1 ms
     BRA	    CCW2	    ; Not at 1 ms, decrement the pulse width
     MOVLW   00001111B	    ; High byte for 1 ms
@@ -546,40 +549,20 @@ CCW:
     BRA	    CRP_End	    ; Return if we are already at 1 ms
     
 CCW2:
-    MOVLW   40		    ; Load value to subtract
+    MOVLW   00101000B	    ; Load value to subtract
     SUBWF   DTIME3L, f, a   ; Subtract from the low byte
-    MOVLW   0		    ; Zero
+    MOVLW   00000000B	    ; Zero
     SUBWFB  DTIME3H, f, a   ; Subtract with carry
     SUBWFB  DTIME3X, f, a   ; Subtract with carry
-    BRA	    CRP_End	    ; Return
     
-    MOVLW   40		    ; Load the value into the WREG
+    MOVLW   00101000B	    ; Load the value into the WREG
     ADDWF   DTIME4L, f, a   ; Add to the low byte
-    MOVLW   0		    ; High and upper are zero to add
+    MOVLW   00000000B	    ; High and upper are zero to add
     ADDWFC  DTIME4H, f, a   ; Add with carry
     ADDWFC  DTIME4X, f, a   ; Add with carry
-   
+  
 CRP_End:
     RETURN
-    
-    
-;CW:			    ; This adds 40 to the on portion of the PWM
-;    MOVLW   40		    ; Load 40 into WREG
-;    ADDWF   DTIME3L, f, a   ; Add to the low byte
-;    BTFSC   STATUS, 0, a    ; Check if the carry bit is set, skip if not
-;    INCF    DTIME3H, f, a   ; Increment the next byte
-;    BTFSC   STATUS, 0, a    ; Check if the carry bit is set, skip if not
-;    INCF    DTIME3X, f, a   ; Increment the extension
-;CW2:			    ; This subtracts 40 from the off portion of the PWM
-;    MOVLW   40		    ; Move 40 into WREG
-;    CPFSGT  DTIME4L, a	    ; Skip if the file register is greater than the working, just subtract like normal
-;    BRA	    CW_Carry	    ; Condition to borrow from the next byte
-;    SUBWF   DTIME4L, f, a   ; Subtract 40 from the low byte
-;    BRA	    CRP_End	    ; Return
-;    
-;CW_Carry:   
-;    MOVF   DTIME4H, w, a    ; Move the byte to the WREG
-;    ANDLW   11111111B	    ; And with the WREG
     
 
 	
