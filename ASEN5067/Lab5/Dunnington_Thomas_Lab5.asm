@@ -503,7 +503,8 @@ RP8:
 	
 ;;;;;;; Check_RPG subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; This function calls the RPG function to get a direction and changes 
-; the values of the pulse width by 40 instructions
+; the values of the pulse width by 40 instructions which is a 0.01 ms change 
+; which corresponds to the rotation of 1/64 of the RPG
 	
 Check_RPG:
     RCALL   RPG		    ; Determine if there is a change
