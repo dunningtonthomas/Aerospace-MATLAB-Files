@@ -588,16 +588,16 @@ UpdateLCD_CW:
     ; Clockwise case, increment
     INCF    LCD_Value+4, a
     MOVLW   0x3A			; Value for overflow
-    CPFSEQ  LCD_Value+4, a		; Skip if there was an overflow
-    BRA	    UpdateLCD_End		; Return
-    MOVLF   0x30, LCD_Value+4, a	; Reset to 0
-    INCF    LCD_Value+3, a		; Increment the next digit
+    SUBWF   LCD_Value+0x04, w, a	; Subtract 0x3A from the value
+    BNZ	    UpdateLCD_End		; Return if its not zero
+    MOVLF   0x30, LCD_Value+0x04, a	; Reset to 0
+    INCF    LCD_Value+0x03, a		; Increment the next digit
     MOVLW   0x3A			; WREG value
-    CPFSEQ  LCD_Value+3, a		; Skip if there was an overflow
+    SUBWF   LCD_Value+0x03, w, a	; Subtract 0x3A from the value
+    BNZ	    UpdateLCD_End		; Return if its not zero
+    MOVLF   0x30, LCD_Value+0x03, a	; Reset to 0
+    INCF    LCD_Value+0x01, a		; Increment the next digit
     BRA	    UpdateLCD_End		; Return
-    MOVLF   0x30, LCD_Value+3, a	; Reset to 0
-    INCF    LCD_Value+1, a		; Increment the next digit
-    BRA	    UpdateLCD_End			; Return
 UpdateLCD_CCW:
     DECF    LCD_Value+4, a		; Decrement lowest digit
     MOVLW   0x2F			; Value for overflow
@@ -625,6 +625,7 @@ HiPriISR:                        ; High-priority interrupt service routine
 	MOVFF	STATUS, STATUS_TEMP	; Set aside STATUS and WREG
         MOVWF	WREG_TEMP, a
 	MOVFF	BSR, BSR_TEMP
+	MOVLB   0x0F			; Set BSR for ccps outside of access
 H2:
         BTFSS	PIR3, 2, a	; Test CCP2IF bit <2> for this interrupt
         BRA	H3
