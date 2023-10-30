@@ -1,4 +1,4 @@
-;;;;;;; ASEN 4-5067 Lab 5 Dunnington Thomas ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;; ASEN 4-5067 Lab 5 Dunnington Thomas ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ;	Author: Thomas Dunnington
 ;	Last Modified: October 30, 2023   
@@ -340,6 +340,8 @@ count1:		DS	1   ; Used for timing delay
 count2:		DS	1   ; Used for timing delay  
 count3:		DS	1   ; Used for timing delay
 
+LCD_Value:	DS	6   ; 6 bytes for the (location)1.00(endstring) for the string
+
 ; Objects to be defined in Bank 1
 PSECT	udata_bank1
     NOP
@@ -379,18 +381,29 @@ loop:
 ; registers. YOU will need to add those that are omitted/needed for your 
 ; specific code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-Initial:
+Initial:    
     ; LCD initialization output
-    CLRF    TRISD, a			; Set PORTD as output
+    CLRF    TRISB, a			; Set PORTB as output for the LCD
+    MOVLF   00000011B, TRISD, a		; 1 and 0 for input from rpg, the rest is output for the LCD
     RCALL   InitLCD			; Initialize the LCD
     POINT   LCDs			; ASEN5067
     RCALL   DisplayC			; Display characters
     POINT   LCDsPw1			; PW1.00ms
     RCALL   DisplayC			; Display characters
-    MOVLF   00000011B, TRISD, a		; 1 and 0 for input from rpg, the rest is output for the LCD
-    ;END LCD Init
+    ; END LCD Init
     
-    ;Flash LEDs init
+    ; LCD with RAM for variable display
+    MOVLF   0xC2, LCD_Value, a		; Position code for 1.00
+    MOVLF   0x31, LCD_Value+1, a	; 1
+    MOVLF   0x2E, LCD_Value+2, a	; .
+    MOVLF   0x30, LCD_Value+3, a	; 0
+    MOVLF   0x30, LCD_Value+4, a	; 0
+    MOVLF   0x00, LCD_Value+5, a	; End string
+    LFSR    0, LCD_Value		; Load into FSR0 
+    RCALL   DisplayV
+    
+    
+    ; Flash LEDs init
     CLRF    INTCON, a			; Clear the flags in INTCON
     MOVLF   00000100B, T0CON, a		; Set up Timer0 for a delay of 0.5 s, 32 prescaler
     MOVLF   high Bignum, TMR0H, a	; Writing binary 3036 to TMR0H / TMR0L
@@ -536,8 +549,8 @@ CW2:
     MOVLW   00000000B	    ; Zero
     SUBWFB  DTIME4H, f, a   ; Subtract with carry
     SUBWFB  DTIME4X, f, a   ; Subtract with carry
+    RCALL   UpdateLCD_CW    ; Update the LCD
     BRA	    CRP_End	    ; Return
-
 CCW:
     ;Check if we are at 1 ms
     MOVLW   10100000B	    ; Low byte for 1 ms, 4000 instructions
@@ -547,7 +560,6 @@ CCW:
     CPFSEQ  DTIME3H, a	    ; Check if the low byte is at the condition for 1 ms
     BRA	    CCW2	    ; Not at 1 ms, decrement the pulse width
     BRA	    CRP_End	    ; Return if we are already at 1 ms
-    
 CCW2:
     MOVLW   00101000B	    ; Load value to subtract
     SUBWF   DTIME3L, f, a   ; Subtract from the low byte
@@ -560,8 +572,47 @@ CCW2:
     MOVLW   00000000B	    ; High and upper are zero to add
     ADDWFC  DTIME4H, f, a   ; Add with carry
     ADDWFC  DTIME4X, f, a   ; Add with carry
-  
+    RCALL   UpdateLCD_CCW   ; Update the LCD
 CRP_End:
+    RETURN
+    
+    
+    
+UpdateLCD_CW:
+;    MOVLF   0xC2, LCD_Value, a		; Position code for 1.00
+;    MOVLF   0x31, LCD_Value+1, a	; 1
+;    MOVLF   0x2E, LCD_Value+2, a	; .
+;    MOVLF   0x30, LCD_Value+3, a	; 0
+;    MOVLF   0x30, LCD_Value+4, a	; 0
+;    MOVLF   0x00, LCD_Value+5, a	; End string
+    ; Clockwise case, increment
+    INCF    LCD_Value+4, a
+    MOVLW   0x3A			; Value for overflow
+    CPFSEQ  LCD_Value+4, a		; Skip if there was an overflow
+    BRA	    UpdateLCD_End		; Return
+    MOVLF   0x30, LCD_Value+4, a	; Reset to 0
+    INCF    LCD_Value+3, a		; Increment the next digit
+    MOVLW   0x3A			; WREG value
+    CPFSEQ  LCD_Value+3, a		; Skip if there was an overflow
+    BRA	    UpdateLCD_End		; Return
+    MOVLF   0x30, LCD_Value+3, a	; Reset to 0
+    INCF    LCD_Value+1, a		; Increment the next digit
+    BRA	    UpdateLCD_End			; Return
+UpdateLCD_CCW:
+    DECF    LCD_Value+4, a		; Decrement lowest digit
+    MOVLW   0x2F			; Value for overflow
+    CPFSEQ  LCD_Value+4, a		; Skip if there was a borrow
+    BRA	    UpdateLCD_End		; Return
+    MOVLF   0x39, LCD_Value+4, a	; Reset to 9
+    DECF    LCD_Value+3, a		; Decrement the next digit
+    MOVLW   0x2F			; WREG value
+    CPFSEQ  LCD_Value+3, a		; Skip if there was an overflow
+    BRA	    UpdateLCD_End		; Return
+    MOVLF   0x39, LCD_Value+3, a	; Reset to 9
+    DECF    LCD_Value+1, a		; Decrement the next digit
+UpdateLCD_End:
+    LFSR    0, LCD_Value	; Set FSR0
+    RCALL   DisplayV		; Update the display
     RETURN
     
 
@@ -785,6 +836,43 @@ Loop5:
         BNZ	Loop5
         RETURN
 	
+	
+;;;;;;; DisplayV subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; DisplayV taken from Reference: Peatman CH7 LCD
+; This subroutine is called with FSR0 containing the address of a variable
+; display string.  It sends the bytes of the string to the LCD.  The first
+; byte sets the cursor position.  The remaining bytes are displayed, beginning
+; at that position.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+
+DisplayV:
+        BCF     LATB,4,A	    ;Drive RS pin low for cursor positioning code
+Loop6:
+	MOVLW 0xF0
+	ANDWF LATB,F,A		    ;Clear RB0:RB3, which are used to send LCD data
+        BSF   LATB,5,A		    ;Drive E pin high
+        MOVF INDF0,W,A		    ;Move byte from FSR to working register
+	ANDLW 0xF0		    ;Mask to get only upper nibble
+	SWAPF WREG,W,A		    ;swap so that upper nibble is in right position to move to LATB (RB0:RB3)
+	IORWF PORTB,W,A		    ;Mask to include the rest of PORTB
+	MOVWF LATB,A		    ;Send upper nibble out to LATB
+        BCF   LATB,5,A		    ;Drive E pin low so LCD will accept nibble
+	
+	MOVLW 0xF0
+	ANDWF LATB,F,A		    ;Clear RB0:RB3, which are used to send LCD data
+        BSF   LATB,5,A		    ;Drive E pin high again
+        MOVF INDF0,W,A		    ;Move byte from table latch to working register
+	ANDLW 0x0F		    ;Mask to get only lower nibble
+	IORWF PORTB,W,A		    ;Mask to include the rest of PORTB
+	MOVWF LATB,A		    ;Send lower nibble out to LATB
+        BCF   LATB,5,A		    ;Drive E pin low so LCD will accept nibble
+        RCALL T50		    ;Wait 50 usec so LCD can process
+	  
+        BSF   LATB,4,A		    ;Drive RS pin high for displayable characters
+        MOVF  PREINC0,W,A	    ;Increment pointer, then get next byte
+        BNZ   Loop6
+        RETURN	
 	
 ;;;;;;; Wait05sec subroutine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Uses Wait10ms by Scott Palo and Trudy Schwartz as a template
