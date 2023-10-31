@@ -1,6 +1,6 @@
-/****** ASEN 4/5067 Lab 5 ******************************************************
+/****** ASEN 5067 Lab 5 ******************************************************
  * Author: Thomas Dunnington
- * Date  : 10/29/2023
+ * Date  : 10/30/2023
  *
  * Description
  * "Blinky"
@@ -69,16 +69,15 @@ void main() {
  ******************************************************************************/
 void Initial() {
     // Configure the IO ports
-    TRISD  = 0; //*** STUDENTS SPECIFY VALUE ***;
-    LATD = 0; //*** STUDENTS SPECIFY VALUE ***;
-    TRISC  = 0; //*** STUDENTS SPECIFY VALUE ***;
-    LATC = 0; //*** STUDENTS SPECIFY VALUE ***;
+    TRISD  = 0;     //Outputs for PORTD
+    LATD = 0;       //Clear the output
+    TRISC  = 0;     //Outputs for PORTC
+    LATC = 0;       //Clear the output
  
     // Initializing TMR0
-    T0CON = 0b00000100; //*** STUDENTS SPECIFY VALUE ***;
-    TMR0L = 0b11011100;                      // Loading the value for 
-    TMR0H = 0b00001011;                      // Clear high register if used
-
+    T0CON = 0b00000100;         // Prescale of 32
+    TMR0L = 0b11011100;         // Low byte of 3036
+    TMR0H = 0b00001011;         // High byte of 3036
 
     // Configuring Interrupts
     RCONbits.IPEN = 1;              // Enable priority levels
@@ -130,10 +129,10 @@ void TMR0handler() {
 // STUDENTS ADD CODE HERE TO IMPLEMENT THE TIMER SERVICE ROUTINE TO MAKE THE LED BLINK
 // Note that the variable Alive_count has been declared with global scope and may be used
 // in this handler if desired.
-    LATDbits.LATD4 = ~LATDbits.LATD4;
-    TMR0L = 0b11011100;                      // Reset the values
+    LATDbits.LATD4 = ~LATDbits.LATD4;           // Toggle the LED
+    TMR0L = 0b11011100;                         // Reload the values into the timer
     TMR0H = 0b00001011;                   
-    INTCONbits.TMR0IF = 0;      //Remember to clear flag before return to polling routine
+    INTCONbits.TMR0IF = 0;                       // Clear the interrupt flag
 }
 
 
