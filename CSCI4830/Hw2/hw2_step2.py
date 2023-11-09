@@ -1,7 +1,6 @@
 # Author: Thomas Dunnington
 # Date: 11/8/2023
 
-
 # Import Libraries
 import roboticstoolbox as rtb
 import sys
@@ -80,6 +79,30 @@ def denavMatrix(d, theta, a, alpha):
     return np.array(DH_mat)
 
 
+# Function for forward kinematics
+def forwardDH(q):
+    # Get the transformation matrices for each link
+    A01 = denavMatrix(0.333, q[0], 0, 0)
+    A12 = denavMatrix(0, q[1], 0, -1*np.pi/2)
+    A23 = denavMatrix(0.316, q[2], 0, np.pi/2)
+    A34 = denavMatrix(0, q[3], 0.0825, np.pi/2)
+    A45 = denavMatrix(0.384, q[4], -0.0825, -1*np.pi/2)
+    A56 = denavMatrix(0, q[5], 0, np.pi/2)
+    A67 = denavMatrix(0.107, q[6], 0.088, np.pi/2)
+    
+    # Matrix multiplication for the final transformation matrix from the base to end effector
+    A02 = np.matmul(A01, A12)
+    A03 = np.matmul(A02, A23)
+    A04 = np.matmul(A03, A34)
+    A05 = np.matmul(A04, A45)
+    A06 = np.matmul(A05, A56)
+    A07 = np.matmul(A06, A67)
+    
+    return A07
+
+
+# Function to calculate the new pose of the end effector given a time step and configuration
+
 
 # %% Main Code
 # Read the command line
@@ -95,30 +118,96 @@ for i in output5:
     qArr.append(float(i))
 
 # Convert to numpy array
-q = np.array(qArr)
+qAll = np.array(qArr)
 
 # Hard code the values of q if there is not command line argument
 #Check if q is the right size
-if q.size != 7:
-    q = np.array([0, -0.3, 0, -1.2, 0, 1.5, 0.79]) #If not, assign values to q
-    q = np.array([1, 1, 1, 1, 1, 1, 1]) #If not, assign values to q
+if qAll.size != 15:
+    qAll = np.array([1, 1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1]) #If not, assign values to q
     
-    
-# Compute the REAL Jacobian
-panda_rtb = rtb.models.DH.Panda()
-# print(panda_rtb)
-# print(panda_rtb.q)
+# Split into q and dq
+q = qAll[0:7]
+dq = qAll[7:14]
+dt = qAll[14]
 
-# Print the REAL Jacobian
-# panda_rtb.plot(q, block=True)
-# panda_rtb.jacob0([0, 0, 0, 0, 0, 0, 0])
+# Compute the REAL Jacobian to compare to
+panda_rtb = rtb.models.DH.Panda()
 geoJac_Real = panda_rtb.jacob0(q)
-# print(geoJac_Real)
-# print("\n\n")
 
 # Compute the jacobian
 geoJac = compute_geoJacobian(q)
-print(geoJac)
+
+
+# Split the time into small enough intervals for infinitesimal changes
+tStep = 0.001
+
+# Calculate the number of iterations
+numIterations = dt / tStep
+
+# Initial Configuration
+init_ee = forwardDH(q)
+currPose = init_ee
+qInit = q
+
+# Iterate through each time step
+for i in range(int(numIterations)):
+    
+    # Get the initial end effector configuration
+    Ri = currPose[0:3, 0:3]
+    P0_ee = currPose[0:3, 3] 
+    
+    # Compute the jacobian based on the current configuration
+    geoJac = compute_geoJacobian(q)
+    
+    # Apply the jacobian
+    delX = np.matmul(geoJac, dq)
+    
+    # Get the angular and linear velocities
+    dv = delX[0:3]
+    dOmega = delX[3:6]
+    
+    # Get the change in angles for the orientation
+    delAngles = dOmega * tStep
+    
+    # Get the change in position 
+    delPos = dv * tStep
+    
+    # Create the infintesimal change in angles matrix
+    RdAngle = np.array([[1, -delAngles[2], delAngles[1]], 
+                        [delAngles[2], 1, -delAngles[0]],
+                        [-delAngles[1], delAngles[0], 1]])
+    
+    # Calculate the new rotation matrix
+    Rnew = np.matmul(RdAngle, Ri)
+    
+    # Calculat the new position
+    Pnew = P0_ee + delPos
+    
+    # Get the new pose
+    currPose[0:3, 0:3] = Rnew
+    currPose[0:3, 3] = Pnew
+    
+    # Update the values of q for the next iteration
+    q = q + dq * tStep
+    
+
+
+# Final configuration is the final iteration of currPose
+finalPose = currPose
+
+# Compare to the forward kinematics result
+qFinal = qInit + dq * dt
+
+# Forward kinematics with final joint configuration
+finalPose_Check = forwardDH(qFinal)
+
+# Output the result
+print(finalPose_Check)
+
+
+
+
+
 
 
 

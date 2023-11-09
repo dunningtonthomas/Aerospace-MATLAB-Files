@@ -79,6 +79,40 @@ def denavMatrix(d, theta, a, alpha):
     
     return np.array(DH_mat)
 
+# Function for forward kinematics
+def forwardDH(q):
+    # Get the transformation matrices for each link
+    A01 = denavMatrix(0.333, q[0], 0, 0)
+    A12 = denavMatrix(0, q[1], 0, -1*np.pi/2)
+    A23 = denavMatrix(0.316, q[2], 0, np.pi/2)
+    A34 = denavMatrix(0, q[3], 0.0825, np.pi/2)
+    A45 = denavMatrix(0.384, q[4], -0.0825, -1*np.pi/2)
+    A56 = denavMatrix(0, q[5], 0, np.pi/2)
+    A67 = denavMatrix(0.107, q[6], 0.088, np.pi/2)
+    
+    # Matrix multiplication for the final transformation matrix from the base to end effector
+    A02 = np.matmul(A01, A12)
+    A03 = np.matmul(A02, A23)
+    A04 = np.matmul(A03, A34)
+    A05 = np.matmul(A04, A45)
+    A06 = np.matmul(A05, A56)
+    A07 = np.matmul(A06, A67)
+    
+    return A07
+
+# This function computes the forward kinematics using the current q configuration and
+# calculates the error function
+def errorFunc(rd, currQ):
+    # Get the current forward kinematics
+    fq = forwardDH(currQ)
+    
+    # Get the current position
+    currPos = fq[0:3, 3]
+    
+    # Difference
+    diff = rd - currPos
+    
+    return diff
 
 
 # %% Main Code
@@ -95,30 +129,59 @@ for i in output5:
     qArr.append(float(i))
 
 # Convert to numpy array
-q = np.array(qArr)
+qAll = np.array(qArr)
 
 # Hard code the values of q if there is not command line argument
 #Check if q is the right size
-if q.size != 7:
-    q = np.array([0, -0.3, 0, -1.2, 0, 1.5, 0.79]) #If not, assign values to q
-    q = np.array([1, 1, 1, 1, 1, 1, 1]) #If not, assign values to q
+if qAll.size != 10:
+    qAll = np.array([1, 1, 1, 1, 1, 1, 1, 0.5, 0.25, 0.33]) #If not, assign values to q
     
+# Split into q and desired position
+q = qAll[0:7]
+rd = qAll[7:10]
     
+
 # Compute the REAL Jacobian
 panda_rtb = rtb.models.DH.Panda()
-# print(panda_rtb)
-# print(panda_rtb.q)
-
-# Print the REAL Jacobian
-# panda_rtb.plot(q, block=True)
-# panda_rtb.jacob0([0, 0, 0, 0, 0, 0, 0])
-geoJac_Real = panda_rtb.jacob0(q)
-# print(geoJac_Real)
-# print("\n\n")
 
 # Compute the jacobian
 geoJac = compute_geoJacobian(q)
-print(geoJac)
+
+# Implement the Gradient Descent Method
+tolerance = 0.01        # Error tolerance
+alpha = 0.05            # Step size
+currQ = q
+currError = (np.linalg.norm(errorFunc(rd, currQ)))
+
+while(currError > tolerance): #Iterate until below the tolerance    
+    # Calculate the current Jacobian
+    currJac = compute_geoJacobian(currQ)
+    
+    # Truncate the jacobian since we are not using orientations
+    currJac = currJac[0:3, :]
+    jacTrans = alpha * np.transpose(currJac)
+    
+    # Calculate the new q values
+    currQ = currQ + np.matmul(jacTrans, errorFunc(rd, currQ))
+
+
+    # New error
+    currError = (np.linalg.norm(errorFunc(rd, currQ)))
+    print(currError)
+
+
+# Test forward kinematics with the new q
+finalT = forwardDH(currQ)
+finalPos = finalT[0:3, 3]
+desPos = rd
+
+# Print Results
+print("Desired Position: ", desPos)
+print("Achieved Position: ", finalPos)
+
+
+
+
 
 
 
