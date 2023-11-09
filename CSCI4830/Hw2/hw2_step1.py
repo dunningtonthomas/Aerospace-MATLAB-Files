@@ -115,7 +115,7 @@ geoJac_Real = panda_rtb.jacob0(q)
 geoJac = compute_geoJacobian(q)
 print(geoJac)
 
-
+#
 
 
 
