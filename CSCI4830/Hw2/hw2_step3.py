@@ -164,21 +164,21 @@ while(currError > tolerance): #Iterate until below the tolerance
     # Calculate the new q values
     currQ = currQ + np.matmul(jacTrans, errorFunc(rd, currQ))
 
-
     # New error
     currError = (np.linalg.norm(errorFunc(rd, currQ)))
-    print(currError)
 
 
 # Test forward kinematics with the new q
-finalT = forwardDH(currQ)
+finalQ = currQ
+finalT = forwardDH(finalQ)
 finalPos = finalT[0:3, 3]
 desPos = rd
 
 # Print Results
-print("Desired Position: ", desPos)
-print("Achieved Position: ", finalPos)
-
+# print("Desired Position: ", desPos)
+# print("Achieved Position: ", finalPos)
+# print("Joint Angles: ", finalQ)
+print(finalQ)
 
 
 

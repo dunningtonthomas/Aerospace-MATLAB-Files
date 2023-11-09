@@ -100,18 +100,13 @@ q = np.array(qArr)
 # Hard code the values of q if there is not command line argument
 #Check if q is the right size
 if q.size != 7:
-    q = np.array([0, -0.3, 0, -1.2, 0, 1.5, 0.79]) #If not, assign values to q
     q = np.array([1, 1, 1, 1, 1, 1, 1]) #If not, assign values to q
     
     
 # Compute the REAL Jacobian
 panda_rtb = rtb.models.DH.Panda()
-# print(panda_rtb)
-# print(panda_rtb.q)
 
 # Print the REAL Jacobian
-# panda_rtb.plot(q, block=True)
-# panda_rtb.jacob0([0, 0, 0, 0, 0, 0, 0])
 geoJac_Real = panda_rtb.jacob0(q)
 # print(geoJac_Real)
 # print("\n\n")

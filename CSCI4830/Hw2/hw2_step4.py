@@ -1,6 +1,7 @@
 # Author: Thomas Dunnington
 # Date: 11/8/2023
 
+
 # Import Libraries
 import roboticstoolbox as rtb
 import sys
@@ -78,7 +79,6 @@ def denavMatrix(d, theta, a, alpha):
     
     return np.array(DH_mat)
 
-
 # Function for forward kinematics
 def forwardDH(q):
     # Get the transformation matrices for each link
@@ -100,8 +100,19 @@ def forwardDH(q):
     
     return A07
 
-
-# Function to calculate the new pose of the end effector given a time step and configuration
+# This function computes the forward kinematics using the current q configuration and
+# calculates the error function
+def errorFunc(rd, currQ):
+    # Get the current forward kinematics
+    fq = forwardDH(currQ)
+    
+    # Get the current position
+    currPos = fq[0:3, 3]
+    
+    # Difference
+    diff = rd - currPos
+    
+    return diff
 
 
 # %% Main Code
@@ -122,89 +133,51 @@ qAll = np.array(qArr)
 
 # Hard code the values of q if there is not command line argument
 #Check if q is the right size
-if qAll.size != 15:
-    qAll = np.array([1, 1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1]) #If not, assign values to q
-
-# Split into q and dq
+if qAll.size != 10:
+    qAll = np.array([1, 1, 1, 1, 1, 1, 1, -0.3, 0.3, 1]) #If not, assign values to q
+    
+# Split into q and desired position
 q = qAll[0:7]
-dq = qAll[7:14]
-dt = qAll[14]
+rd = qAll[7:10]
+    
 
-# Compute the REAL Jacobian to compare to
+# Compute the REAL Jacobian
 panda_rtb = rtb.models.DH.Panda()
-geoJac_Real = panda_rtb.jacob0(q)
 
 # Compute the jacobian
 geoJac = compute_geoJacobian(q)
 
+# Implement Newton Method
+tolerance = 0.01        # Error tolerance
+currQ = q
+currError = (np.linalg.norm(errorFunc(rd, currQ)))
 
-# Split the time into small enough intervals for infinitesimal changes
-tStep = 0.001
+while(currError > tolerance): #Iterate until below the tolerance    
+    # Calculate the current Jacobian
+    currJac = compute_geoJacobian(currQ)
+    
+    # Truncate the jacobian since we are not using orientations
+    currJac = currJac[0:3, :]
+    jacT = np.transpose(currJac)
+    
+    # Calculate the pseudo inverse of the jacobian
+    pseudoJac = jacT @ np.linalg.inv(np.matmul(currJac, jacT))
+    
+    # Calculate the new q values
+    currQ = currQ + np.matmul(pseudoJac, errorFunc(rd, currQ))
 
-# Calculate the number of iterations
-numIterations = dt / tStep
-
-# Initial Configuration
-init_ee = forwardDH(q)
-currPose = init_ee
-qInit = q
-
-# Iterate through each time step
-for i in range(int(numIterations)):
-    
-    # Get the initial end effector configuration
-    Ri = currPose[0:3, 0:3]
-    P0_ee = currPose[0:3, 3] 
-    
-    
-    # Compute the jacobian based on the current configuration
-    geoJac = compute_geoJacobian(q)
-    
-    # Apply the jacobian
-    delX = np.matmul(geoJac, dq)
-    
-    # Get the angular and linear velocities
-    dv = delX[0:3]
-    dOmega = delX[3:6]
-    
-    # Get the change in angles for the orientation
-    delAngles = dOmega * tStep
-    
-    # Get the change in position 
-    delPos = dv * tStep
-    
-    # Create the infintesimal change in angles matrix
-    RdAngle = np.array([[1, -delAngles[2], delAngles[1]], 
-                        [delAngles[2], 1, -delAngles[0]],
-                        [-delAngles[1], delAngles[0], 1]])
-    
-    # Calculate the new rotation matrix
-    Rnew = np.matmul(RdAngle, Ri)
-    
-    # Calculat the new position
-    Pnew = P0_ee + delPos
-    
-    # Get the new pose
-    currPose[0:3, 0:3] = Rnew
-    currPose[0:3, 3] = Pnew
-    
-    # Update the values of q for the next iteration
-    q = q + dq * tStep
-    
+    # New error
+    currError = (np.linalg.norm(errorFunc(rd, currQ)))
 
 
-# Final configuration is the final iteration of currPose
-finalPose = currPose
+# Test forward kinematics with the new q
+finalQ = currQ
+finalT = forwardDH(finalQ)
+finalPosition = finalT[0:3, 3]
+desPosition = rd
 
-# Compare to the forward kinematics result
-qFinal = qInit + dq * dt
-
-# Forward kinematics with final joint configuration
-finalPose_Check = forwardDH(qFinal)
-
-# Output the result
-print(finalPose)
-
+# Print the final q configuration
+print(finalQ)
 
 
 
