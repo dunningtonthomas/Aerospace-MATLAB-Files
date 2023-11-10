@@ -134,7 +134,8 @@ qAll = np.array(qArr)
 # Hard code the values of q if there is not command line argument
 #Check if q is the right size
 if qAll.size != 10:
-    qAll = np.array([1, 1, 1, 1, 1, 1, 1, -0.3, 0.3, 1]) #If not, assign values to q
+    print("Not Enough Input Arguments, q = ones, rd = 0.5s \n\n")
+    qAll = np.array([1, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5]) #If not, assign values to q
     
 # Split into q and desired position
 q = qAll[0:7]
@@ -177,8 +178,11 @@ finalPosition = finalT[0:3, 3]
 desPosition = rd
 
 # Print the final q configuration
-print(finalQ)
-
+# print("Desired Position: ", desPosition)
+# print("Achieved Position: ", finalPosition)
+# print("Joint Angles: ", finalQ)
+# print(finalQ)
+print(finalT)
 
 
 

@@ -100,6 +100,7 @@ q = np.array(qArr)
 # Hard code the values of q if there is not command line argument
 #Check if q is the right size
 if q.size != 7:
+    print("Not Enough Input Arguments, q = ones\n\n")
     q = np.array([1, 1, 1, 1, 1, 1, 1]) #If not, assign values to q
     
     
@@ -115,7 +116,6 @@ geoJac_Real = panda_rtb.jacob0(q)
 geoJac = compute_geoJacobian(q)
 print(geoJac)
 
-#
 
 
 
