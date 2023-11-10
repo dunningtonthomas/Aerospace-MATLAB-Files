@@ -123,6 +123,7 @@ qAll = np.array(qArr)
 # Hard code the values of q if there is not command line argument
 #Check if q is the right size
 if qAll.size != 15:
+    print("Not Enough Input Arguments, q = ones, dq = 0.1, dt = 1\n\n")
     qAll = np.array([1, 1, 1, 1, 1, 1, 1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1]) #If not, assign values to q
 
 # Split into q and dq
@@ -130,13 +131,9 @@ q = qAll[0:7]
 dq = qAll[7:14]
 dt = qAll[14]
 
-# Compute the REAL Jacobian to compare to
-panda_rtb = rtb.models.DH.Panda()
-geoJac_Real = panda_rtb.jacob0(q)
 
 # Compute the jacobian
 geoJac = compute_geoJacobian(q)
-
 
 # Split the time into small enough intervals for infinitesimal changes
 tStep = 0.001
