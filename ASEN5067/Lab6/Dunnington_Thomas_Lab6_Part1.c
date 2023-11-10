@@ -73,13 +73,15 @@ const float voltConv = 0.000805664; // Voltage bin
  ******************************************************************************/
 void Initial(void);         // Function to initialize hardware and interrupts
 void TMR0handler(void);     // Interrupt handler for TMR0, typo in main
+void update_LCD(float, char); // Update the LCD with new values
 
 /******************************************************************************
  * main()
  ******************************************************************************/
-void main() {
+void main() 
+{
     
-    char state = 1;        // State = 1 if the ADC finished reading temperature, State = 0 if ADC finished potentiometer
+    char state = 1;        // State = 1 --> Read temperature, State = 0 --> Read potentiometer
     float volt = 0.0;      // voltage is the voltage output from the ADC
     float deg = 0.0;        // Degree measurement from the temperature sensor
     
@@ -100,10 +102,14 @@ void main() {
                   // Conversion is complete
                   volt = voltConv * ADRES;
                   
-                  // Change the configuration for the 
+                  // Update the LCD
+                  update_LCD(volt, state);
+                  
+                  // Change the configuration for the ADC
                   ADCON0 = 0b00001101;        // Channel AN3
                   __delay_us(2.5);            // Delay by 2.5 microseconds for acquisition
                   ADCON0bits.GO = 1;          // Start the next conversion
+                  state = 1;                  // Update state
               }
               else           // Temperature reading
               {
@@ -116,10 +122,14 @@ void main() {
                   // Conversion is complete
                   deg = degConv * ADRES;
                   
-                  // Change the configuration for the 
+                  // Update the LCD
+                  update_LCD(deg, state);
+                  
+                  // Change the configuration for the ADC
                   ADCON0 = 0b00000001;        // Channel AN0
                   __delay_us(2.5);            // Delay by 2.5 microseconds for acquisition
                   ADCON0bits.GO = 1;          // Start the next conversion
+                  state = 0;                  // Update state
               }
           }
      }
@@ -237,5 +247,40 @@ void TMR0handler() {
 
 
 /******************************************************************************
- * read_ADC reads the 
+ * update_LCD updates the LCD with the new values of the temperature/potentiometer
+ * num = floating point number to display to one decimal place XX.X
+ * state = 0 for potentiometer, state = 1 for temperature 
  ******************************************************************************/
+void update_LCD(float num, char state)
+{
+    if(state == 1) // Temperature
+    {
+        char buffer[9];
+        char word[7];
+        sprintf(word, "T=%.1fC", num);
+        buffer[0] = 0xC0;
+        buffer[8] = 0x00;
+        
+        for(int i = 1; i < 8; i++)
+        {
+            buffer[i] = word[i-1];
+        }
+        
+        DisplayV(buffer);
+    }
+    else    // Potentiometer
+    {
+        char buffer[10];
+        char word[8];
+        sprintf(word, "PT=%.2fV", num);
+        buffer[0] = 0x80;
+        buffer[9] = 0x00;
+        
+        for(int i = 1; i < 9; i++)
+        {
+            buffer[i] = word[i-1];
+        }
+        
+        DisplayV(buffer);
+    }
+}
