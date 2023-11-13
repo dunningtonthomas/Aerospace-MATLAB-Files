@@ -1,6 +1,6 @@
 /****** ASEN 5067 Lab 6 ******************************************************
  * Author: Thomas Dunnington
- * Date  : 11/2/2023
+ * Date  : 11/12/2023
  *
  * Updated for XC8
  * 
@@ -64,76 +64,35 @@
 /******************************************************************************
  * Global variables
  ******************************************************************************/
-const char LCDRow1[] = {0x80,'T','E','S','T','I','N','G','!',0x00};  //const puts into prog memory
-const float degConv = 0.080566;     // Celsius per bin
-const float voltConv = 0.000805664; // Voltage bin
+const float degConv = 0.080566;         // Celsius per bin
+const float voltConv = 0.0008056640625; // Voltage per bin
 
 /******************************************************************************
  * Function prototypes
  ******************************************************************************/
-void Initial(void);         // Function to initialize hardware and interrupts
-void TMR0handler(void);     // Interrupt handler for TMR0, typo in main
-void update_LCD(float, char); // Update the LCD with new values
+void Initial(void);             // Function to initialize hardware and interrupts
+void TMR0handler(void);         // Interrupt handler for TMR0, typo in main
+void update_LCD(float, char);   // Update the LCD with new values
+void ADC_Set(char*, char);      // Update the ADC channel and begin conversion
+void ADC_Handle(char*);         // Handle the ADC conversion once it is complete
 
 /******************************************************************************
  * main()
  ******************************************************************************/
 void main() 
-{
-    
-    char state = 1;        // State = 1 --> Read temperature, State = 0 --> Read potentiometer
-    float volt = 0.0;      // voltage is the voltage output from the ADC
-    float deg = 0.0;        // Degree measurement from the temperature sensor
-    
-    Initial();                 // Initialize everything
+{    
+    Initial();                  // Initialize everything
+    char state = 1;             // State = 1 --> Read temperature, State = 0 --> Read potentiometer
      
-     while(1) {
-        // Put mainline code here
-          if(ADCON0bits.GO == 0)  // Conversion is complete
-          {
-              if(state == 0) // Potentiometer reading
-              {
-                  // Throw away the first measurement, start conversion again and wait
-                  ADCON0bits.GO = 1;
-                  while(ADCON0bits.GO == 1)
-                  {
-                      ;
-                  }
-                  // Conversion is complete
-                  volt = voltConv * ADRES;
-                  
-                  // Update the LCD
-                  update_LCD(volt, state);
-                  
-                  // Change the configuration for the ADC
-                  ADCON0 = 0b00001101;        // Channel AN3
-                  __delay_us(2.5);            // Delay by 2.5 microseconds for acquisition
-                  ADCON0bits.GO = 1;          // Start the next conversion
-                  state = 1;                  // Update state
-              }
-              else           // Temperature reading
-              {
-                  // Throw away the first measurement, start conversion again and wait
-                  ADCON0bits.GO = 1;
-                  while(ADCON0bits.GO == 1)
-                  {
-                      ;
-                  }
-                  // Conversion is complete
-                  deg = degConv * ADRES;
-                  
-                  // Update the LCD
-                  update_LCD(deg, state);
-                  
-                  // Change the configuration for the ADC
-                  ADCON0 = 0b00000001;        // Channel AN0
-                  __delay_us(2.5);            // Delay by 2.5 microseconds for acquisition
-                  ADCON0bits.GO = 1;          // Start the next conversion
-                  state = 0;                  // Update state
-              }
-          }
-     }
+    while(1) 
+    {
+        if(ADCON0bits.GO == 0)  // Conversion is complete
+        {
+            ADC_Handle(&state); // Get ADC result and output to LCD
+        }
+    }
 }
+
 
 /******************************************************************************
  * Initial()
@@ -161,7 +120,6 @@ void Initial() {
 
     // Initialize the LCD and print to it
     InitLCD();
-    DisplayC(LCDRow1);
     
     // Blink LEDs
     LATD = 0b00100000;          // Turn on RD5
@@ -170,6 +128,7 @@ void Initial() {
     __delay_ms(500);            // Delay for 0.5 seconds
     LATD = 0b10000000;          // Turn on RD7
     __delay_ms(500);            // Delay for 0.5 seconds
+    LATD = 0b00000000;          // Turn all LEDs off
     
     // Initialize the ADCONx registers
     ADCON0 = 0b00001101;        // Channel AN3
@@ -245,6 +204,59 @@ void TMR0handler() {
     INTCONbits.TMR0IF = 0;      //Clear flag and return to polling routine
 }
 
+/******************************************************************************
+ * ADC_Handle reads the result of the ADC after throwing away the first value and reconfigures the ADC for the next channel
+ * state indicates whether we are reading from the potentiometer or the temperature sensor
+ ******************************************************************************/
+void ADC_Handle(char *state)
+{
+    // Throw away the first measurement, start conversion again and wait
+    ADCON0bits.GO = 1;
+    while(ADCON0bits.GO == 1)
+    {
+        ;
+    }
+        
+    if(*state == 0) // Potentiometer reading
+    {
+        // Convert to voltage
+        float volt = voltConv * ADRES;
+
+        // Update the LCD
+        update_LCD(volt, (*state));
+
+        // Update ADC channel and state
+        ADC_Set(state, 0b00001101);   
+    }
+    else           // Temperature reading
+    {
+        // Convert to degrees
+        float deg = degConv * ADRES;
+
+        // Update the LCD
+        update_LCD(deg, (*state));
+
+        // Update ADC channel and state
+        ADC_Set(state, 0b00000001);  
+    }
+    
+}
+
+
+/******************************************************************************
+ * ADC_Set changes channels to the corresponding 
+ * state is used to tell which ADC channel we are setting to
+ * bits is the byte to be loaded into ADCON0
+ ******************************************************************************/
+void ADC_Set(char *state, char bits)
+{
+    // Change the configuration for the ADC
+    ADCON0 = bits;        // Channel AN3
+    __delay_us(2.5);      // Delay by 2.5 microseconds for acquisition
+    *state = !(*state);   // Update state
+    ADCON0bits.GO = 1;    // Start the next conversion
+}
+
 
 /******************************************************************************
  * update_LCD updates the LCD with the new values of the temperature/potentiometer
@@ -255,12 +267,14 @@ void update_LCD(float num, char state)
 {
     if(state == 1) // Temperature
     {
+        // Create string buffer for the floating point to string
         char buffer[9];
         char word[7];
         sprintf(word, "T=%.1fC", num);
         buffer[0] = 0xC0;
         buffer[8] = 0x00;
         
+        // Create the full word to send to the LCD
         for(int i = 1; i < 8; i++)
         {
             buffer[i] = word[i-1];
@@ -270,12 +284,14 @@ void update_LCD(float num, char state)
     }
     else    // Potentiometer
     {
+        // Create string buffer for the floating point to string
         char buffer[10];
         char word[8];
         sprintf(word, "PT=%.2fV", num);
         buffer[0] = 0x80;
         buffer[9] = 0x00;
         
+        // Create the full word to send to the LCD
         for(int i = 1; i < 9; i++)
         {
             buffer[i] = word[i-1];
