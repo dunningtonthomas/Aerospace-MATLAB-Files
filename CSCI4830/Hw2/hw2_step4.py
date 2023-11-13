@@ -181,9 +181,8 @@ desPosition = rd
 # print("Desired Position: ", desPosition)
 # print("Achieved Position: ", finalPosition)
 # print("Joint Angles: ", finalQ)
-# print(finalQ)
-print(finalT)
-
+# print(finalT)
+print(finalQ)
 
 
 
