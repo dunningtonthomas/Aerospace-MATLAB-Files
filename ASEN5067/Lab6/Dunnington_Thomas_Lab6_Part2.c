@@ -66,16 +66,27 @@
  ******************************************************************************/
 const float degConv = 0.080566;         // Celsius per bin
 const float voltConv = 0.0008056640625; // Voltage per bin
+char UART_buffer[10];                   // Character buffer array for receiving
+char index = 0;                         // index for the UART_buffer
+char oldIndex = 0;                      // old index value
+char endBool = 0;                       // endBool = 1 if line feed detected
+char tempBuffer[7];                     // String for TEMP reading
+char potBuffer[8];                      // String for POT reading
+char cont_on = 0;                       // 1 if continuous transmission enabled
+char count = 0;                         // count to use for timer0 and continuous transmission
 
 /******************************************************************************
  * Function prototypes
  ******************************************************************************/
 void Initial(void);             // Function to initialize hardware and interrupts
 void TMR0handler(void);         // Interrupt handler for TMR0, typo in main
+void receive_handler(void);     // Interrupt handler for receiving transmission     
 void update_LCD(float, char);   // Update the LCD with new values
 void ADC_Set(char*, char);      // Update the ADC channel and begin conversion
 void ADC_Handle(char*);         // Handle the ADC conversion once it is complete
-void sendE(void);
+void send_byte(char);           // This function will send the input byte over UART
+void command_parse(void);       // Function to parse the commands
+void contSend(void);            // Send T and P
 
 /******************************************************************************
  * main()
@@ -87,9 +98,16 @@ void main()
      
     while(1) 
     {
+        // ADC Conversion
         if(ADCON0bits.GO == 0)  // Conversion is complete
         {
             ADC_Handle(&state); // Get ADC result and output to LCD
+        }
+        
+        if(endBool == 1) // This is set once we get a line feed character
+        {
+            command_parse();        // Parse the command
+            endBool = 0;            // Reset the boolean for line feed reception
         }
         
     }
@@ -152,13 +170,23 @@ void Initial() {
 
     T0CONbits.TMR0ON = 1;           // Turning on TMR0
     
+    // Configure Interrupts for EUSART receive
+    PIE1bits.RC1IE = 1;             // Turn on interrupts for receiving a transmission
+    IPR1bits.RC1IP = 1;             // High priority for receiving data
+    
     // Configure USART
-    TRISCbits.TRISC6 = 0;   //OUTPUT
-    TRISCbits.TRISC7 = 1;   //INPUT
-    TXSTA1 = 0b00100110;    //Double check high versus low speed mode
-    RCSTA1 = 0b10010000;    //Enable, 8 bit, enable receiver, async
-    BAUDCON1 = 0b01000000;  //8 bit, non-inverted, idle high, bit 5 is the polarity bit check this, bit 4 is idle level
+    TRISCbits.TRISC6 = 0;   // OUTPUT
+    TRISCbits.TRISC7 = 1;   // INPUT
+    TXSTA1 = 0b00100110;    // Double check high versus low speed mode
+    RCSTA1 = 0b10010000;    // Enable, 8 bit, enable receiver, async
+    BAUDCON1 = 0b01000000;  // 8 bit, non-inverted, idle high, bit 5 is the polarity bit check this, bit 4 is idle level
     SPBRG1 = 51;            // 19200 baud rate, high speed 8 bit, actual 19231
+    
+    // Clear the UART buffer
+    for(int i = 0; i < 10; i++)
+    {
+        UART_buffer[i] = 0;
+    }
     
     // Start ADC with the temperature sensor, turn on
     ADCON0bits.GO = 1;
@@ -172,7 +200,47 @@ void Initial() {
 
 void __interrupt() HiPriISR(void) {
     
+    // Check if the receive flag is set
+    if(PIR1bits.RC1IF == 1)
+    {
+        receive_handler();
+    }
+    
 }	// Supports retfie FAST automatically
+
+/******************************************************************************
+ * receive_handler subroutine, the receive flag is set
+ * 
+ ******************************************************************************/
+void receive_handler()
+{
+    // Temporary character to read received byte
+    char temp;
+    
+    // Read the value in RCREG1, this clears the interrupt flag
+    temp = RCREG1;
+    
+    // See if a new line character was received
+    if(temp == 10)    // 10 is the line feed character, end of command
+    {
+        endBool = 1;
+        return;      // Return so the new line is not stored in the buffer
+    }
+    
+    // Store in the buffer
+    UART_buffer[index] = temp; 
+
+    // Increment the index
+    index = index + 1;
+
+    // Check if index is greater than the size of the buffer
+    if(index > 9)
+    {
+        // Rollover the index
+        index = 0;
+    }       
+}
+
 
 /******************************************************************************
  * LoPriISR interrupt service routine
@@ -201,6 +269,23 @@ void __interrupt(low_priority) LoPriISR(void)
  * Handles Alive LED Blinking via counter 
  ******************************************************************************/
 void TMR0handler() {
+    // Increment counter for continuous transmission
+    count = count + 1;
+    
+    // Condition to transmit
+    if(count == 2 && cont_on == 1)
+    {
+        count = 0;  // Reset
+        contSend(); // Output values
+    }
+    
+    //Reset
+    if(count > 2) 
+    {
+        count = 0;
+    }
+    
+    // TOGGLE LED
     if(LATDbits.LATD4 == 1) //Condition for high
     {
         LATDbits.LATD4 = 0;
@@ -209,31 +294,109 @@ void TMR0handler() {
     else //LED is low
     {
         LATDbits.LATD4 = 1;
-        TMR0 = 65536 - 6250;           // Instructions for 100 ms
-        
-        //Test call send E
-        if(PIR1bits.TX1IF == 1)
-        {
-            sendE();
-        }
-        
+        TMR0 = 65536 - 6250;           // Instructions for 100 ms      
     }
     INTCONbits.TMR0IF = 0;      //Clear flag and return to polling routine
 }
 
-// Temporary function
-void sendE(void)
+
+/******************************************************************************
+ * command_parse
+ * This subroutine will parse through the UART_buffer and determine what command
+ * was received
+ * It will then call then send the relevant byte over UART
+ ******************************************************************************/
+void command_parse()
+{    
+    // Define the different cases as strings
+    char str1[10] = "TEMP";
+    char str2[10] = "POT";
+    char str3[10] = "CONT_ON";
+    char str4[10] = "CONT_OFF";
+    
+    // Use string compare to see what case it is
+    if(!strcmp(str1, UART_buffer)) //TEMP
+    {
+        // Output the temperature
+        for(int i = 2; i < 7; i++)
+        {
+            send_byte(tempBuffer[i]);
+        }
+    }
+    else if(!strcmp(str2, UART_buffer)) //POT
+    {
+        // Output the potentiometer
+        for(int i = 3; i < 8; i++)
+        {
+            send_byte(potBuffer[i]);
+        }
+    }
+    else if(!strcmp(str3, UART_buffer)) //CONT_ON
+    {
+        cont_on = 1;
+    }
+    else if(!strcmp(str4, UART_buffer)) //CONT_OFF
+    {
+        cont_on = 0;;
+    }
+    else // Not a command
+    {
+        char notComm[13] = "Not a Command";
+        for(int i = 0; i < 13; i++)
+        {
+            send_byte(notComm[i]);
+        }
+    }
+    
+    // Reset the indices to 0 and clear the buffer
+    index = 0;
+    for(int i = 0; i < 10; i++)
+    {
+        UART_buffer[i] = 0;
+    }    
+}
+
+/******************************************************************************
+ * contSend
+ * This subroutine will send T and PT for the continuous send
+ ******************************************************************************/
+void contSend()
 {
-    // Test USART
-    TXREG1 = 0x45;
-            
-    while(PIR1bits.TX1IF == 0) // Wait until transmission is done
+    // Output the temperature value
+    for(int i = 0; i < 7; i++)
+    {
+        send_byte(tempBuffer[i]);
+    }
+    
+    send_byte(';');
+    send_byte(' ');
+    
+    // Output the potentiometer value
+    for(int i = 0; i < 8; i++)
+    {
+        send_byte(potBuffer[i]);
+    }
+    
+    // Carriage return
+    send_byte(0x0D);
+}
+
+
+
+/******************************************************************************
+ * send_byte
+ * This subroutine will take as an input a byte and send over UART
+ ******************************************************************************/
+void send_byte(char byte)
+{
+    // Make sure previous transmission has gone through
+    while(PIR1bits.TX1IF == 0) // Wait until transmission is done before sending next
     {
         ;
-    }
-
-    TXREG1 = 0x46;      // New line character
+    }    
     
+    // Send byte over UART
+    TXREG1 = byte;
 }
     
 
@@ -314,7 +477,14 @@ void update_LCD(float num, char state)
             buffer[i] = word[i-1];
         }
         
-        DisplayV(buffer);
+        // Get string to write over UART
+        for(int i = 0; i < 7; i++)
+        {
+            tempBuffer[i] = word[i]; // Copy over the word
+        }
+        
+        // Display on the LCD
+        DisplayV(buffer); 
     }
     else    // Potentiometer
     {
@@ -331,6 +501,13 @@ void update_LCD(float num, char state)
             buffer[i] = word[i-1];
         }
         
+        // Get string to write over UART
+        for(int i = 0; i < 8; i++)
+        {
+            potBuffer[i] = word[i]; // Copy over the word
+        }
+        
+        // Display on the LCD
         DisplayV(buffer);
     }
 }
