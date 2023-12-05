@@ -74,6 +74,8 @@ char tempBuffer[7];                     // String for TEMP reading
 char potBuffer[8];                      // String for POT reading
 char cont_on = 0;                       // 1 if continuous transmission enabled
 char count = 0;                         // count to use for timer0 and continuous transmission
+unsigned int dacVal = 0;                // Output value to the DAC
+char direction = 1;                     // Boolean to increase or decrease the dac value, 1 is increase
 
 /******************************************************************************
  * Function prototypes
@@ -87,6 +89,8 @@ void ADC_Handle(char*);         // Handle the ADC conversion once it is complete
 void send_byte(char);           // This function will send the input byte over UART
 void command_parse(void);       // Function to parse the commands
 void contSend(void);            // Send T and P
+void writeSPI(void);            // Sends voltage to the DAC
+void updateSPI(void);           // Updates the value of the value to be written to SPI
 
 /******************************************************************************
  * main()
@@ -109,6 +113,9 @@ void main()
             command_parse();        // Parse the command
             endBool = 0;            // Reset the boolean for line feed reception
         }
+        
+        // Send SPI command
+        writeSPI();
         
     }
 }
@@ -188,6 +195,23 @@ void Initial() {
         UART_buffer[i] = 0;
     }
     
+    // Configure the SPI parameters
+    TRISCbits.TRISC3 = 0;       // Clock output
+    TRISCbits.TRISC4 = 1;       // MISO input
+    TRISCbits.TRISC5 = 0;       // MOSI output
+    TRISEbits.TRISE0 = 0;       // CS output, CS = 0 to select the device
+    TRISAbits.TRISA5 = 1;       // RA5 input for the output of the DAC to the board
+    
+    SSP1STAT = 0b00000000;      // Master mode with rising edge, buffer is not full
+    SSP1CON1 = 0b00100000;      // Enable serial port, idle state low, Fosc/4 for the clock
+    
+    // Configure TIMER3 for the timing of the update spi function
+    T3CON = 0b00000101;             // 16-bit, no prescaler
+    TMR3 = 65536 - 1953;            // Instructions for 0.488281 ms
+    PIE2bits.TMR3IE = 1;            // Enable interrupts for timer3
+    IPR2bits.TMR3IP = 0;            // Low priority interrupts
+    T3CONbits.TMR3ON = 1;           // Turn the timer on
+    
     // Start ADC with the temperature sensor, turn on
     ADCON0bits.GO = 1;
 }
@@ -257,6 +281,15 @@ void __interrupt(low_priority) LoPriISR(void)
             TMR0handler();
             continue;
         }
+        
+        // Check if timer 3 flag has gone off
+        if(PIR2bits.TMR3IF == 1)
+        {
+            updateSPI();
+            TMR3 = 65536 - 1953;    // Instructions for 0.488281 ms
+            PIR2bits.TMR3IF = 0;   // Clear the flag      
+            continue;
+        }
         // Save temp copies of WREG, STATUS and BSR if needed.
         break;      // Supports RETFIE automatically
     }
@@ -297,6 +330,98 @@ void TMR0handler() {
         TMR0 = 65536 - 6250;           // Instructions for 100 ms      
     }
     INTCONbits.TMR0IF = 0;      //Clear flag and return to polling routine
+}
+
+
+/******************************************************************************
+ * writeSPI will send a 12 bit value to the DAC and read the buffer to clear the receive buffer
+ * It will then update the value to be sent
+ ******************************************************************************/
+void writeSPI()
+{    
+    char garbo; // Garbage variable
+    
+    // Assert the CS bit
+    LATEbits.LATE0 = 0;
+    
+    // Send one byte, get second most sig byte of the data to send
+    char byteSend = (dacVal >> 8) & 0x0F;
+    byteSend = byteSend | 0x70;   // OR with the command 0111 for the DAC, write to DACa, buffered input, gain = 1, output power down control bit
+    
+    // Send the first byte
+    SSP1BUF = byteSend;
+            
+    // Wait until complete
+    while(PIR1bits.SSP1IF == 0)
+    {
+        ;
+    }
+    PIR1bits.SSP1IF = 0;    // Clear the flag
+    
+   
+    // Read in the received byte
+    garbo = SSP1BUF;
+    
+    // Get the second byte, lower byte of the integer
+    byteSend = dacVal & 0xFF;
+    
+    // Send another byte
+    SSP1BUF = byteSend;
+    
+    // Wait until complete
+    while(PIR1bits.SSP1IF == 0)
+    {
+        ;
+    }
+    PIR1bits.SSP1IF = 0;    // Clear the flag
+    
+    // Read in the received byte
+    garbo = SSP1BUF;
+    
+    // De-assert the CS
+    LATEbits.LATE0 = 1;
+    
+    // Make sure the flag is clear
+    PIR1bits.SSP1IF = 0;    // Clear the flag
+}
+
+
+/******************************************************************************
+ * updateSPI updates the value of the dacValue to send over SPI
+ * it increments by 1 and resets if it is beyond the max value
+ ******************************************************************************/
+void updateSPI()
+{
+    dacVal = dacVal + 2;
+    
+    if(dacVal >= 4096)
+    {
+       dacVal = 0;  // Switch to decrease
+    }
+    
+    
+//    if(direction == 1)
+//    {
+//        // Increase
+//        dacVal = dacVal + 2;
+//        
+//        // See if it has reached the max value
+//        if(dacVal >= 4096)
+//        {
+//            direction = 0;  // Switch to decrease
+//        }
+//    }
+//    else
+//    {
+//        // Decrease
+//        dacVal = dacVal - 2;
+//        
+//        // See if it has reached the min value
+//        if(dacVal <= 0)
+//        {
+//            direction = 1;  // Switch to increase
+//        }
+//    }
 }
 
 
