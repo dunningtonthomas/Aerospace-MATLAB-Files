@@ -1,0 +1,438 @@
+/****** ASEN 5067 Final Project ******************************************************
+ * Author: Thomas Dunnington
+ * Date  : 12/7/2023
+ *
+ *******************************************************************************
+ *
+ * Program hierarchy 
+ *
+ * Mainline
+ *   Initial
+ *
+ * HiPriISR (included just to show structure)
+ *
+ * LoPriISR
+ *   TMR0handler
+ ******************************************************************************/
+
+#include <xc.h>
+#include "LCDroutinesEasyPic.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
+#define _XTAL_FREQ 16000000   //Required in XC8 for delays. 16 Mhz oscillator clock
+#pragma config FOSC=HS1, PWRTEN=ON, BOREN=ON, BORV=2, PLLCFG=OFF
+#pragma config WDTEN=OFF, CCP2MX=PORTC, XINST=OFF
+
+/******************************************************************************
+ * Global variables
+ ******************************************************************************/
+const char ASEN5067[11] = {0x80, 'A', 'S', 'E', 'N', ' ', '5', '0', '6', '7', 0x00};
+const float ampConv = 1;                // Amps per bin, not sure what this is yet
+char UART_buffer[10];                   // Character buffer array for receiving
+char Luna_buffer[9];                   // UART buffer for data received from the Luna sensor
+char distBool = 0;                      // Boolean to record distance data
+char twoByteBool = 0;                   // Boolean to record distance data
+int currDist = 0;                       // Current detected distance in cm
+char index = 0;                         // Index for the UART_buffer
+char Luna_Ind = 0;                      // Index for the Luna sensor buffer
+char endBool = 0;                       // endBool = 1 if line feed detected
+char tempBuffer[7];                     // String for TEMP reading
+char potBuffer[8];                      // String for POT reading
+char cont_on = 0;                       // 1 if continuous transmission enabled
+char count = 0;                         // count to use for timer0 and continuous transmission
+
+/******************************************************************************
+ * Function prototypes
+ ******************************************************************************/
+void Initial(void);             // Function to initialize hardware and interrupts
+void TMR0handler(void);         // Interrupt handler for TMR0, typo in main
+void receive_handler(void);     // Interrupt handler for receiving transmission     
+void update_LCD(int);         // Update the LCD with new values
+void send_byte(char);           // This function will send the input byte over UART
+void command_parse(void);       // Function to parse the commands
+void contSend(void);            // Send D and I
+void lunaReceive(void);         // Received byte from the luna sensor
+
+/******************************************************************************
+ * main()
+ ******************************************************************************/
+void main() 
+{    
+    Initial();                  // Initialize everything
+     
+    while(1) 
+    {        
+        if(endBool == 1) // This is set once we get a line feed character
+        {
+            command_parse();        // Parse the command
+            endBool = 0;            // Reset the boolean for line feed reception
+        }       
+    }
+}
+
+
+/******************************************************************************
+ * Initial()
+ *
+ * This subroutine performs all initializations of variables and registers.
+ * 
+ ******************************************************************************/
+void Initial() {     
+    // Configure the IO ports
+    TRISD  = 0b00001111;
+    LATD = 0;               // Turn off all LEDs
+    TRISC  = 0b10010011;
+    LATC = 0;
+    
+    // Configure the LCD pins for output. Defined in LCDRoutinesEasyPic.h
+    LCD_RS_TRIS   = 0;              // Register Select Control line
+    LCD_E_TRIS    = 0;              // Enable control line 
+    LCD_DATA_TRIS = 0b11000000;     // Note the LCD data is only on the upper nibble RB0:3
+                                    // Redundant to line above RB 4:5 for control
+                                    // RB 6:7 set as inputs for other use, not used by LCD
+    LCD_DATA_LAT = 0;           // Initialize LCD data LAT to zero
+
+
+    // Initialize the LCD and print to it
+    InitLCD();
+    
+    // Write to LCD
+    DisplayC(ASEN5067);
+    
+    // Blink LEDs
+    LATD = 0b00100000;          // Turn on RD5
+    __delay_ms(500);            // Delay for 0.5 seconds
+    LATD = 0b01000000;          // Turn on RD6
+    __delay_ms(500);            // Delay for 0.5 seconds
+    LATD = 0b10000000;          // Turn on RD7
+    __delay_ms(500);            // Delay for 0.5 seconds
+    LATD = 0b00000000;          // Turn all LEDs off
+
+    // Initializing TMR0
+    T0CON = 0b00000101;             // 16-bit, 64 prescaler
+    TMR0 = 65536 - 56250;           // Instructions for 900 ms
+
+    // Configuring Interrupts
+    RCONbits.IPEN = 1;              // Enable priority levels
+    INTCON2bits.TMR0IP = 0;         // Assign low priority to TMR0 interrupt
+
+    INTCONbits.TMR0IE = 1;          // Enable TMR0 interrupts
+    INTCONbits.GIEL = 1;            // Enable low-priority interrupts to CPU
+    INTCONbits.GIEH = 1;            // Enable all interrupts
+
+    T0CONbits.TMR0ON = 1;           // Turning on TMR0
+    
+    
+    // Configure Interrupts for EUSART 1 receive
+    PIE1bits.RC1IE = 1;             // Turn on interrupts for receiving a transmission
+    IPR1bits.RC1IP = 1;             // High priority for receiving data
+    
+    // Configure USART 1
+    TRISCbits.TRISC6 = 0;   // OUTPUT
+    TRISCbits.TRISC7 = 1;   // INPUT
+    TXSTA1 = 0b00100110;    // Double check high versus low speed mode
+    RCSTA1 = 0b10010000;    // Enable, 8 bit, enable receiver, async
+    BAUDCON1 = 0b01000000;  // 8 bit, non-inverted, idle high, bit 5 is the polarity bit check this, bit 4 is idle level
+    SPBRG1 = 51;            // 19200 baud rate, high speed 8 bit, actual 19231
+    
+    // Clear the UART buffer
+    for(int i = 0; i < 10; i++)
+    {
+        UART_buffer[i] = 0;
+    }
+    
+    // Configure Interrupts for EUSART 2 receive
+    PIE3bits.RC2IE = 1;             // Turn on interrupts for receiving a transmission
+    IPR3bits.RC2IP = 1;             // High priority for receiving data from the sensor at 100Hz
+    
+    // CHECK THESE CONFIGURATIONS
+    // Configure USART 2
+    TRISGbits.TRISG2 = 1;       // 1 For input to receive transmissions
+    TRISGbits.TRISG1 = 0;       // Output to transmit to the sensor
+    TXSTA2 = 0b00100110;        // Enabled
+    RCSTA2 = 0b10010000;        // Enable, 8 bit, enable receiver, async
+    BAUDCON2 = 0b01001000;      // 16 bit, non-inverted, idle is high, bit 5 is the polarity bit, bit 4 is idle level
+    SPBRG2 = 34;                // 115200 baud rate, high speed 16 bit, actual 114286
+}
+
+/******************************************************************************
+ * HiPriISR interrupt service routine
+ *
+ * Included to show form, does nothing
+ ******************************************************************************/
+
+void __interrupt() HiPriISR(void) {
+    
+    while(1)
+    {
+        // Check if the receive flag is set
+        if(PIR1bits.RC1IF == 1)
+        {
+            receive_handler();
+            continue;
+        }          
+        
+        // Data from Luna
+        if(PIR3bits.RC2IF == 1)
+        {
+            lunaReceive();
+            continue;
+        }
+
+        break;
+    }
+
+}	// Supports retfie FAST automatically
+
+/******************************************************************************
+ * receive_handler subroutine, the receive flag is set
+ * 
+ ******************************************************************************/
+void receive_handler()
+{
+    // Temporary character to read received byte
+    char temp;
+    
+    // Read the value in RCREG1, this clears the interrupt flag
+    temp = RCREG1;
+    
+    // See if a new line character was received
+    if(temp == 10)    // 10 is the line feed character, end of command
+    {
+        endBool = 1;
+        return;      // Return so the new line is not stored in the buffer
+    }
+    
+    // Store in the buffer
+    UART_buffer[index] = temp; 
+
+    // Increment the index
+    index = index + 1;
+
+    // Check if index is greater than the size of the buffer
+    if(index > 9)
+    {
+        // Rollover the index
+        index = 0;
+    }       
+}
+
+/******************************************************************************
+ * lunaReceive subroutine, a byte was received from the sensor
+ * 
+ ******************************************************************************/
+void lunaReceive()
+{
+    // Temporary character to read received byte
+    char temp;
+    
+    // Read the value in RCREG2, this clears the interrupt flag
+    temp = RCREG2;    
+    
+    // Read into the Luna buffer
+    Luna_buffer[Luna_Ind] = temp;
+    
+    // Check if we record distance
+    if(distBool) // distBool is set if we previously received 0x59 0x59
+    {
+        if(!twoByteBool) // First Byte, twoByteBool = 0 if first byte
+        {
+            currDist = Luna_buffer[Luna_Ind];
+            twoByteBool = 1;
+        }
+        else    // Second byte, twoByteBool = 1 if second byte
+        {
+            currDist = (Luna_buffer[Luna_Ind] << 8) | currDist;
+            distBool = 0;
+            update_LCD(currDist);   // Update the LCD with the current distance
+        }
+    }
+    
+    // Check if we are at the distance measurement read byte
+    if(Luna_Ind >= 1 && (Luna_buffer[Luna_Ind] == 0x59 && Luna_buffer[Luna_Ind-1] == 0x59)) 
+    {
+        distBool = 1;       // Record the next two bytes
+        twoByteBool = 0;    // Two bytes not yet received
+    }
+    
+    // Increment index
+    Luna_Ind = Luna_Ind + 1;
+    
+    // Check if the index is greater than the size of the buffer and roll over
+    if(Luna_Ind > 8)
+    {
+        Luna_Ind = 0; //Reset
+    }
+}
+
+
+/******************************************************************************
+ * LoPriISR interrupt service routine
+ *
+ * Calls the individual interrupt routines. It sits in a loop calling the required
+ * handler functions until TMR0IF is clear.
+ ******************************************************************************/
+
+void __interrupt(low_priority) LoPriISR(void) 
+{
+    // Save temp copies of WREG, STATUS and BSR if needed.
+    while(1) {
+        if( INTCONbits.TMR0IF ) {
+            TMR0handler();
+            continue;
+        }
+        
+        
+        // Save temp copies of WREG, STATUS and BSR if needed.
+        break;      // Supports RETFIE automatically
+    }
+}
+
+
+/******************************************************************************
+ * TMR0handler interrupt service routine.
+ *
+ * Handles Alive LED Blinking via counter 
+ ******************************************************************************/
+void TMR0handler() {
+    
+    // TOGGLE LED
+    LATDbits.LATD4 = ~LATDbits.LATD4;
+    TMR0 = 65536 - 56250;           // Instructions for 900 ms
+
+    INTCONbits.TMR0IF = 0;      //Clear flag and return to polling routine
+}
+
+
+/******************************************************************************
+ * command_parse
+ * This subroutine will parse through the UART_buffer and determine what command
+ * was received
+ * It will then call then send the relevant byte over UART
+ ******************************************************************************/
+void command_parse()
+{    
+    // Define the different cases as strings
+    char str1[10] = "DIST";         // Output the measured distance
+    char str2[10] = "DETECT";       // Output whether or not something is detected
+    char str3[10] = "DIST_ON";      // Continuous transmission of distance
+    char str4[10] = "DIST_OFF";     // End continuous
+    
+    // Use string compare to see what case it is
+    if(!strcmp(str1, UART_buffer)) //DIST
+    {
+        // Output the temperature
+        for(int i = 2; i < 7; i++)
+        {
+            send_byte(tempBuffer[i]);
+        }
+    }
+    else if(!strcmp(str2, UART_buffer)) //DETECT
+    {
+        // Output the potentiometer
+        for(int i = 3; i < 8; i++)
+        {
+            send_byte(potBuffer[i]);
+        }
+    }
+    else if(!strcmp(str3, UART_buffer)) //DIST_ON
+    {
+        cont_on = 1;
+    }
+    else if(!strcmp(str4, UART_buffer)) //DIST_OFF
+    {
+        cont_on = 0;;
+    }
+    else // Not a command
+    {
+        char notComm[13] = "Not a Command";
+        for(int i = 0; i < 13; i++)
+        {
+            send_byte(notComm[i]);
+        }
+    }
+    
+    // Reset the indices to 0 and clear the buffer
+    index = 0;
+    for(int i = 0; i < 10; i++)
+    {
+        UART_buffer[i] = 0;
+    }    
+}
+
+/******************************************************************************
+ * contSend
+ * This subroutine will send T and PT for the continuous send
+ ******************************************************************************/
+void contSend()
+{
+    // Output the temperature value
+    for(int i = 0; i < 7; i++)
+    {
+        send_byte(tempBuffer[i]);
+    }
+    
+    send_byte(';');
+    send_byte(' ');
+    
+    // Output the potentiometer value
+    for(int i = 0; i < 8; i++)
+    {
+        send_byte(potBuffer[i]);
+    }
+    
+    // Carriage return
+    send_byte(0x0D);
+}
+
+
+
+/******************************************************************************
+ * send_byte
+ * This subroutine will take as an input a byte and send over UART
+ ******************************************************************************/
+void send_byte(char byte)
+{
+    // Make sure previous transmission has gone through
+    while(PIR1bits.TX1IF == 0) // Wait until transmission is done before sending next
+    {
+        ;
+    }    
+    
+    // Send byte over UART
+    TXREG1 = byte;
+}
+
+
+/******************************************************************************
+ * update_LCD updates the LCD with the new values of the distance/Amps
+ * num = floating point number to display to one decimal place XX.X
+ * state = 0 for distance measurement, state = 1 for amps 
+ ******************************************************************************/
+void update_LCD(int num)
+{
+    // Create string buffer for the integer to string
+    char buffer[8];
+    char word[6];
+    sprintf(word, "D=%d", num);
+    buffer[0] = 0xC0;
+    buffer[7] = 0x00;
+
+    // Create the full word to send to the LCD
+    for(int i = 1; i < 7; i++)
+    {
+        buffer[i] = word[i-1];
+    }
+
+    // Get string to write over UART
+//    for(int i = 0; i < 7; i++)
+//    {
+//        tempBuffer[i] = word[i]; // Copy over the word
+//    }
+
+    // Display on the LCD
+    DisplayV(buffer);  // Distance
+}
