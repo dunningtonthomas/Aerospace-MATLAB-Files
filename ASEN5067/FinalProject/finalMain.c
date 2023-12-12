@@ -37,6 +37,7 @@ char Luna_buffer[9];                   // UART buffer for data received from the
 char distBool = 0;                      // Boolean to record distance data
 char twoByteBool = 0;                   // Boolean to record distance data
 int currDist = 0;                       // Current detected distance in cm
+int prevDist = 0;                       // Previously detected distance
 char index = 0;                         // Index for the UART_buffer
 char Luna_Ind = 0;                      // Index for the Luna sensor buffer
 char endBool = 0;                       // endBool = 1 if line feed detected
@@ -81,6 +82,15 @@ void main()
             endBool = 0;            // Reset the boolean for line feed reception
         }   
         
+        if(PIR2bits.TMR3IF == 1) // Update LCD
+        {
+            PIR2bits.TMR3IF = 0;        // Reset flag
+            TMR3 = 65536 - 50000;       // Instructions for 10 Hz
+            
+            // Update the LCD
+            DisplayC(clearDist);    // Clear previous
+            update_LCD(currDist);   // Set new                
+        }
     }
 }
 
@@ -106,7 +116,6 @@ void Initial() {
                                     // RB 6:7 set as inputs for other use, not used by LCD
     LCD_DATA_LAT = 0;           // Initialize LCD data LAT to zero
 
-
     // Initialize the LCD and print to it
     InitLCD();
     
@@ -125,6 +134,11 @@ void Initial() {
     // Initializing TMR0
     T0CON = 0b00000101;             // 16-bit, 64 prescaler
     TMR0 = 65536 - 56250;           // Instructions for 900 ms
+    
+    // Configure TIMER3 for output to LCD
+    T3CON = 0b00110101;             // 16-bit, 8 prescaler, 
+    TMR3 = 65536 - 50000;           // Instructions for 10 Hz
+    
 
     // Configuring Interrupts
     RCONbits.IPEN = 1;              // Enable priority levels
@@ -134,7 +148,9 @@ void Initial() {
     INTCONbits.GIEL = 1;            // Enable low-priority interrupts to CPU
     INTCONbits.GIEH = 1;            // Enable all interrupts
 
+    // Turn the timers on
     T0CONbits.TMR0ON = 1;           // Turning on TMR0
+    T3CONbits.TMR3ON = 1;           // Turn the timer on
     
     
     // Configure Interrupts for EUSART 1 receive
@@ -183,15 +199,6 @@ void Initial() {
     SPBRG2 = 34;                // 115200 baud rate, high speed 8 bit, actual 114286
     
     
-    // Send command to change baud rate to 9600
-//    send_byte(0x5A);
-//    send_byte(0x08);
-//    send_byte(0x06);
-//    send_byte(0x80);
-//    send_byte(0x25);
-//    send_byte(0x00);
-//    send_byte(0x00);
-//    send_byte(0x00);
     
     
 }
@@ -373,6 +380,7 @@ void lunaReceive3() //DEBUGGING TEST to see if it works with usart1
     // Record distance
     if(bool1 == 1)                              // First byte
     {
+        prevDist = currDist;                    // Previous distance
         currDist = currRec;                     // Get low byte
         bool1 = 0;                              // Reset first byte bool
         bool2 = 1;                              // Second byte bool
@@ -429,8 +437,8 @@ void TMR0handler() {
     TMR0 = 65536 - 56250;           // Instructions for 900 ms
     
     // Update LCD
-    DisplayC(clearDist);    // Clear previous
-    update_LCD(currDist);   // Set new
+    //DisplayC(clearDist);    // Clear previous
+    //update_LCD(currDist);   // Set new
     
     INTCONbits.TMR0IF = 0;      //Clear flag and return to polling routine
 }
