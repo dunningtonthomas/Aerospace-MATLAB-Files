@@ -29,7 +29,8 @@
 /******************************************************************************
  * Global variables
  ******************************************************************************/
-const char ASEN5067[11] = {0x80, 'A', 'S', 'E', 'N', ' ', '5', '0', '6', '7', 0x00};
+const char ASEN5067[11] = {0x80, 'A', 'S', 'E', 'N', ' ', '5', '0', '6', '7', 0x00};    // Top of LCD
+const char clearDist[9] = {0xC0, 'D', '=', 0x20, 0x20, 0x20, 0x20, 0x20, 0x00};         // Reset distance measurement
 const float ampConv = 1;                // Amps per bin, not sure what this is yet
 char UART_buffer[10];                   // Character buffer array for receiving
 char Luna_buffer[9];                   // UART buffer for data received from the Luna sensor
@@ -43,6 +44,12 @@ char tempBuffer[7];                     // String for TEMP reading
 char potBuffer[8];                      // String for POT reading
 char cont_on = 0;                       // 1 if continuous transmission enabled
 char count = 0;                         // count to use for timer0 and continuous transmission
+char received = 0;                      // Full transmission hasn't been received yet
+char prevRec = 0;
+char currRec = 0;
+char bool1 = 0;
+char bool2 = 0;
+int tempCount = 0;
 
 /******************************************************************************
  * Function prototypes
@@ -55,6 +62,9 @@ void send_byte(char);           // This function will send the input byte over U
 void command_parse(void);       // Function to parse the commands
 void contSend(void);            // Send D and I
 void lunaReceive(void);         // Received byte from the luna sensor
+void lunaReceive2(void);        // DEBUGGING TEST
+void lunaReceive3(void);        // Different method to receive distance
+
 
 /******************************************************************************
  * main()
@@ -69,7 +79,8 @@ void main()
         {
             command_parse();        // Parse the command
             endBool = 0;            // Reset the boolean for line feed reception
-        }       
+        }   
+        
     }
 }
 
@@ -127,6 +138,18 @@ void Initial() {
     
     
     // Configure Interrupts for EUSART 1 receive
+//    PIE1bits.RC1IE = 1;             // Turn on interrupts for receiving a transmission
+//    IPR1bits.RC1IP = 1;             // High priority for receiving data
+//    
+//    // Configure USART 1
+//    TRISCbits.TRISC6 = 0;   // OUTPUT
+//    TRISCbits.TRISC7 = 1;   // INPUT
+//    TXSTA1 = 0b00100110;    // Double check high versus low speed mode
+//    RCSTA1 = 0b10010000;    // Enable, 8 bit, enable receiver, async
+//    BAUDCON1 = 0b01000000;  // 8 bit, non-inverted, idle high, bit 5 is the polarity bit check this, bit 4 is idle level
+//    SPBRG1 = 51;            // 19200 baud rate, high speed 8 bit, actual 19231
+    
+    // DEBUGGING: EUSART 1 for data from LUNA
     PIE1bits.RC1IE = 1;             // Turn on interrupts for receiving a transmission
     IPR1bits.RC1IP = 1;             // High priority for receiving data
     
@@ -135,8 +158,8 @@ void Initial() {
     TRISCbits.TRISC7 = 1;   // INPUT
     TXSTA1 = 0b00100110;    // Double check high versus low speed mode
     RCSTA1 = 0b10010000;    // Enable, 8 bit, enable receiver, async
-    BAUDCON1 = 0b01000000;  // 8 bit, non-inverted, idle high, bit 5 is the polarity bit check this, bit 4 is idle level
-    SPBRG1 = 51;            // 19200 baud rate, high speed 8 bit, actual 19231
+    BAUDCON1 = 0b01001000;  // 8 bit, non-inverted, idle high, bit 5 is the polarity bit check this, bit 4 is idle level
+    SPBRG1 = 34;            // DEBUGGING TEST: 115200 baud rate, high speed 8 bit, actual 19231
     
     // Clear the UART buffer
     for(int i = 0; i < 10; i++)
@@ -144,18 +167,33 @@ void Initial() {
         UART_buffer[i] = 0;
     }
     
+    // Set ANCON2 bits to be zero so we can use EUSART2 for UART
+    ANCON2 = 0b00000000;
+    
     // Configure Interrupts for EUSART 2 receive
     PIE3bits.RC2IE = 1;             // Turn on interrupts for receiving a transmission
     IPR3bits.RC2IP = 1;             // High priority for receiving data from the sensor at 100Hz
     
-    // CHECK THESE CONFIGURATIONS
     // Configure USART 2
     TRISGbits.TRISG2 = 1;       // 1 For input to receive transmissions
     TRISGbits.TRISG1 = 0;       // Output to transmit to the sensor
     TXSTA2 = 0b00100110;        // Enabled
     RCSTA2 = 0b10010000;        // Enable, 8 bit, enable receiver, async
     BAUDCON2 = 0b01001000;      // 16 bit, non-inverted, idle is high, bit 5 is the polarity bit, bit 4 is idle level
-    SPBRG2 = 34;                // 115200 baud rate, high speed 16 bit, actual 114286
+    SPBRG2 = 34;                // 115200 baud rate, high speed 8 bit, actual 114286
+    
+    
+    // Send command to change baud rate to 9600
+//    send_byte(0x5A);
+//    send_byte(0x08);
+//    send_byte(0x06);
+//    send_byte(0x80);
+//    send_byte(0x25);
+//    send_byte(0x00);
+//    send_byte(0x00);
+//    send_byte(0x00);
+    
+    
 }
 
 /******************************************************************************
@@ -171,14 +209,16 @@ void __interrupt() HiPriISR(void) {
         // Check if the receive flag is set
         if(PIR1bits.RC1IF == 1)
         {
-            receive_handler();
+            //receive_handler();
+            lunaReceive2();
             continue;
         }          
         
         // Data from Luna
         if(PIR3bits.RC2IF == 1)
         {
-            lunaReceive();
+            //lunaReceive();
+            lunaReceive3(); // DEBUGGING
             continue;
         }
 
@@ -268,6 +308,91 @@ void lunaReceive()
     }
 }
 
+/******************************************************************************
+ * lunaReceive2 subroutine, a byte was received from the sensor
+ * 
+ ******************************************************************************/
+void lunaReceive2() //DEBUGGING TEST to see if it works with usart1
+{
+    // Temporary character to read received byte
+    char temp;
+    tempCount = tempCount + 1;  // Update to show we have read something
+    
+    // Read the value in RCREG2, this clears the interrupt flag
+    temp = RCREG1;    
+    
+    // Read into the Luna buffer
+    Luna_buffer[Luna_Ind] = temp;
+    
+    // Check if we record distance
+    if(distBool) // distBool is set if we previously received 0x59 0x59
+    {
+        if(!twoByteBool) // First Byte, twoByteBool = 0 if first byte
+        {
+            currDist = Luna_buffer[Luna_Ind];
+            twoByteBool = 1;
+        }
+        else    // Second byte, twoByteBool = 1 if second byte
+        {
+            currDist = (Luna_buffer[Luna_Ind] << 8) | currDist;
+            distBool = 0;
+            update_LCD(currDist);   // Update the LCD with the current distance
+        }
+    }
+    
+    // Check if we are at the distance measurement read byte
+    if(Luna_Ind >= 1 && (Luna_buffer[Luna_Ind] == 0x59 && Luna_buffer[Luna_Ind-1] == 0x59)) 
+    {
+        distBool = 1;       // Record the next two bytes
+        twoByteBool = 0;    // Two bytes not yet received
+    }
+    
+    // Increment index
+    Luna_Ind = Luna_Ind + 1;
+    
+    // Check if the index is greater than the size of the buffer and roll over
+    if(Luna_Ind > 8)
+    {
+        Luna_Ind = 0; //Reset
+    }
+}
+
+
+/******************************************************************************
+ * lunaReceive3 subroutine, a byte was received from the sensor
+ * 
+ ******************************************************************************/
+void lunaReceive3() //DEBUGGING TEST to see if it works with usart1
+{   
+    // Set previous
+    prevRec = currRec;
+    
+    // Get current, this clears the flag
+    currRec = RCREG2;
+    
+    // Record distance
+    if(bool1 == 1)                              // First byte
+    {
+        currDist = currRec;                     // Get low byte
+        bool1 = 0;                              // Reset first byte bool
+        bool2 = 1;                              // Second byte bool
+        return;
+    }
+    if(bool2 == 1)                              // Second byte
+    {
+        currDist = (currRec << 8) | currDist;   // Get high byte
+        bool2 = 0;                              // Reset second bool
+        return;
+    }
+    
+    // Check to see if we received 0x59 0x59
+    if(prevRec == 0x59 && currRec == 0x59)
+    {
+        // Set boolean to get distance
+        bool1 = 1;
+    }
+}
+
 
 /******************************************************************************
  * LoPriISR interrupt service routine
@@ -302,7 +427,11 @@ void TMR0handler() {
     // TOGGLE LED
     LATDbits.LATD4 = ~LATDbits.LATD4;
     TMR0 = 65536 - 56250;           // Instructions for 900 ms
-
+    
+    // Update LCD
+    DisplayC(clearDist);    // Clear previous
+    update_LCD(currDist);   // Set new
+    
     INTCONbits.TMR0IF = 0;      //Clear flag and return to polling routine
 }
 
@@ -417,6 +546,13 @@ void update_LCD(int num)
     // Create string buffer for the integer to string
     char buffer[8];
     char word[6];
+    
+    // DEBUGGING TEST
+    for(int i = 0; i < 6; i++)
+    {
+        word[i] = 46;
+    }
+    
     sprintf(word, "D=%d", num);
     buffer[0] = 0xC0;
     buffer[7] = 0x00;
