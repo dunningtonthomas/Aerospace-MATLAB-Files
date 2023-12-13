@@ -62,10 +62,8 @@ void receive_handler(void);     // Interrupt handler for receiving transmission
 void update_LCD(int);         // Update the LCD with new values
 void send_byte(char);           // This function will send the input byte over UART
 void command_parse(void);       // Function to parse the commands
-void contSend(void);            // Send D and I
 void lunaReceive(void);         // Received byte from the luna sensor
-void lunaReceive2(void);        // DEBUGGING TEST
-void lunaReceive3(void);        // Different method to receive distance
+
 
 
 /******************************************************************************
@@ -317,8 +315,24 @@ void TMR0handler() {
     
     // TOGGLE LED
     LATDbits.LATD4 = ~LATDbits.LATD4;
-    TMR0 = 65536 - 56250;           // Instructions for 900 ms
     
+    // Send data through USART
+    if(cont_on == 1)
+    {
+        // Send Distance
+        for(int i = 0; i < 8; i++)
+        {
+            if(distBuffer[i] == 0) // If null go to next character
+            {
+                continue;
+            }
+            send_byte(distBuffer[i]);   // Send character
+        }
+        send_byte(0x0A);    // Line feed for end of transmission
+    }
+            
+    // Reset
+    TMR0 = 65536 - 56250;           // Instructions for 900 ms
     INTCONbits.TMR0IF = 0;      //Clear flag and return to polling routine
 }
 
@@ -333,24 +347,19 @@ void command_parse()
 {    
     // Define the different cases as strings
     char str1[10] = "DIST";         // Output the measured distance
-    char str2[10] = "DETECT";       // Output whether or not something is detected
     char str3[10] = "DIST_ON";      // Continuous transmission of distance
     char str4[10] = "DIST_OFF";     // End continuous
     
     // Use string compare to see what case it is
     if(!strcmp(str1, UART_buffer)) //DIST
     {
-        char byte = currDist & 0xFF;
-        send_byte(byte);
-        byte = (currDist >> 8) & 0xFF;
-        send_byte(byte);
-    }
-    else if(!strcmp(str2, UART_buffer)) //DETECT
-    {
-        // Output the potentiometer
-        for(int i = 3; i < 8; i++)
+        for(int i = 0; i < 8; i++)
         {
-            send_byte(potBuffer[i]);
+            if(distBuffer[i] == 0) // If null go to next character
+            {
+                continue;
+            }
+            send_byte(distBuffer[i]);   // Send character
         }
     }
     else if(!strcmp(str3, UART_buffer)) //DIST_ON
@@ -378,31 +387,6 @@ void command_parse()
     }    
 }
 
-/******************************************************************************
- * contSend
- * This subroutine will send T and PT for the continuous send
- ******************************************************************************/
-void contSend()
-{
-    // Output the temperature value
-    for(int i = 0; i < 7; i++)
-    {
-        send_byte(tempBuffer[i]);
-    }
-    
-    send_byte(';');
-    send_byte(' ');
-    
-    // Output the potentiometer value
-    for(int i = 0; i < 8; i++)
-    {
-        send_byte(potBuffer[i]);
-    }
-    
-    // Carriage return
-    send_byte(0x0D);
-}
-
 
 
 /******************************************************************************
@@ -428,20 +412,11 @@ void send_byte(char byte)
  * state = 0 for distance measurement, state = 1 for amps 
  ******************************************************************************/
 void update_LCD(int num)
-{
-    // Create string buffer for the integer to string
-//    char buffer[8];
-//    char word[6];
-//   
-//    // Format word
-//    sprintf(word, "D=%d", num);
-//    buffer[0] = 0xC0;
-//    buffer[7] = 0x00;
-    
+{    
     // Buffer for LCD
     char buffer[10];
     
-    // Format full string
+    // Format full string into distBuffer
     sprintf(distBuffer, "D=%dcm", num);
     buffer[0] = 0xC0;
     buffer[9] = 0x00;
@@ -453,12 +428,6 @@ void update_LCD(int num)
         buffer[i] = distBuffer[i-1];
     }
 
-    // Get string to write over UART
-//    for(int i = 0; i < 7; i++)
-//    {
-//        tempBuffer[i] = word[i]; // Copy over the word
-//    }
-
     // Display on the LCD
-    DisplayV(buffer);  // Distance
+    DisplayV(buffer); 
 }
