@@ -3,15 +3,19 @@ close all; clear; clc;
 
 %% Test serial
 port = 'COM4';
-s = serialport(port,115200);
+s = serialport(port,19200);
 
 
 % Set properties for the serial port
-set(s, 'Terminator', 'LF');  % Specify the terminator for the data
-set(s, 'Timeout', 10);       % Set the timeout in seconds
+s.configureTerminator("LF", "LF");
+
 
 % Open the serial port
 fopen(s);
+
+% Stop sending
+charString = 'DIST_OFF';
+%fwrite(s, charString)
 
 try
     while isvalid(s)
@@ -34,6 +38,8 @@ end
 % Close the serial port when done
 fclose(s);
 delete(s);
+
+
 
 
 
