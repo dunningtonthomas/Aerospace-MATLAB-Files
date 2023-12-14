@@ -54,6 +54,7 @@ char bool1 = 0;
 char bool2 = 0;
 int tempCount = 0;
 char distBuffer[8] = {0, 0, 0, 0, 0, 0, 0, 0};  // Distance string to be sent over USART
+int tmr7Val = 0;                        // Value for TMR7 to range from 1 to 2 ms
 
 /******************************************************************************
  * Function prototypes
@@ -66,6 +67,8 @@ void send_byte(char);           // This function will send the input byte over U
 void command_parse(void);       // Function to parse the commands
 void lunaReceive(void);         // Received byte from the luna sensor
 void sendDistance(void);        // Send the current distance over USART1
+void tmr5Handler(void);         // Toggle high on RC2
+void tmr7Handler(void);         // Toggle low on RC2
 
 
 
@@ -84,11 +87,18 @@ void main()
             endBool = 0;            // Reset the boolean for line feed reception
         }   
         
-        if(PIR2bits.TMR3IF == 1) // Update LCD
+        if(PIR2bits.TMR3IF == 1) // Update LCD and pwm
         {
             PIR2bits.TMR3IF = 0;        // Reset flag
             TMR3 = 65536 - 50000;       // Instructions for 10 Hz
             
+            // Update PWM signal
+            tmr7Val = tmr7Val + 40;
+            if(tmr7Val >= 8000) // Reset
+            {
+                tmr7Val = 4000; 
+            }
+           
             // Update the LCD
             DisplayC(clearDist);    // Clear previous
             update_LCD(currDist);   // Set new      
@@ -155,6 +165,18 @@ void Initial() {
     T3CON = 0b00110101;             // 16-bit, 8 prescaler, 
     TMR3 = 65536 - 50000;           // Instructions for 10 Hz
     
+    // Configure TIMER5 for PWM generation 20 ms for total period
+    T5CON = 0b00010100;             // 16-bit, 2 prescaler
+    TMR5 = 65536 - 40000;           // Instructions for 20 ms
+    
+    // Configure TIMER7 for PWM generation 1-2 ms for toggling the pwm off
+    T7CON = 0b00000100;             // 16-bit, no prescaler
+    tmr7Val = 4000;                 // 1 ms value
+    TMR7 = 65536 - tmr7Val;
+    
+    // Drive RC2 low
+    LATCbits.LATC2 = 0;
+    
 
     // Configuring Interrupts
     RCONbits.IPEN = 1;              // Enable priority levels
@@ -163,11 +185,18 @@ void Initial() {
     INTCONbits.TMR0IE = 1;          // Enable TMR0 interrupts
     INTCONbits.GIEL = 1;            // Enable low-priority interrupts to CPU
     INTCONbits.GIEH = 1;            // Enable all interrupts
+    
+    // Interrupts for TMR5 and TMR7
+    PIE5bits.TMR5IE = 1;            // Enable interrupts TMR5
+    PIE5bits.TMR7IE = 1;            // Enable interrupts TMR7
+    IPR5bits.TMR5IP = 0;            // Low priority
+    IPR5bits.TMR7IP = 0;            // Low priority
 
     // Turn the timers on
     T0CONbits.TMR0ON = 1;           // Turning on TMR0
     T3CONbits.TMR3ON = 1;           // Turn the timer on
-    
+    T5CONbits.TMR5ON = 1;           // 5 on, 7 is turned on when 5 toggles the pwm
+
     
     // Interrupts for receiving commands
     PIE1bits.RC1IE = 1;             // Turn on interrupts for receiving a transmission
@@ -317,6 +346,20 @@ void __interrupt(low_priority) LoPriISR(void)
             continue;
         }
         
+        if(PIR5bits.TMR5IF)
+        {
+            // Call handler
+            tmr5Handler();
+            continue;
+        }
+        
+        if(PIR5bits.TMR7IF)
+        {
+            // Call handler
+            tmr7Handler();
+            continue;
+        }
+        
         // Save temp copies of WREG, STATUS and BSR if needed.
         break;      // Supports RETFIE automatically
     }
@@ -343,6 +386,43 @@ void TMR0handler() {
     TMR0 = 65536 - 56250;           // Instructions for 900 ms
     INTCONbits.TMR0IF = 0;      //Clear flag and return to polling routine
 }
+
+
+/******************************************************************************
+ * tmr5Handler
+ * This subroutine will turn on RC2 and start the timer TMR7 to turn off the PWM
+ ******************************************************************************/
+void tmr5Handler(void)
+{
+    // Toggle RC2
+    LATCbits.LATC2 = 1; // Drive high
+    
+    // Start timer 7
+    TMR7 = 65536 - tmr7Val;         // Load value into the timer
+    T7CONbits.TMR7ON = 1;           // Turn the timer on
+    
+    // Reset timer 5
+    TMR5 = 65536 - 40000;           // Instructions for 20 ms
+    PIR5bits.TMR5IF = 0;            // Reset the flag
+}
+
+/******************************************************************************
+ * tmr7Handler
+ * This subroutine will turn off RC2 and TMR7
+ ******************************************************************************/
+void tmr7Handler(void)
+{
+    // Toggle RC2
+    LATCbits.LATC2 = 0; // Drive Low
+    
+    // Turn the timer off
+    T7CONbits.TMR7ON = 0; 
+    
+    
+    PIR5bits.TMR7IF = 0;    // Reset the flag
+}
+
+
 
 /******************************************************************************
  * sendDistance
