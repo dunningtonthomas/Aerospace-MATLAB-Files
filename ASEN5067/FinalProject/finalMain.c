@@ -46,6 +46,7 @@ char potBuffer[8];                      // String for POT reading
 char cont_on = 0;                       // 1 if continuous transmission enabled
 char fast_on = 0;                       // 1 for fast transmission at 10 Hz
 char fast_bool = 0;                     // Fast bool so we transmit every other time
+char point_bool = 0;                    // Boolean to send servo data with distance data
 char count = 0;                         // count to use for timer0 and continuous transmission
 char received = 0;                      // Full transmission hasn't been received yet
 char prevRec = 0;
@@ -67,6 +68,7 @@ void send_byte(char);           // This function will send the input byte over U
 void command_parse(void);       // Function to parse the commands
 void lunaReceive(void);         // Received byte from the luna sensor
 void sendDistance(void);        // Send the current distance over USART1
+void sendDistanceServo(void);   // Send the current distance and servo position over USART1
 void tmr5Handler(void);         // Toggle high on RC2
 void tmr7Handler(void);         // Toggle low on RC2
 
@@ -108,7 +110,14 @@ void main()
             {
                 if(fast_bool == 1) // Send data every other, ~5Hz
                 {
-                    sendDistance();                    
+                    if(point_bool == 1) // Send servo distance as well
+                    {
+                        sendDistanceServo(); // Send Distance and servo position
+                    }
+                    else
+                    {
+                        sendDistance(); // Send Distance
+                    }                                        
                     fast_bool = 0;  // Flip
                 }
                 else // Flip boolean
@@ -195,7 +204,6 @@ void Initial() {
     // Turn the timers on
     T0CONbits.TMR0ON = 1;           // Turning on TMR0
     T3CONbits.TMR3ON = 1;           // Turn the timer on
-    T5CONbits.TMR5ON = 1;           // 5 on, 7 is turned on when 5 toggles the pwm
 
     
     // Interrupts for receiving commands
@@ -443,6 +451,38 @@ void sendDistance()
 }
 
 /******************************************************************************
+ * sendDistanceServo
+ * This subroutine will send the current distance over USART1 and the servo position
+ * encoded in tmr7Val
+ ******************************************************************************/
+void sendDistanceServo()
+{
+    // Send Distance
+    for(int i = 0; i < 8; i++)
+    {
+        if(distBuffer[i] == 0) // If null go to next character
+        {
+            continue;
+        }
+        send_byte(distBuffer[i]);   // Send character
+    }
+    // Send a semicolon and timer value
+    send_byte(0x3B);
+    
+    // Format timer value
+    char timerWord[4];
+    sprintf(timerWord, "%d", tmr7Val);
+    
+    // Send servo data
+    for(int i = 0; i < 4; i++)
+    {
+        send_byte(timerWord[i]);
+    }
+    
+    send_byte(0x0A);    // Line feed for end of transmission
+}
+
+/******************************************************************************
  * command_parse
  * This subroutine will parse through the UART_buffer and determine what command
  * was received
@@ -455,7 +495,12 @@ void command_parse()
     char str2[10] = "DIST_ON";      // Continuous transmission of distance
     char str3[10] = "DIST_OFF";     // End continuous
     char str4[10] = "FAST_ON";      // Fast transmission of distance
-    char str5[10] = "FAST_OFF";      // End transmission of distance
+    char str5[10] = "FAST_OFF";     // End transmission of distance
+    char str6[10] = "SCAN_ON";      // Start scanning with the servo
+    char str7[10] = "SCAN_OFF";     // Stop scanning with the servo
+    char str8[10] = "POINT_ON";     // Send distance and tmr7 value for servo location
+    char str9[10] = "POINT_OFF";    // Stop sending tmr7 values
+    
     
     // Use string compare to see what case it is
     if(!strcmp(str1, UART_buffer)) //DIST
@@ -481,6 +526,38 @@ void command_parse()
     {
         fast_on = 0;
         cont_on = 0;
+    }
+    else if(!strcmp(str6, UART_buffer)) //SCAN_ON
+    {
+        // Start scanning with the servo
+        TMR5 = 65536 - 40000;           // Instructions for 20 ms
+        tmr7Val = 4000;                 // 1 ms value
+        T5CONbits.TMR5ON = 1;           // Turn timer 5 on to toggle the servo
+    }
+    else if(!strcmp(str7, UART_buffer)) //SCAN_OFF
+    {
+        // Stop scanning with the servo
+        T5CONbits.TMR5ON = 0;           // Turn timer 5 off
+        T7CONbits.TMR7ON = 0;           // Turn timer 7 off
+        
+        // Reset values and clear flags
+        TMR5 = 65536 - 40000;           // Instructions for 20 ms
+        tmr7Val = 4000;                 // 1 ms value
+        PIR5bits.TMR5IF = 0;            // Reset flags
+        PIR5bits.TMR7IF = 0;            // Reset flags
+        
+        // Drive RC2 low
+        LATCbits.LATC2 = 0;
+    }
+    else if(!strcmp(str8, UART_buffer)) //POINT_ON
+    {
+        // Start sending the servo location
+        point_bool = 1;
+    }
+    else if(!strcmp(str9, UART_buffer)) //POINT_OFF
+    {
+        // Stop sending the servo location
+        point_bool = 0;
     }
     else // Not a command
     {
