@@ -5,10 +5,17 @@ close all; clear; clc;
 port = 'COM4';
 s = serialport(port,19200);
 
-
 % Set properties for the serial port
 s.configureTerminator("LF", "LF");
 
+% Other test
+command = "DIST";
+writeline(s,"DIST_OFF"); 
+
+% Read
+%readline(s)
+
+%%
 
 % Open the serial port
 fopen(s);
