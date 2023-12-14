@@ -44,6 +44,8 @@ char endBool = 0;                       // endBool = 1 if line feed detected
 char tempBuffer[7];                     // String for TEMP reading
 char potBuffer[8];                      // String for POT reading
 char cont_on = 0;                       // 1 if continuous transmission enabled
+char fast_on = 0;                       // 1 for fast transmission at 10 Hz
+char fast_bool = 0;                     // Fast bool so we transmit every other time
 char count = 0;                         // count to use for timer0 and continuous transmission
 char received = 0;                      // Full transmission hasn't been received yet
 char prevRec = 0;
@@ -59,10 +61,11 @@ char distBuffer[8] = {0, 0, 0, 0, 0, 0, 0, 0};  // Distance string to be sent ov
 void Initial(void);             // Function to initialize hardware and interrupts
 void TMR0handler(void);         // Interrupt handler for TMR0, typo in main
 void receive_handler(void);     // Interrupt handler for receiving transmission     
-void update_LCD(int);         // Update the LCD with new values
+void update_LCD(int);           // Update the LCD with new values
 void send_byte(char);           // This function will send the input byte over UART
 void command_parse(void);       // Function to parse the commands
 void lunaReceive(void);         // Received byte from the luna sensor
+void sendDistance(void);        // Send the current distance over USART1
 
 
 
@@ -88,7 +91,21 @@ void main()
             
             // Update the LCD
             DisplayC(clearDist);    // Clear previous
-            update_LCD(currDist);   // Set new                
+            update_LCD(currDist);   // Set new      
+            
+            // Send data if fast on
+            if(fast_on == 1)
+            {
+                if(fast_bool == 1) // Send data every other, ~5Hz
+                {
+                    sendDistance();                    
+                    fast_bool = 0;  // Flip
+                }
+                else // Flip boolean
+                {
+                    fast_bool = 1;  // Flip
+                }
+            }
         }
     }
 }
@@ -154,7 +171,7 @@ void Initial() {
     
     // Interrupts for receiving commands
     PIE1bits.RC1IE = 1;             // Turn on interrupts for receiving a transmission
-    IPR1bits.RC1IP = 1;             // High priority for receiving data, DEBUGGING MAY NEED TO CHANGE
+    IPR1bits.RC1IP = 1;             // High priority for receiving data
     
     // Configure EUSART 1
     TRISCbits.TRISC6 = 0;   // OUTPUT
@@ -174,8 +191,8 @@ void Initial() {
     ANCON2 = 0b00000000;
     
     // Configure Interrupts for EUSART 2 receive
-    PIE3bits.RC2IE = 1;             // Turn on interrupts for receiving a transmission
-    IPR3bits.RC2IP = 1;             // High priority for receiving data from the sensor at 100Hz
+    PIE3bits.RC2IE = 1;         // Turn on interrupts for receiving a transmission
+    IPR3bits.RC2IP = 1;         // High priority for receiving data from the sensor at 100Hz
     
     // Configure USART 2
     TRISGbits.TRISG2 = 1;       // 1 For input to receive transmissions
@@ -319,16 +336,7 @@ void TMR0handler() {
     // Send data through USART
     if(cont_on == 1)
     {
-        // Send Distance
-        for(int i = 0; i < 8; i++)
-        {
-            if(distBuffer[i] == 0) // If null go to next character
-            {
-                continue;
-            }
-            send_byte(distBuffer[i]);   // Send character
-        }
-        send_byte(0x0A);    // Line feed for end of transmission
+        sendDistance(); // Send the current distance
     }
             
     // Reset
@@ -336,6 +344,23 @@ void TMR0handler() {
     INTCONbits.TMR0IF = 0;      //Clear flag and return to polling routine
 }
 
+/******************************************************************************
+ * sendDistance
+ * This subroutine will send the current distance over USART1
+ ******************************************************************************/
+void sendDistance()
+{
+    // Send Distance
+    for(int i = 0; i < 8; i++)
+    {
+        if(distBuffer[i] == 0) // If null go to next character
+        {
+            continue;
+        }
+        send_byte(distBuffer[i]);   // Send character
+    }
+    send_byte(0x0A);    // Line feed for end of transmission
+}
 
 /******************************************************************************
  * command_parse
@@ -347,28 +372,35 @@ void command_parse()
 {    
     // Define the different cases as strings
     char str1[10] = "DIST";         // Output the measured distance
-    char str3[10] = "DIST_ON";      // Continuous transmission of distance
-    char str4[10] = "DIST_OFF";     // End continuous
+    char str2[10] = "DIST_ON";      // Continuous transmission of distance
+    char str3[10] = "DIST_OFF";     // End continuous
+    char str4[10] = "FAST_ON";      // Fast transmission of distance
+    char str5[10] = "FAST_OFF";      // End transmission of distance
     
     // Use string compare to see what case it is
     if(!strcmp(str1, UART_buffer)) //DIST
     {
-        for(int i = 0; i < 8; i++)
-        {
-            if(distBuffer[i] == 0) // If null go to next character
-            {
-                continue;
-            }
-            send_byte(distBuffer[i]);   // Send character
-        }
+        sendDistance();
     }
-    else if(!strcmp(str3, UART_buffer)) //DIST_ON
+    else if(!strcmp(str2, UART_buffer)) //DIST_ON
     {
         cont_on = 1;
+        fast_on = 0;
     }
-    else if(!strcmp(str4, UART_buffer)) //DIST_OFF
+    else if(!strcmp(str3, UART_buffer)) //DIST_OFF
     {
-        cont_on = 0;;
+        fast_on = 0;
+        cont_on = 0;
+    }
+    else if(!strcmp(str4, UART_buffer)) //FAST_ON
+    {
+        fast_on = 1;
+        cont_on = 0;
+    }
+    else if(!strcmp(str5, UART_buffer)) //FAST_OFF
+    {
+        fast_on = 0;
+        cont_on = 0;
     }
     else // Not a command
     {
