@@ -42,14 +42,14 @@ end
 
 
 # You can can test it yourself with inputs like this
-a = [1.0 2.0; 3.0 4.0];
-@show a
-bs = [[1.0, 2.0], [5.0, 6.0], [3.0, 4.0]];
-test = f(a, bs);
-@show bs
-@show f(a, bs)
+# a = [1.0 2.0; 3.0 4.0];
+# @show a
+# bs = [[1.0, 2.0], [5.0, 6.0], [3.0, 4.0]];
+# test = f(a, bs);
+# @show bs
+# @show f(a, bs)
 
 # This is how you create the json file to submit
-HW1.evaluate(f, "thomas.dunnington@colorado.edu")
+HW1.evaluate(f, "thomas.dunnington@colorado.edu");
 
 
