@@ -20,6 +20,9 @@ function f(a, bs)
         # Multiply
         mul = a * tempVec;
 
+        # Add to a matrix
+        hcat(mul, a * tempVec)
+
         # Determine if it is bigger
         if isempty(finalVec)    # First multiplication
             finalVec = mul;
@@ -42,10 +45,11 @@ end
 
 
 # You can can test it yourself with inputs like this
-#a = [1.0 2.0; 3.0 4.0];
+a = [1.0 2.0; 3.0 4.0];
 # @show a
-#bs = [[1.0, 2.0], [5.0, 6.0], [3.0, 4.0]];
-# test = f(a, bs);
+bs = [[1.0, 2.0], [5.0, 6.0], [3.0, 4.0]];
+test = f(a, bs);
+@show test
 # @show bs
 #@show typeof(f(a, bs))
 
