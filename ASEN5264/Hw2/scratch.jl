@@ -1,5 +1,3 @@
-using POMDPTools
-using POMDPModels
 using DMUStudent.HW2
 using POMDPs: states, actions
 using POMDPTools: ordered_states
