@@ -1,6 +1,6 @@
 using DMUStudent.HW2
-#using POMDPs: states, actions, transition, support
-using POMDPs
+using POMDPs: states, actions, transition, support
+#using POMDPs
 using POMDPTools: ordered_states
 using LinearAlgebra
 
@@ -48,12 +48,13 @@ function value_iteration(m)
     Vp = rand(length(states(m)))
 
     # Set tolerance and discount values
-    epsilon = 1E-3
+    epsilon = 1E-6
     g = 0.95
 
     # Conduct value iteration
+    numIter = 0
     while (norm(V - Vp) > epsilon) # Keep going until the tolerance is met
-        V = Vp     # Update value function
+        V = copy(Vp)     # Update value function, use copy to create new storage
 
         # Bellman's equation
         for (i, s) in enumerate(states(m))  # Iterate through all states
@@ -75,7 +76,6 @@ function value_iteration(m)
             Vp[i] = maximum(q)  # Update value with the maximum utility across all actions             
         end
     end
-
     return V
 end
 
