@@ -37,22 +37,17 @@ display(R) # this is a Dict that contains a reward vector for each action
 
 
 
-function value_iteration(m)
+function value_iteration(m, g, epsilon)
     # It is good to put performance-critical code in a function: https://docs.julialang.org/en/v1/manual/performance-tips/
     # Setup
-    T = transition_matrices(m)  # Transition matrix
+    T = transition_matrices(m; sparse=true)  # Transition matrix
     R = reward_vectors(m)       # Reward vector
     A = collect(actions(m))     # Action vector
 
     V = rand(length(states(m)))         # Containers for the two value functions
     Vp = rand(length(states(m)))
 
-    # Set tolerance and discount values
-    epsilon = 1E-6
-    g = 0.95
-
     # Conduct value iteration
-    numIter = 0
     while (norm(V - Vp) > epsilon) # Keep going until the tolerance is met
         V = copy(Vp)     # Update value function, use copy to create new storage
 
@@ -80,15 +75,16 @@ function value_iteration(m)
 end
 
 
+# Set tolerance and discount values
+epsilon = 1E-6
+g = 0.95
 
-V = value_iteration(m)
+# Call value iteration
+V = value_iteration(m, g, epsilon)
 
 # You can use the following commented code to display the value. If you are in an environment with multimedia capability (e.g. Jupyter, Pluto, VSCode, Juno), you can display the environment with the following commented code. From the REPL, you can use the ElectronDisplay package.
-display(render(grid_world, color=V))
+#display(render(grid_world, color=V))
 #@show HW2.evaluate(V)
-
-
-
 
 
 
@@ -96,13 +92,17 @@ display(render(grid_world, color=V))
 # Question 4
 ############
 
-# # You can create an mdp object representing the problem with the following:
-# m = UnresponsiveACASMDP(2)
+# You can create an mdp object representing the problem with the following:
+m = UnresponsiveACASMDP(2)
 
-# # transition_matrices and reward_vectors work the same as for grid_world, however this problem is much larger, so you will have to exploit the structure of the problem. In particular, you may find the docstring of transition_matrices helpful:
-# display(@doc(transition_matrices))
+# transition_matrices and reward_vectors work the same as for grid_world, however this problem is much larger, so you will have to exploit the structure of the problem. In particular, you may find the docstring of transition_matrices helpful:
+#display(@doc(transition_matrices))
 
-# V = value_iteration(m)
+# Set tolerance and discount values
+epsilon = 1E-6
+g = 0.99
+
+# V = value_iteration(m, g, epsilon)
 
 # @show HW2.evaluate(V)
 
