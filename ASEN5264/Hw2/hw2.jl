@@ -1,6 +1,6 @@
 using DMUStudent.HW2
-using POMDPs: states, actions, transition, support
-#using POMDPs
+#using POMDPs: states, actions, transition, support
+using POMDPs
 using POMDPTools: ordered_states
 using LinearAlgebra
 
