@@ -106,6 +106,28 @@ xlabel('Time (Units)');
 ylabel('Temperature');
 
 
+%% DMU test
+
+sum = 0;
+i = 1;
+g = 0.95;
+r = -1;
+bool = 1;
+
+while(true)
+    if(bool)
+        bool = ~bool;
+        continue;
+    end
+    
+    sum = sum + g^i * r;
+    i = i + 1;
+
+    if(abs(g^i * r) < 1e-6)
+        break
+    end
+end
+
 
 
 
