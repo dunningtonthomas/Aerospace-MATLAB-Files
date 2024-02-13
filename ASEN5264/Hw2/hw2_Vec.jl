@@ -23,15 +23,11 @@ function value_iteration(m, g, epsilon)
     # Conduct value iteration
     while (norm(V - Vp) > epsilon)      # Keep going until the tolerance is met
         V = copy(Vp)                    # Update value function, use copy to create new storage
-
         for a in A                      # Iterate through all possible actions at the given state
-            td = T[a]                   # Transition matrix for the given action
-            r = R[a]                    # Reward vector for the current action
-            q = r + g * td * Vp         # Bellman operator
+            q = R[a] + g * T[a] * Vp    # Bellman operator
             Vp = max.(Vp, q)            # Take the maximum
         end
     end
-
     return V
 end
 
@@ -56,44 +52,44 @@ display(render(grid_world, color=V))
 # Question 4
 ############
 
-# You can create an mdp object representing the problem with the following:
+# # You can create an mdp object representing the problem with the following:
 m = UnresponsiveACASMDP(10)
 
-# transition_matrices and reward_vectors work the same as for grid_world, however this problem is much larger, so you will have to exploit the structure of the problem. In particular, you may find the docstring of transition_matrices helpful:
-#display(@doc(transition_matrices))
+# # transition_matrices and reward_vectors work the same as for grid_world, however this problem is much larger, so you will have to exploit the structure of the problem. In particular, you may find the docstring of transition_matrices helpful:
+# #display(@doc(transition_matrices))
 
-# R = reward_vectors(m)
-# T = transition_matrices(m; sparse=true)
+# # R = reward_vectors(m)
+# # T = transition_matrices(m; sparse=true)
 
-# Set tolerance and discount values
+# # Set tolerance and discount values
 epsilon = 1E-6
 g = 0.99
 
-# Call value iteration
+# # Call value iteration
 V = value_iteration(m, g, epsilon)
 
-# Evaluate
+# # Evaluate
 HW2.evaluate(V, "thomas.dunnington@colorado.edu")
 
-########
-# Extras
-########
+# ########
+# # Extras
+# ########
 
-# The comments below are not needed for the homework, but may be helpful for interpreting the problems or getting a high score on the leaderboard.
+# # The comments below are not needed for the homework, but may be helpful for interpreting the problems or getting a high score on the leaderboard.
 
-# Both UnresponsiveACASMDP and grid_world implement the POMDPs.jl interface. You can find complete documentation here: https://juliapomdp.github.io/POMDPs.jl/stable/api/#Model-Functions
+# # Both UnresponsiveACASMDP and grid_world implement the POMDPs.jl interface. You can find complete documentation here: https://juliapomdp.github.io/POMDPs.jl/stable/api/#Model-Functions
 
-# To convert from physical states to indices in the transition function, use the stateindex function
-# IMPORTANT NOTE: YOU ONLY NEED TO USE STATE INDICES FOR THIS ASSIGNMENT, using the states may help you make faster specialized code for the ACAS problem, but it is not required
-# using POMDPs: states, stateindex
+# # To convert from physical states to indices in the transition function, use the stateindex function
+# # IMPORTANT NOTE: YOU ONLY NEED TO USE STATE INDICES FOR THIS ASSIGNMENT, using the states may help you make faster specialized code for the ACAS problem, but it is not required
+# # using POMDPs: states, stateindex
 
-# s = first(states(m))
-# @show si = stateindex(m, s)
+# # s = first(states(m))
+# # @show si = stateindex(m, s)
 
-# # To convert from a state index to a physical state in the ACAS MDP, use convert_s:
-# using POMDPs: convert_s
+# # # To convert from a state index to a physical state in the ACAS MDP, use convert_s:
+# # using POMDPs: convert_s
 
-# @show s = convert_s(ACASState, si, m)
+# # @show s = convert_s(ACASState, si, m)
 
-# # To visualize a state in the ACAS MDP, use
-# render(m, (s=s,))
+# # # To visualize a state in the ACAS MDP, use
+# # render(m, (s=s,))
