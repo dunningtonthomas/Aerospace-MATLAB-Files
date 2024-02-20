@@ -1,5 +1,6 @@
 using DMUStudent.HW3: HW3, DenseGridWorld, visualize_tree
-using POMDPs: actions, @gen, isterminal, discount, statetype, actiontype, simulate, states, initialstate, support
+#using POMDPs: actions, @gen, isterminal, discount, statetype, actiontype, simulate, states, initialstate, support
+using POMDPs
 using D3Trees: inchrome, inbrowser
 using StaticArrays: SA
 using Statistics: mean
@@ -37,7 +38,6 @@ end
 
 # This code runs monte carlo simulations: you can calculate the mean and standard error from the results
 @show results = [rollout(m, heuristic_policy, rand(initialstate(m))) for _ in 1:10]
-
 
 
 
