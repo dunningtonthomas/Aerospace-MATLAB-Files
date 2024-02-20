@@ -38,7 +38,6 @@ function rollout(mdp, policy, s0, max_steps=100)
         r_total += discount(m)^t * r            # Accumulated discounted reward
         t += 1                                  # Update time step
     end
-
     return r_total  # Return the reward
 end
 
@@ -85,7 +84,6 @@ print("Random Policy:\n")
 print("Mean: ", meanReward, "\n")
 print("SEM: ", SEM, "\n\n")
 
-
 # Improved Heuristic Policy
 results = [rollout(m, heuristic_policy, rand(initialstate(m))) for _ in 1:simNum]
 
@@ -106,24 +104,19 @@ print("SEM: ", SEM, "\n\n")
 # Question 3
 ############
 # Perform 7 iterations of Monte Carlo Tree Search, start at (19.19)
-
-
 m = DenseGridWorld(seed = 4)
 S = statetype(m)
 A = actiontype(m)
-
 
 # Bonus macro
 bonus(Nsa, Ns) = Nsa == 0 ? Inf : sqrt(log(Ns)/Nsa) 
 
 # Explore function
 function explore(s, m, c, N, Q)
-    A = actions(m)
-    Ns = sum(N[(s, a)] for a in A)                  # Total visit count
-
+    A = actions(m)                                          # Get Actions
+    Ns = sum(N[(s, a)] for a in A)                          # Total visit count
     return argmax(a->Q[(s,a)] + c*bonus(N[(s,a)], Ns), A)   # Return the best action
 end
-
 
 # Simulate function
 function simulate!(s, d, m, N, Q, T)
@@ -165,12 +158,12 @@ T = Dict{Tuple{S, A, S}, Int}()
 
 # Run 7 times
 s = SA[19,19]
-d = 10
+d = 5
 for _ in 1:7
     simulate!(s, d, m, N, Q, T)
 end
 
-#inchrome(visualize_tree(Q, N, T, SA[19,19])) # use inbrowser(visualize_tree(q, n, t, SA[1,1]), "firefox") etc. if you want to use a different browser
+inchrome(visualize_tree(Q, N, T, SA[19,19])) # use inbrowser(visualize_tree(q, n, t, SA[1,1]), "firefox") etc. if you want to use a different browser
 
 # ############
 # # Question 4
@@ -188,15 +181,14 @@ function select_action(m, s)
     sSim = copy(s)
     Aa = actions(m)
 
-    for _ in 1:1000
-    # while time_ns() < start + 40_000_000 # you can replace the above line with this if you want to limit this loop to run within 40ms
+    #for _ in 1:1000
+    while time_ns() < start + 40_000_000 # you can replace the above line with this if you want to limit this loop to run within 40ms
         simulate!(sSim, d, m, N, Q, T)
     end
 
     # Select a good action based on Q
     return argmax(a->Q[(s,a)], Aa)
 end
-
 
 # Evaluate Monte Carlo Select Actions function
 simNum = 100
@@ -223,7 +215,6 @@ print("SEM: ", SEM, "\n\n")
 
 HW3.evaluate(select_action, "thomas.dunnington@colorado.edu", time=true)
 
-# If you want to see roughly what's in the evaluate function (with the timing code removed), check sanitized_evaluate.jl
 
 ########
 # Extras
