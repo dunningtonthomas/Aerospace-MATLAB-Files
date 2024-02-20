@@ -183,7 +183,7 @@ function select_action(m, s)
     Aa = actions(m)
 
     #for _ in 1:1000
-    while time_ns() < start + 30_000_000 # Run within 20 ms
+    while time_ns() < start + 40_000_000 # Run within 40 ms
         simulate!(sSim, d, m, N, Q, T)
     end
 
