@@ -49,19 +49,35 @@ function random_policy(m, s)
 end
 
 
+# function heuristic_policy(m, s)
+#     # Choose the action that has the highest reward from the given state
+#     rMax = -1000
+#     aMax = actions(m)[1]
+
+#     for a in actions(m)
+#         sp, r = @gen(:sp, :r)(m, s, a)         # Use generative model to get the next state and reward
+#         if r > rMax
+#             rMax = r
+#             aMax = a
+#         end
+#     end
+
+#     return aMax
+# end
+
 # Reward states at [40,40] [20,40] [40,20] [20,20]
 function heuristic_policy(m, s)
     if s[2] % 20 != 0           # Align y position
-        if s[2] % 20 > 10
-            return :up
-        else
+        if s[2] - 40 > 0
             return :down
+        else
+            return :up
         end
     elseif s[1] % 20 != 0       # Align x position
-        if s[1] % 20 > 10
-            return :right
-        else
+        if s[1] - 40 > 0
             return :left
+        else
+            return :right
         end
     else                        # Should have reached terminal state, doesn't matter whats returned here
         return rand(actions(m))
@@ -107,6 +123,26 @@ print("SEM: ", SEM, "\n\n")
 ############
 # Perform 7 iterations of Monte Carlo Tree Search, start at (19.19)
 
+# struct MonteCarloTreeSearch
+#     P # problem
+#     N # visit counts
+#     Q # action value estimates
+#     d # depth
+#     n # number of simulations
+#     c # exploration constant
+#     U # value function estimate
+# end
+
+# function (pi::MonteCarloTreeSearch)(s)
+#     for k in 1:pi.n
+#     simulate!(pi, s)
+#     end
+#     return argmax(a->π.Q[(s,a)], π.P.A)
+# end
+
+    
+
+
 
 m = DenseGridWorld(seed = 4)
 S = statetype(m)
@@ -121,7 +157,12 @@ function explore(s, m, c, N, Q)
     A = actions(m)
     Ns = sum(N[(s, a)] for a in A)                  # Total visit count
 
-    return argmax(a->Q[(s,a)] + c*bonus(N[(s,a)], Ns), A)   # Return the best action
+    aVals = []                                      # Loop through actions at current state 
+    for a in A
+        push!(aVals, Q[(s,a)] + c*bonus(N[(s,a)], Ns))
+    end
+
+    return A[argmax(aVals)]                         # Return the most favorable action
 end
 
 
@@ -130,10 +171,14 @@ function simulate!(s, d, m, N, Q, T)
     if d <= 0                                       # Base case
         return rollout(m, heuristic_policy, s)      # Rollout with heuristic policy
     end
+
+    # if isterminal(m, s)                                # Reached terminal, return reward
+    #     return 100
+    # end
     
     A = actions(m)
     g = discount(m)
-    c = 200                                         # Exploration parameter
+    c = 100                                         # Exploration parameter
 
     if !haskey(N, (s, A[1]))                        # Add state and action to the dictionary
         for a in A
@@ -170,50 +215,55 @@ for _ in 1:7
     simulate!(s, d, m, N, Q, T)
 end
 
-#inchrome(visualize_tree(Q, N, T, SA[19,19])) # use inbrowser(visualize_tree(q, n, t, SA[1,1]), "firefox") etc. if you want to use a different browser
+inchrome(visualize_tree(Q, N, T, SA[19,19])) # use inbrowser(visualize_tree(q, n, t, SA[1,1]), "firefox") etc. if you want to use a different browser
+
+
+
+
+# This is an example state - it is a StaticArrays.SVector{2, Int}
+# s = SA[19,19]
+# @show typeof(s)
+# @assert s isa statetype(m)
+
+
+
+
+
+
+# here is an example of how to visualize a dummy tree (q, n, and t should actually be filled in your mcts code, but for this we fill it manually)
+# q[(SA[1,1], :right)] = 0.0
+# q[(SA[2,1], :right)] = 0.0
+# n[(SA[1,1], :right)] = 1
+# n[(SA[2,1], :right)] = 0
+# t[(SA[1,1], :right, SA[2,1])] = 1
+
+# inchrome(visualize_tree(q, n, t, SA[1,1])) # use inbrowser(visualize_tree(q, n, t, SA[1,1]), "firefox") etc. if you want to use a different browser
+
+
+
+
 
 # ############
 # # Question 4
 # ############
 
-# MCTS Select Action
+#A starting point for the MCTS select_action function which can be used for Questions 4 and 5
 function select_action(m, s)
+
     start = time_ns()
-    S = statetype(m)
-    A = actiontype(m)
-    N = Dict{Tuple{statetype(m), actiontype(m)}, Int}()
-    Q = Dict{Tuple{statetype(m), actiontype(m)}, Float64}()
-    T = Dict{Tuple{S, A, S}, Int}()
-    d = 5                                                     # 100 step MCTS
-    sSim = copy(s)
-    Aa = actions(m)
+    n = Dict{Tuple{statetype(m), actiontype(m)}, Int}()
+    q = Dict{Tuple{statetype(m), actiontype(m)}, Float64}()
+
 
     for _ in 1:1000
     # while time_ns() < start + 40_000_000 # you can replace the above line with this if you want to limit this loop to run within 40ms
-        simulate!(sSim, d, m, N, Q, T)
+        break # replace this with mcts iterations to fill n and q
     end
 
-    # Select a good action based on Q
-    return argmax(a->Q[(s,a)], Aa)
+    # select a good action based on q and/or n
+
+    return rand(actions(m)) # this dummy function returns a random action, but you should return your selected action
 end
-
-
-# Evaluate Monte Carlo Select Actions function
-simNum = 100
-results = [rollout(m, select_action, rand(initialstate(m))) for _ in 1:simNum]
-
-# Calculate the mean and standard deviation
-meanReward = mean(results)
-stdReward = std(results)
-
-# Standard error of the mean
-SEM = stdReward / sqrt(length(results))
-
-# Print results
-print("MCTS Policy:\n")
-print("Mean: ", meanReward, "\n")
-print("SEM: ", SEM, "\n\n")
-
 
 #@btime select_action(m, SA[35,35]) # you can use this to see how much time your function takes to run. A good time is 10-20ms.
 
@@ -221,16 +271,16 @@ print("SEM: ", SEM, "\n\n")
 # # Question 5
 # ############
 
-HW3.evaluate(select_action, "thomas.dunnington@colorado.edu", time=true)
+# HW3.evaluate(select_action, "your.gradescope.email@colorado.edu")
 
-# If you want to see roughly what's in the evaluate function (with the timing code removed), check sanitized_evaluate.jl
+# # If you want to see roughly what's in the evaluate function (with the timing code removed), check sanitized_evaluate.jl
 
-########
-# Extras
-########
+# ########
+# # Extras
+# ########
 
-# With a typical consumer operating system like Windows, OSX, or Linux, it is nearly impossible to ensure that your function *always* returns within 50ms. Do not worry if you get a few warnings about time exceeded.
+# # With a typical consumer operating system like Windows, OSX, or Linux, it is nearly impossible to ensure that your function *always* returns within 50ms. Do not worry if you get a few warnings about time exceeded.
 
-# You may wish to call select_action once or twice before submitting it to evaluate to make sure that all parts of the function are precompiled.
+# # You may wish to call select_action once or twice before submitting it to evaluate to make sure that all parts of the function are precompiled.
 
-# Instead of submitting a select_action function, you can alternatively submit a POMDPs.Solver object that will get 50ms of time to run solve(solver, m) to produce a POMDPs.Policy object that will be used for planning for each grid world.
+# # Instead of submitting a select_action function, you can alternatively submit a POMDPs.Solver object that will get 50ms of time to run solve(solver, m) to produce a POMDPs.Policy object that will be used for planning for each grid world.
