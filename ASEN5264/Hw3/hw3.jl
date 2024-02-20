@@ -158,18 +158,19 @@ T = Dict{Tuple{S, A, S}, Int}()
 
 # Run 7 times
 s = SA[19,19]
-d = 5
+d = 10
 for _ in 1:7
     simulate!(s, d, m, N, Q, T)
 end
 
-inchrome(visualize_tree(Q, N, T, SA[19,19])) # use inbrowser(visualize_tree(q, n, t, SA[1,1]), "firefox") etc. if you want to use a different browser
+# Visualize in chrome
+inchrome(visualize_tree(Q, N, T, SA[19,19])) 
 
 # ############
-# # Question 4
+# # Question 4/5
 # ############
 
-# MCTS Select Action
+# MCTS Select Best Action
 function select_action(m, s)
     start = time_ns()
     S = statetype(m)
@@ -182,13 +183,14 @@ function select_action(m, s)
     Aa = actions(m)
 
     #for _ in 1:1000
-    while time_ns() < start + 40_000_000 # you can replace the above line with this if you want to limit this loop to run within 40ms
+    while time_ns() < start + 30_000_000 # Run within 20 ms
         simulate!(sSim, d, m, N, Q, T)
     end
 
     # Select a good action based on Q
     return argmax(a->Q[(s,a)], Aa)
 end
+
 
 # Evaluate Monte Carlo Select Actions function
 simNum = 100
@@ -206,15 +208,10 @@ print("MCTS Policy:\n")
 print("Mean: ", meanReward, "\n")
 print("SEM: ", SEM, "\n\n")
 
-
-#@btime select_action(m, SA[35,35]) # you can use this to see how much time your function takes to run. A good time is 10-20ms.
-
-# ############
-# # Question 5
-# ############
-
+# Evaluate the function
 HW3.evaluate(select_action, "thomas.dunnington@colorado.edu", time=true)
 
+#@btime select_action(m, SA[35,35]) # you can use this to see how much time your function takes to run. A good time is 10-20ms.
 
 ########
 # Extras
