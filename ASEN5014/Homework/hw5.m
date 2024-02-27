@@ -39,36 +39,54 @@ A = [y1,y2];
 w = [1;2;3;4;5];
 res = A' * w;
 
+Ap = [A, w];
+
+
+
+
+
 
 %% Problem 4
 A = [1,2,1,1;1,3,4,2;3,8,9,5;4.5,12.5,15,8];
 y = [10;17;44;69.5];
+Ap = [A, y];
 
 x0 = [1;1;2;1];
 
-xls = inv(A'*A)*A'*y;
-
-
-
 Aaug = [A, y];
 
+Arr = rref(Aaug);
+ArrNew = Arr(1:2, 1:(end-1));
+ynew = Arr(1:2,end);
+
+Anew = A(1:2,:);
+
+xln = Anew'*inv(Anew*Anew')*y(1:2);
+xNol = ArrNew'*inv(ArrNew*ArrNew')*ynew;
+
+B = null(A);
+
+xbest = x0 - xln;
+
+Baug = [B, xbest];
+
+nls = inv(B'*B)*B'*xbest;
+
+xnls = B * nls;
+
+xFinal = xln + xnls;
 
 
+%% Next Part
+xnPre = [0;0;1;1] - xln;
+xnPreT = xnPre(3:4);
+Bp = B(3:4, :);
+Bpaug = [Bp, xnPreT];
+sol = rref(Bpaug);
+nullCoeff = sol(:,end);
 
+xn = B * nullCoeff;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+xf2 = xln + xn;
 
 
