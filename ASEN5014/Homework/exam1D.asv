@@ -13,22 +13,4 @@ n2 = leftNull(:,2);
 
 
 comp1 = dot(z,n1)/(norm(n1)^2);
-comp2 = dot(z,n2)/(norm(n2)^2);
-
-
-n1f = comp1*n1;
-n2f = comp2*n2;
-
-u = n1f + n2f;
-
-ortho1 = (z-u)'*n1;
-ortho2 = (z-u)'*n2;
-
-
-%% Problem 3
-A = [1,0,0;2,3,1;3,4,-1;1,1,1];
-G = A'*A;
-
-
-
-
+comp2 = dot(z,n2)/(norm(n)^2);
