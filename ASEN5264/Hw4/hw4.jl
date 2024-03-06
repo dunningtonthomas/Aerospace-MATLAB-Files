@@ -1,4 +1,5 @@
 using DMUStudent.HW4
+using Plots
 #using POMDPs: actions, @gen, isterminal, discount, statetype, actiontype, simulate, states, initialstate, support
 using CommonRLInterface
 using Statistics: mean, std
@@ -53,6 +54,26 @@ function sarsa!(env; n_episodes=100)
     
     return episodes
 end
+
+
+function evaluate(env, policy; n_episodes=1000, max_steps=1000, γ=1.0)
+    returns = Float64[]
+    for _ in 1:n_episodes
+        t = 0
+        r = 0.0
+        reset!(env)
+        s = observe(env)
+        while !terminated(env)
+            a = policy(s)
+            r += γ^t*act!(env, a)
+            s = observe(env)
+            t += 1
+        end
+        push!(returns, r)
+    end
+    return returns
+end
+
 
 
 
