@@ -136,40 +136,33 @@ sarsa_episodes = sarsa!(env, n_episodes=100000);
 Q_episodes = Q!(env, n_episodes=100000);
 
 # Plot Results Create Dictionary
-episodes = Dict("SARSA"=>sarsa_episodes, "Q"=>Q_episodes)
+episodes = Dict("SARSA"=>sarsa_episodes, "Q Learning"=>Q_episodes)
 
 # Create Steps in Environment Plot
-p = plot(xlabel="steps in environment", ylabel="avg return")
+p = plot(xlabel="Steps in Environment", ylabel="Avg Return")
+p2 = plot(xlabel="Wall Clock Time", ylabel="Avg Return")
 n = 1000
 stop = 100000
 for (name, eps) in episodes
     Q = Dict((s, a) => 0.0 for s in observations(env), a in actions(env))
     xs = [0]
+    xs2 = [0.0]
     ys = [mean(evaluate(env, s->argmax(a->Q[(s, a)], actions(env))))]
+    ys2 = [mean(evaluate(env, s->argmax(a->Q[(s, a)], actions(env))))]
     for i in n:n:min(stop, length(eps))
         newsteps = sum(length(ep.hist) for ep in eps[i-n+1:i])
+        newtime = sum(ep.time for ep in eps[i-n+1:i])
         push!(xs, last(xs) + newsteps)
+        push!(xs2, last(xs2) + newtime)
         Q = eps[i].Q
         push!(ys, mean(evaluate(env, s->argmax(a->Q[(s, a)], actions(env)))))
+        push!(ys2, mean(evaluate(env, s->argmax(a->Q[(s, a)], actions(env)))))
     end    
     plot!(p, xs, ys, label=name)
+    plot!(p2, xs2, ys2, label=name)
 end
 
 
-# Create Wall Clock Time Plot
-p2 = plot(xlabel="wall clock time", ylabel="avg return")
-for (name,eps) in episodes
-    Q = Dict((s, a) => 0.0 for s in observations(env), a in actions(env))
-    xs = [0.0]
-    ys = [mean(evaluate(env, s->argmax(a->Q[(s, a)], actions(env))))]
-    for i in n:n:min(stop, length(eps))
-        newtime = sum(ep.time for ep in eps[i-n+1:i])
-        push!(xs, last(xs) + newtime)
-        Q = eps[i].Q
-        push!(ys, mean(evaluate(env, s->argmax(a->Q[(s, a)], actions(env)))))
-    end    
-    plot!(p2, xs, ys, label=name)
-end
 
 
 
