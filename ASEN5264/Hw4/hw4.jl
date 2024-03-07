@@ -143,6 +143,7 @@ p = plot(xlabel="Steps in Environment", ylabel="Avg Return")
 p2 = plot(xlabel="Wall Clock Time", ylabel="Avg Return")
 n = 1000
 stop = 100000
+numSteps = 0
 for (name, eps) in episodes
     Q = Dict((s, a) => 0.0 for s in observations(env), a in actions(env))
     xs = [0]
@@ -161,6 +162,11 @@ for (name, eps) in episodes
     plot!(p, xs, ys, label=name)
     plot!(p2, xs2, ys2, label=name)
 end
+
+# Add horizontal line for the reward of 5
+hline!(p, [5], line=:dash, label="Reward of 5")
+
+
 
 
 
