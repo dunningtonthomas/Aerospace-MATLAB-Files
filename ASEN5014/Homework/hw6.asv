@@ -1,0 +1,29 @@
+%% 
+close all; clear; clc;
+
+
+%% Problem 4
+q = [0.1;0.1;0.2;0.06];
+xdot = [5;10];
+
+
+
+
+
+function J = jacob(q)
+
+    n = length(q);
+    J = zeros(2, n);
+
+    for i = 1:n
+        for j = i:n
+            for k = 1:j
+
+
+            end
+        end
+    end
+
+end
+
+
