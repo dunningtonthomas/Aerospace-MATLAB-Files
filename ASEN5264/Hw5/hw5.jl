@@ -4,6 +4,7 @@ using POMDPTools: Deterministic, Uniform, SparseCat, FunctionPolicy, RolloutSimu
 using Statistics: mean
 using Flux
 import POMDPs
+using Plots: scatter, scatter!, plot, plot!
 
 ##############
 # Instructions
@@ -102,11 +103,21 @@ sim = RolloutSimulator(max_steps=100)
 ############
 # Question 2
 ############
+using Flux: train!
 
 # The notebook at https://github.com/zsunberg/CU-DMU-Materials/blob/master/notebooks/110-Neural-Networks.ipynb can serve as a starting point for this problem.
-actual(x) = 4*x + 2
-x_train, x_test = hcat(0:5...), hcat(6:10...)
-y_train, y_test = actual.(x_train), actual.(x_test)
+actual(x) = (1-x)*sin(20*log(x+0.2))
+
+nTrain = 1000
+x_train = hcat(rand(nTrain)...)             # 1000 data points from 0 to 1
+y_train = actual.(x_train)              # Actual function data
+
+p = scatter(x_train, y_train)
+
+x_test = hcat(rand(nTrain)...) 
+y_test = actual.(x_test)
+
+
 predict = Dense(1 => 1)
 loss(model, x, y) = mean(abs2.(model(x) .- y));
 
@@ -114,7 +125,7 @@ opt = Descent()
 data = [(x_train, y_train)]
 
 
-for epoch in 1:200
+for epoch in 1:2000
     train!(loss, predict, data, opt)
 end
 
