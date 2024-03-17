@@ -112,22 +112,36 @@ nTrain = 1000
 x_train = hcat(rand(nTrain)...)             # 1000 data points from 0 to 1
 y_train = actual.(x_train)              # Actual function data
 
-p = scatter(x_train, y_train)
 
-x_test = hcat(rand(nTrain)...) 
-y_test = actual.(x_test)
-
-
-predict = Dense(1 => 1)
+predict = Chain(Dense(1=>50,σ), Dense(50=>50,σ), Dense(50=>1))
 loss(model, x, y) = mean(abs2.(model(x) .- y));
 
 opt = Descent()
 data = [(x_train, y_train)]
 
 
-for epoch in 1:2000
+# Train the model
+lossVec = []
+epochs = 1:250
+for epoch in epochs
     train!(loss, predict, data, opt)
+    push!(lossVec, loss(predict, x_train, y_train))
 end
+
+# Test model
+x_test = hcat(rand(100)...) 
+y_test = actual.(x_test)
+y_model = predict(x_test)
+
+# Plot the training data
+trainPlot = scatter(vec(x_train), vec(y_train))
+
+# Plot the learning curve
+learningCurve = plot(epochs, lossVec, label="Learning Curve", xlabel="Epoch", ylabel="Mean Square Loss")
+
+# Plot a set of 100 data points fed thrtough the trained model
+finalP = scatter(vec(x_test), vec(y_model), label="Model Result")
+scatter!(finalP, vec(x_test), vec(y_test), label="Actual Function", xlabel="Input", ylabel="Output")
 
 
 
