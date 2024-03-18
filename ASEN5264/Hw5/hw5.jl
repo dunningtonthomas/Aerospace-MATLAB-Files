@@ -113,10 +113,16 @@ x_train = hcat(rand(nTrain)...)             # 1000 data points from 0 to 1
 y_train = actual.(x_train)              # Actual function data
 
 
+σ = Flux.sigmoid
 predict = Chain(Dense(1=>50,σ), Dense(50=>50,σ), Dense(50=>1))
-loss(model, x, y) = mean(abs2.(model(x) .- y));
+#predict = Chain(Dense(1, 64, tanh), Dense(64, 1))
+#loss(model, x, y) = mean(abs2.(model(x) .- y));
+#loss(model, x, y) = mean(abs2.(model(x) .- y));
+#loss(model, x, y) = sum((model(x)-y).^2)
+loss(model, x, y) = Flux.mse(model(x), y);
 
-opt = Descent()
+
+opt = Descent(0.1)
 data = [(x_train, y_train)]
 
 
@@ -141,7 +147,7 @@ learningCurve = plot(epochs, lossVec, label="Learning Curve", xlabel="Epoch", yl
 
 # Plot a set of 100 data points fed thrtough the trained model
 finalP = scatter(vec(x_test), vec(y_model), label="Model Result")
-scatter!(finalP, vec(x_test), vec(y_test), label="Actual Function", xlabel="Input", ylabel="Output")
+scatter!(finalP, (vec(x_test)), (vec(y_test)), label="Actual Function", xlabel="Input", ylabel="Output")
 
 
 
