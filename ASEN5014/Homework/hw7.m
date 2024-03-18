@@ -50,6 +50,8 @@ sys = ss(A,B,C,D);
 
 
 [vecs, vals] = eig(A);
+vecSimp = [real(vecs(:,1)) real(vecs(:,3)) real(vecs(:,6))];
+
 
 
 L1 = null(A);
@@ -57,7 +59,21 @@ L2 = null(A + 3*eye(6));
 L3 = null(A + eye(6));
 
 
-A2 = A^2;
+A1_1 = (A)^2;
+A1_1Aug = [A1_1 zeros(6,1)];
+
+w1 = [0;1;0;0;0;0];
+
+A2_1 = (A + 3*eye(6))^2;
+null2 = null(A2_1);
+
+A2_2 = (A + 3*eye(6))^3;
+null3 = null(A2_2);
+
+
+Atest = [null3 vecSimp(:,2)];
+
+
 
 
 
