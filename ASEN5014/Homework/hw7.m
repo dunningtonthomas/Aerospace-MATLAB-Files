@@ -73,7 +73,7 @@ null3 = null(A2_2);
 
 Atest = [null3 vecSimp(:,2)];
 
-
+[V, J] = jordan(A);
 
 
 

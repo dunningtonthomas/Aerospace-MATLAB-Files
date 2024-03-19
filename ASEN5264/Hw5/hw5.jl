@@ -114,7 +114,7 @@ y_train = actual.(x_train)              # Actual function data
 
 
 σ = Flux.sigmoid
-predict = Chain(Dense(1=>50,σ), Dense(50=>50,σ), Dense(50=>1))
+predict = Chain(Dense(1=>50,leakyrelu), Dense(50=>50,leakyrelu), Dense(50=>50,leakyrelu), Dense(50=>50,leakyrelu), Dense(50=>50,leakyrelu), Dense(50=>1))
 #predict = Chain(Dense(1, 64, tanh), Dense(64, 1))
 #loss(model, x, y) = mean(abs2.(model(x) .- y));
 #loss(model, x, y) = mean(abs2.(model(x) .- y));
@@ -122,20 +122,22 @@ predict = Chain(Dense(1=>50,σ), Dense(50=>50,σ), Dense(50=>1))
 loss(model, x, y) = Flux.mse(model(x), y);
 
 
-opt = Descent(0.1)
-data = [(x_train, y_train)]
+# Optimizer setup
+opt = Flux.setup(Adam(), predict)
 
+# Combine Data
+data = [(x_train, y_train)]
 
 # Train the model
 lossVec = []
-epochs = 1:250
+epochs = 1:2000
 for epoch in epochs
     train!(loss, predict, data, opt)
     push!(lossVec, loss(predict, x_train, y_train))
 end
 
 # Test model
-x_test = hcat(rand(100)...) 
+x_test = hcat(0:0.01:1...) 
 y_test = actual.(x_test)
 y_model = predict(x_test)
 
@@ -147,7 +149,7 @@ learningCurve = plot(epochs, lossVec, label="Learning Curve", xlabel="Epoch", yl
 
 # Plot a set of 100 data points fed thrtough the trained model
 finalP = scatter(vec(x_test), vec(y_model), label="Model Result")
-scatter!(finalP, (vec(x_test)), (vec(y_test)), label="Actual Function", xlabel="Input", ylabel="Output")
+plot!(finalP, (vec(x_test)), (vec(y_test)), label="Actual Function", xlabel="Input", ylabel="Output")
 
 
 
