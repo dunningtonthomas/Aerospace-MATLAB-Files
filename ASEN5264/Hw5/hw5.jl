@@ -113,7 +113,6 @@ x_train = hcat(rand(nTrain)...)             # 1000 data points from 0 to 1
 y_train = actual.(x_train)              # Actual function data
 
 
-σ = Flux.sigmoid
 predict = Chain(Dense(1=>50,leakyrelu), Dense(50=>50,leakyrelu), Dense(50=>50,leakyrelu), Dense(50=>50,leakyrelu), Dense(50=>50,leakyrelu), Dense(50=>1))
 #predict = Chain(Dense(1, 64, tanh), Dense(64, 1))
 #loss(model, x, y) = mean(abs2.(model(x) .- y));

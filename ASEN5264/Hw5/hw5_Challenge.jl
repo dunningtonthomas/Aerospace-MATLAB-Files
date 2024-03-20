@@ -23,11 +23,12 @@ env = QuickWrapper(HW5.mc,
 function dqn(env)
     # This network should work for the Q function - an input is a state; the output is a vector containing the Q-values for each action 
     Q = Chain(Dense(2, 128, relu),
-              Dense(128, length(actions(env))))
+            Dense(128, length(actions(env))))
+
+    Q_target = deepcopy(Q)
 
     # Epsilon Greedy Policy
-    function policy(s)
-        epsilon = 0.1
+    function policy(s, epsilon=0.1)
         if rand() < epsilon
             return rand(1:length(actions(env)))
         else
@@ -35,20 +36,14 @@ function dqn(env)
         end
     end
 
-    # Gain experience function
-    function experience(n)
-        # Get experience
-        s = observe(env)
-        a_ind = 1 
-        r = act!(env, actions(env)[a_ind])
-        sp = observe(env)
+    # Gain experience function, appends the buffer
+    function experience(buffer, n)
+        # See if terminal
         done = terminated(env)
-        experience_tuple = (s, a_ind, r, sp, done)
+        i = 1
 
-        # Buffer container of experience tuples
-        buffer = [experience_tuple]
-
-        for _ in 1:n
+        # Loop through n steps in the environment and add to the buffer
+        while i <= n && !done
             s = observe(env)
             a_ind = policy(s)
             r = act!(env, actions(env)[a_ind])
@@ -56,38 +51,112 @@ function dqn(env)
             done = terminated(env)
             experience_tuple = (s, a_ind, r, sp, done)
             push!(buffer, experience_tuple)                 # Add to the experience
+            i = i + 1
         end
+
         return buffer
     end
 
-    # create your loss function for Q training here
+    # Gain experience function, resets the buffer
+    function reset_buffer(buffer, n)
+        # Reset buffer
+        buffer = []
+        i = 1
+        
+        # See if terminated
+        done = terminated(env)
+
+        # Loop through n steps in the environment and add to the buffer
+        while i <= n && !done
+            s = observe(env)
+            a_ind = policy(s)
+            r = act!(env, actions(env)[a_ind])
+            sp = observe(env)
+            done = terminated(env)
+            experience_tuple = (s, a_ind, r, sp, done)
+            push!(buffer, experience_tuple)                 # Add to the experience
+            i = i + 1
+        end
+
+        return buffer
+    end
+
+    # Q Training Loss Function
     function loss(Q, s, a_ind, r, sp, done)
         # Discount factor
         g = 0.99
 
-        # Return 0 if terminal
+        # Reached terminal state
         if done
-            return 0
+            return (r - Q(s)[a_ind])^2
         end
 
         # DQN Loss Function
-        return (r + g*maximum(Q(sp)[tempInd] for tempInd in 1:length(actions(env))) - Q(s)[a_ind])^2
-        #return (r-Q(s)[a_ind])^2 # this is not correct! you need to replace it with the true Q-learning loss function
-        # make sure to take care of cases when the problem has terminated correctly
+        return (r + g*maximum(Q_target(sp)[tempInd] for tempInd in 1:length(actions(env))) - Q(s)[a_ind])^2
     end
 
+    # Evaluate function for cummulative reward
+    function eval(Q, num_eps)
+        # Max number of steps
+        n = 1000
+        done = terminated(env)
+
+        # Reward value
+        totReward = 0
+
+        # Evaluate
+        for i in 1:num_eps
+            # Reset 
+            reset!(env)
+            j = 1
+            while j <= n && !done
+                s = observe(env)
+                a_ind = policy(s, 0)
+                r = act!(env, actions(env)[a_ind])
+                totReward = totReward + r
+                sp = observe(env)
+                done = terminated(env)
+                j = j + 1
+            end
+        end
+
+        # Return the average reward
+        return totReward / num_eps
+    end
+
+    
+    # Instantiate the buffer, 1000 steps for each episode
+    n = 1000
+    buffer = []
+    buffer = experience(buffer, n)
+
     # Number of epochs
-    epochs = 100
+    epochs = 1000
 
     for i in 1:epochs
+        # Rest the environment
+        reset!(env)
+
         # Gain experience
-        buffer = experience(100)
+        buffer = experience(buffer, n)
 
         # select some data from the buffer
-        data = rand(buffer, 10)
+        data = rand(buffer, 1000)
 
         # do your training like this (you may have to adjust some things, and you will have to do this many times):
         Flux.Optimise.train!(loss, Q, data, Flux.setup(ADAM(0.0005), Q))
+
+
+        # Update the target network every 100 epochs
+        if i%10 == 0
+            Q_target = deepcopy(Q)
+        end
+
+        # Trash old buffer data
+        if i%10 == 0
+            buffer = reset_buffer(buffer, n)
+        end
+
     end
 
     # Make sure to evaluate, print, and plot often! You will want to save your best policy.
@@ -111,7 +180,7 @@ HW5.evaluate(s->actions(env)[argmax(Q(s[1:2]))], n_episodes=100) # you will need
 # The following code allows you to render the value function
 xs = -3.0f0:0.1f0:3.0f0
 vs = -0.3f0:0.01f0:0.3f0
-heatmap(xs, vs, (x, v) -> maximum(Q([x, v])), xlabel="Position (x)", ylabel="Velocity (v)", title="Max Q Value")
+h = heatmap(xs, vs, (x, v) -> maximum(Q([x, v])), xlabel="Position (x)", ylabel="Velocity (v)", title="Max Q Value")
 
 
 # function render_value(value)
