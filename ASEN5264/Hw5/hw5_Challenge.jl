@@ -12,8 +12,6 @@ using DMUStudent.HW5: HW5, mc
 # using DataFrames: DataFrame
 
 
-# The following are some basic components needed for DQN
-
 # Override to a discrete action space, and position and velocity observations rather than the matrix.
 env = QuickWrapper(HW5.mc,
                    actions=[-1.0, -0.5, 0.0, 0.5, 1.0],
@@ -25,14 +23,19 @@ function dqn(env)
     Q = Chain(Dense(2, 128, relu),
             Dense(128, length(actions(env))))
 
+    # Target network is a copy
     Q_target = deepcopy(Q)
+
+    # Best Q function based on eval
+    Q_best = deepcopy(Q)
 
     # Epsilon Greedy Policy
     function policy(s, epsilon=0.1)
         if rand() < epsilon
             return rand(1:length(actions(env)))
         else
-            return argmax(aInd->Q(s)[aInd], 1:length(actions(env)))
+            return argmax(Q(s))
+            #return argmax(aInd->Q(s)[aInd], 1:length(actions(env)))
         end
     end
 
@@ -41,7 +44,6 @@ function dqn(env)
         # See if terminal
         done = terminated(env)
         i = 1
-
         # Loop through n steps in the environment and add to the buffer
         while i <= n && !done
             s = observe(env)
@@ -53,19 +55,16 @@ function dqn(env)
             push!(buffer, experience_tuple)                 # Add to the experience
             i = i + 1
         end
-
         return buffer
     end
 
-    # Gain experience function, resets the buffer
-    function reset_buffer(buffer, n)
+    # Resets the buffer and gains experience
+    function reset_buffer(n)
         # Reset buffer
         buffer = []
         i = 1
-        
         # See if terminated
         done = terminated(env)
-
         # Loop through n steps in the environment and add to the buffer
         while i <= n && !done
             s = observe(env)
@@ -77,98 +76,94 @@ function dqn(env)
             push!(buffer, experience_tuple)                 # Add to the experience
             i = i + 1
         end
-
         return buffer
     end
 
-    # Q Training Loss Function
-    function loss(Q, s, a_ind, r, sp, done)
-        # Discount factor
-        g = 0.99
-
-        # Reached terminal state
-        if done
-            return (r - Q(s)[a_ind])^2
-        end
-
-        # DQN Loss Function
-        return (r + g*maximum(Q_target(sp)[tempInd] for tempInd in 1:length(actions(env))) - Q(s)[a_ind])^2
-    end
-
     # Evaluate function for cummulative reward
-    function eval(Q, num_eps)
-        # Max number of steps
-        n = 1000
-        done = terminated(env)
-
-        # Reward value
+    function eval(Q_eval, num_eps)
         totReward = 0
-
-        # Evaluate
-        for i in 1:num_eps
+        for _ in 1:num_eps
             # Reset 
             reset!(env)
             j = 1
-            while j <= n && !done
+            while j <= 1000 && !terminated(env)
                 s = observe(env)
-                a_ind = policy(s, 0)
+                a_ind = argmax(Q_eval(s))
                 r = act!(env, actions(env)[a_ind])
-                totReward = totReward + r
-                sp = observe(env)
-                done = terminated(env)
-                j = j + 1
+                totReward += r
+                j += 1
             end
         end
-
-        # Return the average reward
+        # Return the average reward per episode
         return totReward / num_eps
     end
 
     
     # Instantiate the buffer, 1000 steps for each episode
-    n = 1000
+    n = 10000
     buffer = []
-    buffer = experience(buffer, n)
+    buffer = experience(buffer, n)      # Initial buffer episode
+    bestReward = -1000
 
     # Number of epochs
     epochs = 1000
 
-    for i in 1:epochs
+    for epoch in 1:epochs
         # Rest the environment
         reset!(env)
 
         # Gain experience
         buffer = experience(buffer, n)
 
-        # select some data from the buffer
+
+        # Q Training Loss Function
+        function loss(Q, s, a_ind, r, sp, done)
+            # Discount factor
+            g = 0.99
+            # Reached terminal state
+            if done
+                return (r - Q(s)[a_ind])^2
+            end
+            # DQN Loss Function
+            return (r + g*maximum(Q_target(sp)) - Q(s)[a_ind])^2
+        end
+
+        # Get random data from the buffer
         data = rand(buffer, 1000)
 
-        # do your training like this (you may have to adjust some things, and you will have to do this many times):
+        # Train based on random data in the buffer
         Flux.Optimise.train!(loss, Q, data, Flux.setup(ADAM(0.0005), Q))
 
-
-        # Update the target network every 100 epochs
-        if i%10 == 0
+        # Trash old buffer data
+        if epoch % 20 == 0
+            buffer = reset_buffer(n)
+            
+            # Set the target Q network
             Q_target = deepcopy(Q)
         end
 
-        # Trash old buffer data
-        if i%10 == 0
-            buffer = reset_buffer(buffer, n)
+        # Evaluate Epoch
+        num_eps = 50
+        avgReward = eval(Q, num_eps)
+        if avgReward > bestReward           # Update if new best is found
+            bestReward = avgReward
+            Q_best = deepcopy(Q)
         end
 
+        # Output data
+        print("Epoch: ", epoch, "\t Buffer Size: ", length(buffer), "\t Average Reward: ", avgReward, "\n")
     end
 
     # Make sure to evaluate, print, and plot often! You will want to save your best policy.
-    return Q
+    return Q_best
 end
 
-
-# Get value function
+# Call DQN to get best Q function
 Q = dqn(env)
 
 # Evaluate
 HW5.evaluate(s->actions(env)[argmax(Q(s[1:2]))], n_episodes=100) # you will need to remove the n_episodes=100 keyword argument to create a json file; evaluate needs to run 10_000 episodes to produce a json
+#HW5.evaluate(s->actions(env)[argmax(Q(s[1:2]))], "thomas.dunnington@colorado.edu")
 
 #----------
 # Rendering
