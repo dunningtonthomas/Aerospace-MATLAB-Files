@@ -39,8 +39,8 @@ function dqn(env)
     bufferSize = 50000
     e_orig = 0.1
     epsilon = 0.1
-    n = 10000
-    epochs = 1000
+    n = 1000
+    epochs = 500
 
     # Set Optimizer
     opt = Flux.setup(ADAM(0.0005), Q)
@@ -48,12 +48,7 @@ function dqn(env)
     # Epsilon Greedy Policy
     function policy(s, epsilon=0.1)
         if rand() < epsilon
-            if s[2] < 0
-                return 1
-            else
-                return 5
-            end
-            #return rand(1:length(actions(env)))
+            return rand(1:length(actions(env)))
         else
             return argmax(Q(s))
             #return argmax(aInd->Q(s)[aInd], 1:length(actions(env)))
@@ -65,6 +60,11 @@ function dqn(env)
         # See if terminal
         done = terminated(env)
         i = 1
+
+        # Reset if terminal
+        if done
+            reset!(env)
+        end
 
         # Recently added buffer
         recentBuffer = []
@@ -131,7 +131,7 @@ function dqn(env)
 
     for epoch in 1:epochs
         # Rest the environment
-        reset!(env)
+        # reset!(env)
 
         # Decay epsilon, goes to 0 in half of the epochs
         # epsilon = e_orig * (1 - epoch/(epochs/2))
@@ -160,7 +160,7 @@ function dqn(env)
         end
 
         # Get random data from the buffer
-        data = rand(buffer, 2000)
+        data = rand(buffer, 1000)
 
         # Train based on random data in the buffer
         Flux.Optimise.train!(loss, Q, data, opt)
