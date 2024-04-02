@@ -1,0 +1,15 @@
+%% Clean
+close all; clear; clc;
+
+
+%% Problem 2
+A = [4 -2; -3 5];
+[vec, val] = eig(A);
+
+maxVec = vec(:,2);
+maxVec = maxVec / norm(maxVec);
+
+maxTemp = [-2/3; 1];
+maxTemp = maxTemp / norm(maxTemp);
+
+test = []

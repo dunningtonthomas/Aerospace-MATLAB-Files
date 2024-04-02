@@ -3,23 +3,89 @@ close all; clear; clc;
 
 
 %% Problem 2
-objFunc = @(x1,x2) 4*x1^2 + 5*x2^2 -5*x1*x2;
-funHand = @lagrangeEq;
-x0 = [0.6;-0.7;0.5];
-x = fsolve(funHand, x0);
+A = [4 -2; -3 5];
+[vec, val] = eig(A);
 
-% Get optimal values
-x1 = x(1);
-x2 = x(2);
+maxVec = vec(:,2);
+maxVec = maxVec / norm(maxVec);
 
-
-maxVal = objFunc(x1, x2);
+maxTemp = [-2/3; 1];
+maxTemp = maxTemp / norm(maxTemp);
 
 
+%% Problem 4
+load('my_secret_REV1.mat');
 
-function F = lagrangeEq(x)
-    x1 = x(1); x2 = x(2); lambda = x(3);
-    F = [8*x1 - 5*x2 + lambda*x1 / sqrt(x1^2 + x2^2);
-        10*x2 - 5*x1 + lambda*x2 / sqrt(x1^2 + x2^2);
-        sqrt(x1^2 + x2^2) - 1];
+x = my_secret(1:7,1);
+testPairs = my_secret(1:7,:);
+A = zeros(7,5);
+
+% Create the linear mapping
+for j = 1:7
+    col = 1;
+    for i = flip(1:5)
+        A(j,col) = x(j)^(i-1);
+        col = col + 1;
+    end
 end
+
+
+% Loop through different values of k and perform least squares
+passInd = 1;
+passVec = 0;
+kvals = 1:14;
+residVec = zeros(size(kvals));
+for k = kvals
+    A = generateA(k, my_secret);
+    pvec = A'*A\A'*my_secret(:,2);
+    passVec(passInd) = pvec(end);
+    residVec(passInd) = sqrt(mean((my_secret(:,2) - A*pvec).^2));
+    passInd = passInd + 1;
+end
+
+
+
+
+%% Plotting
+figure();
+plot(kvals, passVec, 'linewidth', 2,'Color','r');
+xline(8, 'Label','K = 8');
+grid on
+xlabel('K Values');
+ylabel('P0');
+title('K Values verus P0')
+
+% Residuals
+% Create semi-logarithmic plot
+figure;
+semilogy(kvals, residVec, 'linewidth', 2);
+xlabel('K Value');
+ylabel('Root Mean Square Residual');
+title('Least Squares Error');
+xline(8, 'Label','K = 8');
+grid on;
+
+
+
+%% Functions
+% This function generates the A matrix given a k value and the x,y pairs
+function A = generateA(k, pairs)
+    % Get x values in the number pairs
+    x = pairs(:,1);
+    A = zeros(length(x),k);
+
+    % Create the linear mapping
+    for j = 1:length(x)
+        col = 1;
+        for i = flip(1:k+1)
+            A(j,col) = x(j)^(i-1);
+            col = col + 1;
+        end
+    end
+end
+
+
+
+
+
+
