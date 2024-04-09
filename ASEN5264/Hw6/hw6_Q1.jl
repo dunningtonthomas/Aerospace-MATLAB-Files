@@ -64,10 +64,21 @@ struct HW6AlphaVectorPolicy{A} <: Policy
 end
 
 function POMDPs.action(p::HW6AlphaVectorPolicy, b::DiscreteBelief)
+    beliefvec(b::DiscreteBelief) = b.b
+    alphaVecs = p.alphas
+    alphaActions = p.alpha_actions
 
     # Fill in code to choose action based on alpha vectors
+    # Find the most likely state based on the belief vector
+    stateInd = argmax(beliefvec(b))
 
-    return first(actions(b.pomdp))
+    # Get the alpha vector corresponding to the current state
+    stateAlpha = alphaVecs[stateInd]
+    
+    # Return the action associated with the maximum reward for the given alpha vector
+    return argmax(a->stateAlpha, alphaActions)
+
+    #return first(actions(b.pomdp))
 end
 
 beliefvec(b::DiscreteBelief) = b.b # this function may be helpful to get the belief as a vector in stateindex order
@@ -91,13 +102,18 @@ function qmdp_solve(m, discount=discount(m))
     return HW6AlphaVectorPolicy(alphas, acts)
 end
 
+# POMDP definition
 m = TigerPOMDP()
 
 qmdp_p = qmdp_solve(m)
 # Note: you can use the QMDP.jl package to verify that your QMDP alpha vectors are correct.
 sarsop_p = solve(SARSOPSolver(), m)
+
+# Test the updaters
 up = HW6Updater(m)
 up2 = DiscreteUpdater(m)
+
+# Test the policy and action function --> Call the action function based on an initial belief and state
 
 #@show mean(simulate(RolloutSimulator(max_steps=500), m, qmdp_p, up) for _ in 1:5000)
 @show mean(simulate(RolloutSimulator(max_steps=500), m, sarsop_p, up) for _ in 1:5000)
