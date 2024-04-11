@@ -5,6 +5,7 @@ using QuickPOMDPs: QuickPOMDP
 using POMDPModels: TigerPOMDP, TIGER_LEFT, TIGER_RIGHT, TIGER_LISTEN, TIGER_OPEN_LEFT, TIGER_OPEN_RIGHT
 using NativeSARSOP: SARSOPSolver
 using POMDPTesting: has_consistent_distributions
+using Statistics: mean, std
 
 ##################
 # Problem 1: Tiger
