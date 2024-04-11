@@ -139,8 +139,9 @@ sarsop_SEM = std(sarsop_Results) / sqrt(length(sarsop_Results))
 # Print results
 # @show mean(qmdp_Results)
 # @show mean(sarsop_Results)
+print("\n\n------------TIGER POMDP------------\n")
 print("QMDP: \n", "\t Mean: ", mean(qmdp_Results), "\n\t SEM: ", qmdp_SEM, "\n")
-print("SARSOP: \n", "\t Mean: ", mean(qmdp_Results), "\n\t SEM: ", qmdp_SEM, "\n")
+print("SARSOP: \n", "\t Mean: ", mean(sarsop_Results), "\n\t SEM: ", sarsop_SEM, "\n")
 
 # Plot the alpha vectors for QMDP
 stateVec = 0:1
@@ -235,28 +236,35 @@ up = DiscreteUpdater(cancer)
 
 heuristic = FunctionPolicy(
     function(b)
-        # if pdf(b, :healthy) > 0.9
-        #     return :wait
-        # elseif pdf(b, :invasive) > 0.1
-        #     return :test
-        # elseif pdf(b, :in_situ) > 0.1
-        #     return :test
-
         if pdf(b, :healthy) > 0.9
             return :test
         elseif pdf(b, :in_situ) > 0.9 && pdf(b, :invasive) > 0.7
             return :treat
         else
             return action(qmdp_p, b)
-        end
-                               # Fill in your heuristic policy here
-                               # Use pdf(b, s) to get the probability of a state
-                               
+        end                               
     end
 )
 
 
-@show mean(simulate(RolloutSimulator(), cancer, qmdp_p, up) for _ in 1:1000)     # Should be approximately 66
-@show mean(simulate(RolloutSimulator(), cancer, heuristic, up) for _ in 1:1000)
-@show mean(simulate(RolloutSimulator(), cancer, sarsop_p, up) for _ in 1:1000)   # Should be approximately 79
+
+qmdp_Results = (simulate(RolloutSimulator(), cancer, qmdp_p, up) for _ in 1:1000) 
+heuristic_results = (simulate(RolloutSimulator(), cancer, heuristic, up) for _ in 1:1000)
+sarsop_Results = (simulate(RolloutSimulator(), cancer, sarsop_p, up) for _ in 1:1000)
+
+# Standard error of the mean
+qmdp_SEM = std(qmdp_Results) / sqrt(length(qmdp_Results))
+heuristic_SEM = std(heuristic_results) / sqrt(length(heuristic_results))
+sarsop_SEM = std(sarsop_Results) / sqrt(length(sarsop_Results))
+
+# Print results
+# @show mean(qmdp_Results)
+# @show mean(sarsop_Results)
+print("\n\n------------CANCER POMDP------------\n")
+print("QMDP: \n", "\t Mean: ", mean(qmdp_Results), "\n\t SEM: ", qmdp_SEM, "\n")
+print("heuristic: \n", "\t Mean: ", mean(heuristic_results), "\n\t SEM: ", heuristic_SEM, "\n")
+print("SARSOP: \n", "\t Mean: ", mean(sarsop_Results), "\n\t SEM: ", sarsop_SEM, "\n")
+
+
+
 
