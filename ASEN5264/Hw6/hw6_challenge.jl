@@ -32,6 +32,7 @@ up = DiscreteUpdater(m) # you may want to replace this with your updater to test
 function pomcp_solve(m) # this function makes capturing m in the rollout policy more efficient
     solver = POMCPSolver(tree_queries=100,
                          c=1.0,
+                         max_depth=100,
                          default_action=first(actions(m)),
                          estimate_value=FOValue(ValueIterationSolver()))
     return solve(solver, m)
