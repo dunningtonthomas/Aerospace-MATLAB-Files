@@ -108,7 +108,7 @@ function qmdp_solve(m, discount=discount(m))
         alpha = zeros(length(states(m)))
         # Compute the alpha vectors
         for s in ordered_states(m)
-            alpha[stateindex(m, s)] = reward(m, s, a) + discount * sum(T(m, s, a, sp) * Q[stateindex(m, sp)] for sp in ordered_states(m))             
+            alpha[stateindex(m, s)] = reward(m, s, a) + discount * sum(T(m, s, a, sp) * Q[stateindex(m, sp)] for sp in stateVec)             
         end
         push!(alphas, alpha)
         push!(acts, a)  # Add the action
@@ -238,7 +238,7 @@ heuristic = FunctionPolicy(
     function(b)
         if pdf(b, :healthy) > 0.9
             return :test
-        elseif pdf(b, :in_situ) > 0.9 && pdf(b, :invasive) > 0.7
+        elseif pdf(b, :in_situ) > 0.9 || pdf(b, :invasive) > 0.7
             return :treat
         else
             return action(qmdp_p, b)
