@@ -1,4 +1,5 @@
-%% Clean
+%% EXAM 2 MATLAB APPENDIX
+% Author: Thomas Dunnington
 close all; clear; clc;
 
 
@@ -65,6 +66,30 @@ RN = null(A);
 
 x1 = xln + RN(:,1);
 x2 = xln + RN(:,2);
+
+%% Problem 5
+A = [0,1,0,0,0,0; 0,0,0,0,0,0; 0,0,0,1,0,0; 0,0,-1,-2,0,0; 0,0,0,0,0,1; 0,0,1,2,-3,-4];
+B = [0;1;0;1;0;0];
+
+[vec, vals] = eig(A);
+
+Ctild = ctrb(A,B);
+P = [-1 -1.5 -1.75 -2 -2.1 -3];
+K = place(A,B,P);
+
+Aclosed = A - B*K;
+
+[vec2, val2] = eig(Aclosed);
+
+
+%% Functions
+function out = controllMat(A,B)
+    [n,~] = size(B);    
+    out = B;
+    for i = 1:n-1
+        out = [out A^i*B];
+    end
+end
 
 
 
