@@ -10,7 +10,7 @@ close all; clear; clc;
 %% Plotting
 % Sample data
 cases = {'Coarse', 'Fine', 'Joint'};
-data_RGVA = [3.9,2.4,2.1]; % error values
+data_RGVA = [2.9,2.4,2.1]; % error values
 data_RGVB = [2.9,2.6,4.3]; % error values
 model_RGVA = [1.4, 1.1, 1.4];
 model_RGVB = [2.6,1.9,1.6];
