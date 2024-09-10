@@ -1,6 +1,6 @@
 function [velocity_body] = WindAnglesToAirRelativeVelocityVector(wind_angles)
 % Calculates the air relative velocity vector given the wind angles and air
-% relative speed
+% relative speed in body coordinates
 % Inputs: 
 %   wind_angles -> [air speed; sideslip angle; angle of attack]
 % Output:
