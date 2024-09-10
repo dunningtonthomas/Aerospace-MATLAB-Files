@@ -22,16 +22,10 @@ euler_angles = aircraft_state(4:6);
 velocity_inertial = aircraft_state(7:9);
 angular_velocity = aircraft_state(10:12);
 
-% Input parameters
-de = aircraft_surfaces(1);
-da = aircraft_surfaces(2);
-dr = aircraft_surfaces(3);
-dt = aircraft_surfaces(4);
-
 % Velocity
-xdot(1:3) = TransformFromBodyToInertial(velocity_inertial, euler_angles);
+vel_inertial = TransformFromBodyToInertial(velocity_inertial, euler_angles);
 
-% Time Rate of Change of angles
+% Euler rates
 phi = euler_angles(1);
 theta = euler_angles(2);
 psi = euler_angles(3);
@@ -40,22 +34,12 @@ ang_vel_mat = [1, sin(phi)*tan(theta), cos(phi)*tan(theta);
     0, cos(phi), -sin(phi);
     0, sin(phi)*sec(theta), cos(phi)*sec(theta)];
 
-xdot(4:6) = ang_vel_mat*angular_velocity;
+euler_rates = ang_vel_mat*angular_velocity;
 
 % Velocity components
 p = angular_velocity(1);
 q = angular_velocity(2);
 r = angular_velocity(3);
-u = velocity_inertial(1);
-v = velocity_inertial(2);
-w = velocity_inertial(3);
-
-% Aircraft Forces
-rho = stdatmo(-1*aircraft_state(3));
-[aircraft_forces, aircraft_moments] = AircraftForcesAndMoments(aircraft_state, aircraft_surfaces, wind_inertial, rho, aircraft_parameters);
-
-% Acceleration
-xdot(7:9) = [r*v - q*w; p*w - r*u; q*u - p*v] + 1/aircraft_parameters.m * aircraft_forces;
 
 % Define skew semetric matrix
 omega_b = [0, -r, q; r, 0, -p; -q, p, 0];
@@ -63,10 +47,18 @@ omega_b = [0, -r, q; r, 0, -p; -q, p, 0];
 % Define inertial matrix
 IB = aircraft_parameters.inertia_matrix;
 
-% Time rate of change of angular velocity
-xdot(10:12) = IB\(-omega_b*(IB*omega_b) + aircraft_moments);
+% Aircraft Forces
+rho = stdatmo(-1*aircraft_state(3));
+[aircraft_forces, aircraft_moments] = AircraftForcesAndMoments(aircraft_state, aircraft_surfaces, wind_inertial, rho, aircraft_parameters);
 
-% Try this to see if it is the same:
-%xdot(7:9) = -omega_b*velocity_inertial + 1/aircraft_parameters.m * aircraft_forces;
+% Acceleration
+vel_body_dot = -omega_b*velocity_inertial + 1/aircraft_parameters.m * aircraft_forces;
+
+% Time rate of change of angular velocity
+omega_body_dot = inv(IB)*(-1*omega_b*(IB*angular_velocity) + aircraft_moments);
+
+% Full state derivatives
+xdot = [vel_inertial; euler_rates; vel_body_dot; omega_body_dot];
+
 end
 
