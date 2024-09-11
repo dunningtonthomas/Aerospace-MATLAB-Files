@@ -7,7 +7,7 @@ if ~exist(folderName, 'dir')
 end
 
 % Change directory
-cd folderName
+cd(folderName)
 
 % Specify the subfolder
 subfolder = 'Hw2_Problem1';

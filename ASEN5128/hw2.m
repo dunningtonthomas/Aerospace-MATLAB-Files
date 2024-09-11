@@ -37,8 +37,8 @@ init_state = [0; 0; -h; 0; 0; 0; VE(1); VE(2); VE(3); 0; 0; 0];
 aircraft_surfaces = [0; 0; 0; 0];
 rho = stdatmo(h);
 
-tspan = [0 100];
-odeFunc = @(time, aircraft_state)AircraftEOM(time, aircraft_state, aircraft_surfaces, wind_inertial, aircraft_parameters);
+
+odeFunc = @(time, aircraft_state)AircraftEOM_key(time, aircraft_state, aircraft_surfaces, wind_inertial, aircraft_parameters);
 [Tout, Xout] = ode45(odeFunc, tspan, init_state);
 
 for i=1:length(Tout)
@@ -56,7 +56,6 @@ aircraft_surfaces = [5*pi/180; 2*pi/180; -13*pi/180; 0.3];
 wind_inertial = [0;0;0];
 rho = stdatmo(h);
 
-tspan = [0 100];
 odeFunc = @(time, aircraft_state)AircraftEOM(time, aircraft_state, aircraft_surfaces, wind_inertial, aircraft_parameters);
 [Tout, Xout] = ode45(odeFunc, tspan, init_state);
 
