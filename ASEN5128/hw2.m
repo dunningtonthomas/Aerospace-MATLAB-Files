@@ -17,36 +17,35 @@ rho = stdatmo(h);
 xDot_problem2 = AircraftEOM(0, init_state, aircraft_surfaces, wind_inertial, aircraft_parameters);
 
 % Aircraft Simulation
-tspan = [0 100];
+tspan = [0 150];
 odeFunc = @(time, aircraft_state)AircraftEOM(time, aircraft_state, aircraft_surfaces, wind_inertial, aircraft_parameters);
 [Tout, Xout] = ode45(odeFunc, tspan, init_state);
 
+Uout = zeros(length(Tout),4);
 for i=1:length(Tout)
     Uout(i,:) = aircraft_surfaces';
 end
 
-PlotAircraftSim(Tout, Xout, Uout, 1:6, 'r');
+PlotSimulation(Tout, Xout, Uout, 1:6, 'r');
 
 
 %%  Problem 3.2
 V = WindAnglesToAirRelativeVelocityVector([18; 0; 0]);
 wind_inertial = [10; 10; 0];
-VE = TransformFromBodyToInertial(V, [0; 0; 0]) + wind_inertial;
+VE = TransformFromBodyToInertial(V, [0; 0; 0]);
 h = 1655;
 init_state = [0; 0; -h; 0; 0; 0; VE(1); VE(2); VE(3); 0; 0; 0];
 aircraft_surfaces = [0; 0; 0; 0];
-rho = stdatmo(h);
-
 
 odeFunc = @(time, aircraft_state)AircraftEOM_key(time, aircraft_state, aircraft_surfaces, wind_inertial, aircraft_parameters);
 [Tout, Xout] = ode45(odeFunc, tspan, init_state);
 
+Uout = zeros(length(Tout),4);
 for i=1:length(Tout)
     Uout(i,:) = aircraft_surfaces';
 end
 
-PlotAircraftSim(Tout, Xout, Uout, 1:6, ['b', '-']);
-%PlotSimulation(Tout, Xout, Uout, 'b');
+PlotSimulation(Tout, Xout, Uout, 1:6, ['b', '-']);
 
 
 %% Problem 3.3
@@ -59,11 +58,12 @@ rho = stdatmo(h);
 odeFunc = @(time, aircraft_state)AircraftEOM(time, aircraft_state, aircraft_surfaces, wind_inertial, aircraft_parameters);
 [Tout, Xout] = ode45(odeFunc, tspan, init_state);
 
+Uout = zeros(length(Tout),4);
 for i=1:length(Tout)
     Uout(i,:) = aircraft_surfaces';
 end
 
-PlotAircraftSim(Tout, Xout, Uout, 1:6, ['g', '-']);
+PlotSimulation(Tout, Xout, Uout, 1:6, ['g', '-']);
 
 
 
