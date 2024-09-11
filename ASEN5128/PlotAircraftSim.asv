@@ -2,11 +2,12 @@ function PlotAircraftSim(time, aircraft_state_array, control_input_array, fig, c
 % Creates 6 plots from an aircraft simulation
 % Inputs: 
 %   time -> Time during simulation
-%   aircraft_state_array -> full nx12 aircraft state over time
-%   control_input_array -> control input vector nx4
-%   col -> plotting options
+%   aircraft_state_array -> full 12xn aircraft state
+%   aircraft_surfaces -> control input vector [de, da, dr, dt]
+%   wind_inertial -> inertial wind velocity in inertial coordinates
+%   aircraft_parameters -> aircraft parameter structure
 % Output:
-%   6 plots of aircraft state and control variables over time
+%   xdot -> Rate of change of the aircraft state
 % 
 % Author: Thomas Dunnington
 % Date Modified: 9/10/2024
@@ -159,6 +160,8 @@ title('Aircraft Path');
 xlabel('X Position (m)');
 ylabel('Y Position (m)');
 zlabel('Z Position (m)');
+
+
 
 
 end

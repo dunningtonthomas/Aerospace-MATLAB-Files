@@ -75,69 +75,28 @@ plot3(aircraft_state_array(:,1),aircraft_state_array(:,2),-aircraft_state_array(
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
-if (~isempty(control_surfaces))
+if (~isempty(control_input_array))
     figure(6);
     
     subplot(411);
-    plot(time, control_surfaces(:,1),col, 'linewidth', 2);hold on;
+    plot(time, control_input_array(:,1),col, 'linewidth', 2);hold on;
     title('Control Surfaces v Time');   
     ylabel('Elevator [rad]')    
 
     subplot(412);
-    plot(time, control_surfaces(:,2),col, 'linewidth', 2);hold on;
+    plot(time, control_input_array(:,2),col, 'linewidth', 2);hold on;
     ylabel('Aileron [rad]')      
  
     subplot(413);
-    plot(time, control_surfaces(:,3),col, 'linewidth', 2);hold on;
+    plot(time, control_input_array(:,3),col, 'linewidth', 2);hold on;
     ylabel('Rudder [rad]')       
     
     subplot(414);
-    plot(time, control_surfaces(:,4),col, 'linewidth', 2);hold on;
+    plot(time, control_input_array(:,4),col, 'linewidth', 2);hold on;
     ylabel('Throttle [frac]')     
     xlabel('time [sec]');
 
 end
-
-
-% Get the wind angles over time
-inertVels = aircraft_state_array(:,7:9);
-eulerAngles = aircraft_state_array(:,4:6);
-
-%Creating variables for the wind angles
-Vvec = zeros(length(inertVels(:,1)),1);
-betaVec = zeros(length(inertVels(:,1)),1);
-alphaVec = zeros(length(inertVels(:,1)),1);
-
-
-% Calculating the wind from the inertial velocities
-for i = 1:length(inertVels(:,1))
-    inertVel = inertVels(i,:);
-    angles = eulerAngles(i,:);
-    inertWind = TransformFromInertialToBody(background_wind_array, angles);
-    airRelVel = inertVel' - inertWind;
-    windAngles = WindAnglesFromVelocityBody(airRelVel);    
-    Vvec(i) = windAngles(1);
-    betaVec(i) = windAngles(2);
-    alphaVec(i) = windAngles(3);
-end
-
-figure(7);
-subplot(3,1,1);
-plot(time, Vvec, col, 'linewidth', 2);
-hold on;
-ylabel('Wind Velocity (m/s)');
-title('Wind Angles Over Time');
-
-subplot(3,1,2);
-plot(time, betaVec, col, 'linewidth', 2);
-hold on;
-ylabel('Sideslide Angle (rad)');
-
-subplot(3,1,3);
-plot(time, alphaVec, col, 'linewidth', 2);
-hold on;
-ylabel('Angle of Attack (rad)');
-xlabel('Time (s)');
 
 end
 
