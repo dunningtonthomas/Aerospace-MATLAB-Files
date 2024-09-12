@@ -1,4 +1,4 @@
-%% Clean
+%% Problem 3 Code Appendix
 close all; clear; clc;
 ttwistor;
 
