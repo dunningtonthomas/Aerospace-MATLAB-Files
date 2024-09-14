@@ -28,32 +28,33 @@ x0 = [0; 0.1; 0];
 
 times = 0:0.01:5;
 xfinal = zeros(length(times), 3);
-for i = 1:length(times)
-    dt = times(i);
-    eAt = (expm(A.*dt));
-    xfinal(i,:) = (eAt*x0)';
+for i = times
+    eAt = (expm(A.*i));
+    xfinal(1,:) = (eAt*x0)';
 end
 
+% ANDREW
+time = [0:0.01:5];
+x0 = [0;0.1;0];
+
+for k1 = 1:numel(time)
+    eAt = expm(A.*time(k1));
+    x(:,k1) = eAt*x0;
+end
 
 
 % Plot
 figure();
 subplot(3,1,1);
-plot(times, xfinal(:,1), 'LineWidth', 2, 'Color', 'b');
-ylabel('delp (rad/s)')
+plot(times, x(1,:));
 
 subplot(3,1,2);
-plot(times, xfinal(:,2), 'LineWidth', 2, 'Color', 'g');
-ylabel('delq (rad/s)')
+plot(times, x(2,:));
 
 subplot(3,1,3);
-plot(times, xfinal(:,3), 'LineWidth', 2, 'Color', 'r');
+plot(times, x(3,:));
 
-grid on;
-xlabel('Time (s)');
-ylabel('delr (rad/s)')
 
-sgtitle('Spacecraft Dynamics Simulation')
 
 
 
