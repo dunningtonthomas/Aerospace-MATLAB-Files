@@ -37,8 +37,7 @@ beta = wind_angles(2);
 alpha = wind_angles(3);
 
 % Dynamic Pressure
-rho = density;
-Q = 0.5*rho*airspeed^2;
+Q = 0.5*density*airspeed^2;
 
 % Nondimensional rates
 phat = (angular_velocity(1)*aircraft_parameters.b)/(2*airspeed);
@@ -51,17 +50,17 @@ CD = aircraft_parameters.CDmin + aircraft_parameters.K*(CL - aircraft_parameters
 
 % Aerodynamic Force Coefficients
 CX = -CD*cos(alpha) + CL*sin(alpha);
-CY = aircraft_parameters.CYbeta*beta + aircraft_parameters.CYp*phat + aircraft_parameters.CYr*rhat + aircraft_parameters.CYda*da + aircraft_parameters.CYdr*dr;
+CY = aircraft_parameters.CY0 + aircraft_parameters.CYbeta*beta + aircraft_parameters.CYp*phat + aircraft_parameters.CYr*rhat + aircraft_parameters.CYda*da + aircraft_parameters.CYdr*dr;
 CZ = -CD*sin(alpha) - CL*cos(alpha);
 
 % Propulsive Force Coefficient
 CT = 2*aircraft_parameters.Sprop/aircraft_parameters.S * aircraft_parameters.Cprop * ...
-    dt/airspeed^2 * (airspeed + dt*(aircraft_parameters.kmotor - airspeed))*(aircraft_parameters.kmotor - airspeed);
+    dt/(airspeed^2) * (airspeed + dt*(aircraft_parameters.kmotor - airspeed))*(aircraft_parameters.kmotor - airspeed);
 
 % Moment Coefficients
-Cl = aircraft_parameters.Clbeta*beta + aircraft_parameters.Clp*phat + aircraft_parameters.Clr*rhat + aircraft_parameters.Clda*da + aircraft_parameters.Cldr*dr;
+Cl = aircraft_parameters.Cl0 + aircraft_parameters.Clbeta*beta + aircraft_parameters.Clp*phat + aircraft_parameters.Clr*rhat + aircraft_parameters.Clda*da + aircraft_parameters.Cldr*dr;
 Cm = aircraft_parameters.Cm0 + aircraft_parameters.Cmalpha*alpha + aircraft_parameters.Cmq*qhat + aircraft_parameters.Cmde*de;
-Cn = aircraft_parameters.Cnbeta*beta + aircraft_parameters.Cnp*phat + aircraft_parameters.Cnr*rhat + aircraft_parameters.Cnda*da + aircraft_parameters.Cndr*dr;
+Cn = aircraft_parameters.Cn0 + aircraft_parameters.Cnbeta*beta + aircraft_parameters.Cnp*phat + aircraft_parameters.Cnr*rhat + aircraft_parameters.Cnda*da + aircraft_parameters.Cndr*dr;
 
 % Aero Forces
 X = aircraft_parameters.S*Q*CX;
