@@ -1,4 +1,4 @@
-function [trim_state,trim_control] = TrimCalculator(trim_definition, wind_inertial, aircraft_parameters)
+function [trim_state,trim_control] = CoordinatedTurnCalculator(trim_definition, wind_inertial, aircraft_parameters)
 % Uses fmincon to calculate the aircraft state and control surface
 % variables
 % Inputs: 
@@ -12,12 +12,13 @@ function [trim_state,trim_control] = TrimCalculator(trim_definition, wind_inerti
 % Date Modified: 9/16/2024
 
 % Cost Function handle
-cost_func = @(trim_variable)TrimCostFunction(trim_variable, trim_definition, wind_inertial, aircraft_parameters);
+cost_func = @(trim_variable)CoordinatedTurnCostFunction(trim_variable, trim_definition, wind_inertial, aircraft_parameters);
 
 % Fmincon call
-x0 = zeros(3,1);
+x0 = zeros(7,1);
 [trim_variables_final, ~] = fmincon(cost_func, x0);
 
 % Get trim state and control variables
-[trim_state, trim_control] = TrimVariableToState(trim_variables_final,trim_definition);
+[trim_state, trim_control] = CoordinatedTurnVariableToState(trim_variables_final,trim_definition);
 end
+
