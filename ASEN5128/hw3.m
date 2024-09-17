@@ -73,7 +73,7 @@ odeFunc = @(time, aircraft_state)AircraftEOM(time, aircraft_state, coord_control
 
 Uout = zeros(length(Tout),4);
 for i=1:length(Tout)
-    Uout(i,:) = aircraft_surfaces';
+    Uout(i,:) = coord_control';
 end
 
 PlotSimulation(Tout, Xout, Uout, 1:6, ['b', '-']);

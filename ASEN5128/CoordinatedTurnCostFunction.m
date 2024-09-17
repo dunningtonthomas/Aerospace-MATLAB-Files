@@ -48,7 +48,7 @@ ades_inertial = [0; Va^2 / R0; 0];
 ades_body = TransformFromInertialToBody(ades_inertial, trim_state(4:6));
 
 % Cost
-cost = norm(aircraft_forces - aircraft_parameters.m .* ades_body) + norm(aircraft_moments) + aircraft_forces(2)^2;
+cost = norm(aircraft_forces - (aircraft_parameters.m .* ades_body)) + norm(aircraft_moments) + aircraft_forces(2)^2;
 %cost = norm(aircraft_forces) + norm(aircraft_moments);
 
 end

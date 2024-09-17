@@ -26,24 +26,25 @@ beta = trim_variable(5);
 aileron = trim_variable(6);
 rudder = trim_variable(7);
 
-% z position
-z = -h0;
+% Position
+pos_vec = [0; 0; -h0];
 
-% Roll
+% Euler Angles
 phi = roll;
-
-% Pitch
 theta = gamma0 + alpha;
+psi = 0;
+euler_anlges = [phi; theta; psi];
 
 % Velocity vector
 vel_vec = Va .* [cos(alpha)*cos(beta); sin(beta); sin(alpha)*cos(beta)];
 
 % Angular velocity
 chi_dot = Va / R0;
-omega = [-sin(theta); sin(phi)*cos(theta); cos(phi)*cos(theta)] .* chi_dot;
+omega = TransformFromInertialToBody([0;0;chi_dot], euler_anlges);
+%omega = [-sin(theta); sin(phi)*cos(theta); cos(phi)*cos(theta)] .* chi_dot;
 
 % Aicraft state vector
-trim_state = [0; 0; z; phi; theta; 0 ; vel_vec; omega];
+trim_state = [pos_vec; euler_anlges; vel_vec; omega];
 
 % Control Surface
 trim_control = [elevator; aileron; rudder; throttle];
