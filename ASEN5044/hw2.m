@@ -40,18 +40,20 @@ end
 figure();
 subplot(3,1,1);
 plot(times, xfinal(:,1), 'LineWidth', 2, 'Color', 'b');
-ylabel('delp (rad/s)')
+ylabel('del p (rad/s)')
+grid on;
 
 subplot(3,1,2);
 plot(times, xfinal(:,2), 'LineWidth', 2, 'Color', 'g');
-ylabel('delq (rad/s)')
+ylabel('del q (rad/s)')
+grid on;
 
 subplot(3,1,3);
 plot(times, xfinal(:,3), 'LineWidth', 2, 'Color', 'r');
 
 grid on;
 xlabel('Time (s)');
-ylabel('delr (rad/s)')
+ylabel('del r (rad/s)')
 
 sgtitle('Spacecraft Dynamics Simulation')
 

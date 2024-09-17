@@ -2,10 +2,18 @@
 close all; clear; clc;
 
 %% Question 1
-S = [19, 0, 23, 0; 0, 42, 0, 12; 
-    23, 0, 99, -14; 0, 12, -14, 10];
+A = [0, 0; 1,0];
+B = [1; 0];
+dt = 0.5;
 
-Q = [1, -5; 2, -10; 3, -15];
+F = expm(A*dt);
 
-x = [1,0; 1,0];
+Ahat = [A,B; zeros(1,3)];
 
+fullMat = expm(Ahat*dt);
+
+
+
+carA = [0.5,0.5;0.5,0.5];
+
+[vec, val] = eig(carA);
