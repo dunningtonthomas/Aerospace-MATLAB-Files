@@ -1,10 +1,9 @@
-function [cost] = CoordinatedTurnCostFunction(trim_variable, trim_definition, wind_inertial, aircraft_parameters)
+function [cost] = CoordinatedTurnCostFunction(trim_variable, trim_definition, aircraft_parameters)
 % Returns the cost function for a coordinated turn
 % Inputs: 
 %   trim_definition -> [Va; gamma0; h0] -> [air speed; air relative flight path angle; height]
 %   trim_variable -> [alpha0; dele0, delt0] [angle of attack; elevator;
 %   throttle]
-%   wind_inertial -> inertial wind velocity vector in the inertial frame
 %   aircraft_parameters -> Aircraft parameters structure
 % Output:
 %   cost -> Coordinate turn cost function
@@ -29,27 +28,29 @@ rudder = trim_variable(7);
 % Air Density
 density = stdatmo(h0);
 
+% Assume zero wind
+wind_inertial = [0;0;0];
+
 % Calculate trim
 [trim_state, trim_control] = CoordinatedTurnVariableToState(trim_variable,trim_definition);
 
 % Force Calculations
 [aircraft_forces, aircraft_moments] = AircraftForcesAndMoments(trim_state, trim_control, wind_inertial, density, aircraft_parameters);
 
-% Desired acceleration in inertial coordinates
-%inertial_velocity = TransformFromBodyToInertial(trim_state(7:9), trim_state(4:6)) + wind_inertial;
-% a_dir = [inertial_velocity(2); -inertial_velocity(1); 0] ./ norm([inertial_velocity(2); -inertial_velocity(1); 0]);
-% ades_inertial = Va^2 / R0 * a_dir;
-
 % Acceleration in the inertial Y direction
-ades_inertial = [0; Va^2 / R0; 0];
+fdes_inertial = aircraft_parameters.m * [0; Va*Va/R0; 0];
 
 % Rotate to body
-%trim_state(4:6)
-ades_body = TransformFromInertialToBody(ades_inertial, trim_state(4:6));
+fdes_body = TransformFromInertialToBody(fdes_inertial, trim_state(4:6));
+
+% Total force
+sum_forces = aircraft_forces - fdes_body;
+
+% Calculate aerodynamic moments
+[aero_force, aero_moment] = AeroForcesAndMoments_BodyState_WindCoeffs(trim_state, trim_control, wind_inertial, density, aircraft_parameters);
 
 % Cost
-cost = norm(aircraft_forces - (aircraft_parameters.m .* ades_body)) + norm(aircraft_moments) + aircraft_forces(2)^2;
-%cost = norm(aircraft_forces) + norm(aircraft_moments);
+cost = norm(sum_forces) + norm(aircraft_moments) + aero_force(2)^2;
 
 end
 

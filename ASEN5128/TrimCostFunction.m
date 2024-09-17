@@ -1,10 +1,9 @@
-function [cost] = TrimCostFunction(trim_variable, trim_definition, wind_inertial, aircraft_parameters)
+function [cost] = TrimCostFunction(trim_variable, trim_definition, aircraft_parameters)
 % Returns the cost function for the trim condition 
 % Inputs: 
 %   trim_definition -> [Va; gamma0; h0] -> [air speed; air relative flight path angle; height]
 %   trim_variable -> [alpha0; dele0, delt0] [angle of attack; elevator;
 %   throttle]
-%   wind_inertial -> inertial wind velocity vector in the inertial frame
 %   aircraft_parameters -> Aircraft parameters structure
 % Output:
 %   cost -> Trim condition cost function
@@ -20,6 +19,9 @@ h0 = trim_definition(3);
 alpha = trim_variable(1);
 elevator = trim_variable(2);
 throttle = trim_variable(3);
+
+% Assume zero wind
+wind_inertial = [0;0;0];
 
 % Air Density
 density = stdatmo(h0);

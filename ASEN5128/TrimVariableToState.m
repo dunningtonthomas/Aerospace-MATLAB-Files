@@ -1,4 +1,4 @@
-function [trim_state, trim_control] = TrimVariableToState(trim_variable,trim_definition)
+function [trim_state, trim_control] = TrimVariableToState(trim_variable, trim_definition)
 % Calculates the aircraft trim state vector and control surface vector
 % Inputs: 
 %   trim_definition -> [Va; gamma0; h0] -> [air speed; air relative flight path angle; height]
