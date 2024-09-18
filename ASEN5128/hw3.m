@@ -2,7 +2,7 @@
 close all; clear; clc;
 ttwistor;
 
-%% Test fmincon
+%% Trim Conditions
 h = 1655;
 Va = 18;
 gamma0 = 0;
@@ -34,7 +34,7 @@ for i=1:length(Tout)
     Uout(i,:) = aircraft_surfaces';
 end
 
-%PlotSimulation(Tout, Xout, Uout, 1:6, ['g', '-']);
+PlotSimulation(Tout, Xout, Uout, 1:6, ['g', '-']);
 
 %%%%%%
 % 3.2
@@ -69,7 +69,7 @@ for i=1:length(Tout)
     Uout(i,:) = aircraft_surfaces';
 end
 
-%PlotSimulation(Tout, Xout, Uout, 1:6, ['m', '-']);
+PlotSimulation(Tout, Xout, Uout, 1:6, ['m', '-']);
 
 
 %% Coordinated Turn
