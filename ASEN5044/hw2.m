@@ -20,4 +20,9 @@ Ahat = [A, B; zeros(2, length(A(1,:)) + length(B(1,:)))];
 expAhat = expm(Ahat*dt);
 
 
+%
+A = [0, 1, 0; 0, 0, 1; 0, 0, 0];
+Q = [1,1,1;0,0,0;0,0,0];
+
+[vals, vec] = eig(A);
 
