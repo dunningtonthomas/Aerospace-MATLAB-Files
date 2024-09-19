@@ -17,7 +17,6 @@ cost_func = @(trim_variable)CoordinatedTurnCostFunction(trim_variable, trim_defi
 % Fmincon call
 x0 = zeros(7,1);
 [trim_variables_final, fval] = fmincon(cost_func, x0);
-fval
 
 % Get trim state and control variables
 [trim_state, trim_control] = CoordinatedTurnVariableToState(trim_variables_final, trim_definition);
