@@ -24,3 +24,55 @@ b = T1*T2*Tb*origin;
 c = T1*T2*T3*Tc*origin;
 d = T1*T2*T3*Td*origin;
 
+
+
+%% Inverse Kinematics
+syms x1
+syms x2
+syms x3
+
+T1 = Tfunc(x1, 0);
+T2 = Tfunc(x2, 8);
+T3 = Tfunc(x3, 8);
+Td = [1,0,9; 0,1,0; 0,0,1];
+
+d = T1*T2*T3*Td*[0;0;1];
+
+
+theta3 = acos(-65/144);
+
+sintheta3 = sqrt(1 - (65/144)^2);
+
+theta3_2 = asin(-1*sintheta3);
+
+x = -8;
+y = 4;
+costheta3 = -65/144;
+costheta2 = 1 / (x^2 + y^2) * (x*(8 + 9*costheta3) + y*9*sqrt(1-costheta3^2));
+
+
+
+cos_term = -65/144;
+sin_term = sqrt(1 - cos_term^2);
+
+
+theta2_1 = acos(costheta2);
+theta2_2 = acos(-1*costheta2);
+
+
+
+% Try forward kinematics
+T1 = Tfunc(0, 0);
+T2 = Tfunc(1.563, 8);
+T3 = Tfunc(2.0391, 8);
+Td = [1,0,9; 0,1,0; 0,0,1];
+
+d = T1*T2*T3*Td*[0;0;1];
+
+% Test 2
+T1 = Tfunc(0, 0);
+T2 = Tfunc(-2.4903, 8);
+T3 = Tfunc(-2.0391, 8);
+Td = [1,0,9; 0,1,0; 0,0,1];
+
+d2 = T1*T2*T3*Td*[0;0;1];
