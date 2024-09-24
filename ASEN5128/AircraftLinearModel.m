@@ -80,7 +80,6 @@ CLu = 0;%CLM*Ma;
 Cmu = 0;%CmM*Ma;
 
 % Body force derivatives
-%CXalpha = CL0*(1-2*ap.K*ap.CLalpha);
 CXalpha = CDtrim*sin(alpha0) + CLtrim*cos(alpha0) + ap.CLalpha*sin(alpha0) - CDalpha*cos(alpha0);
 CXq = -CDq*cos(alpha0) + ap.CLq*sin(alpha0);
 CXde = -CDde*cos(alpha0) + ap.CLde*sin(alpha0);
