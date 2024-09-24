@@ -57,7 +57,7 @@ wind_inertial = [0; 0; 0];
 
 % Elevator impulse
 t_pulse = 0.2;
-del_pulse = 10*pi/180;
+del_pulse = 15*pi/180;
 pulse_vec = [del_pulse; 0; 0; 0];
 
 
@@ -79,13 +79,34 @@ end
 
 
 %%%% Lateral Excitation AILERON
-t_pulse = [0.2; 0.2];
+t_pulse = [1; 0.1];
 del_pulse = 10*pi/180;
 pulse_vec = [0; del_pulse; 0; 0];
 
 % Integrate
 odeFunc = @(t, aircraft_state)AircraftEOMPulse(t, aircraft_state, trim_control, pulse_vec, t_pulse, wind_inertial, aircraft_parameters);
-tspan = [0 10];
+tspan = [0 150];
+
+[TOUT, XOUT] = ode45(odeFunc, tspan, trim_state);
+
+% Control Surfaces
+UOUT = zeros(length(TOUT),4);
+for i=1:length(TOUT)
+    UOUT(i,:) = trim_control' + ControlSurfacePulse(TOUT(i), t_pulse, pulse_vec)';
+end
+
+% Plotting
+PlotSimulation(TOUT, XOUT, UOUT, 1:6, ['b', '-']);
+
+
+%%%% Lateral Excitation RUDDER
+t_pulse = [0.2; 0.2];
+del_pulse = 10*pi/180;
+pulse_vec = [0; 0; del_pulse; 0];
+
+% Integrate
+odeFunc = @(t, aircraft_state)AircraftEOMPulse(t, aircraft_state, trim_control, pulse_vec, t_pulse, wind_inertial, aircraft_parameters);
+tspan = [0 150];
 
 [TOUT, XOUT] = ode45(odeFunc, tspan, trim_state);
 
@@ -97,27 +118,6 @@ end
 
 % Plotting
 %PlotSimulation(TOUT, XOUT, UOUT, 1:6, ['b', '-']);
-
-
-%%%% Lateral Excitation RUDDER
-t_pulse = [0.2; 0.2];
-del_pulse = 10*pi/180;
-pulse_vec = [0; 0; del_pulse; 0];
-
-% Integrate
-odeFunc = @(t, aircraft_state)AircraftEOMPulse(t, aircraft_state, trim_control, pulse_vec, t_pulse, wind_inertial, aircraft_parameters);
-tspan = [0 10];
-
-[TOUT, XOUT] = ode45(odeFunc, tspan, trim_state);
-
-% Control Surfaces
-UOUT = zeros(length(TOUT),4);
-for i=1:length(TOUT)
-    UOUT(i,:) = trim_control' + ControlSurfacePulse(TOUT(i), t_pulse, pulse_vec)';
-end
-
-% Plotting
-PlotSimulation(TOUT, XOUT, UOUT, 1:6, ['m', '-']);
 
 
 
