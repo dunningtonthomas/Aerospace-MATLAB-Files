@@ -31,12 +31,11 @@ Y = [];
 O = [];
 for n = 1:length(Ydata(:,1))
     % Control Portion
-    for j = 1:n
-        if j == 1
-            mat = H*G * Udata(n, :)';
-        else
-            mat = mat + H*(F^(j-1))*G * Udata(n+1-j, :)';
+    for i = 0:n-1
+        if i == 0
+            mat = 
         end
+        mat = 
     end
 
     % Left hand side
@@ -63,7 +62,7 @@ u = Udata(2:end,:);
 [yout, tout, xout] = lsim(state_space, u, times, x_0);
 
 % Calculate difference between actual and predicted
-y_resid = Ydata - yout;
+
 
 
 %% Plotting
@@ -112,15 +111,6 @@ ylabel('$y_{2}(k)$ (m/s)')
 
 
 %%%% Residuals
-figure();
-sgtitle('Difference in Predicted and Actual Output')
-subplot(2,1,1)
-plot(tout, y_resid(:,1), 'LineWidth', 2, 'color', 'k')
 
-ylabel('Residual $y_{1}$ (m)')
 
-subplot(2,1,2)
-plot(tout, y_resid(:,2), 'LineWidth', 2, 'color', 'k')
 
-xlabel('Time (s)')
-ylabel('Residual $y_{2}$ (m/s)')
