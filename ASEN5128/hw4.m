@@ -85,7 +85,7 @@ pulse_vec = [0; del_pulse; 0; 0];
 
 % Integrate
 odeFunc = @(t, aircraft_state)AircraftEOMPulse(t, aircraft_state, trim_control, pulse_vec, t_pulse, wind_inertial, aircraft_parameters);
-tspan = [0 10];
+tspan = [0 150];
 
 [TOUT, XOUT] = ode45(odeFunc, tspan, trim_state);
 
@@ -96,7 +96,7 @@ for i=1:length(TOUT)
 end
 
 % Plotting
-%PlotSimulation(TOUT, XOUT, UOUT, 1:6, ['b', '-']);
+%PlotSimulation(TOUT, XOUT, UOUT, 7:12, ['b', '-']);
 
 
 %%%% Lateral Excitation RUDDER
@@ -106,7 +106,7 @@ pulse_vec = [0; 0; del_pulse; 0];
 
 % Integrate
 odeFunc = @(t, aircraft_state)AircraftEOMPulse(t, aircraft_state, trim_control, pulse_vec, t_pulse, wind_inertial, aircraft_parameters);
-tspan = [0 10];
+tspan = [0 150];
 
 [TOUT, XOUT] = ode45(odeFunc, tspan, trim_state);
 
@@ -117,7 +117,7 @@ for i=1:length(TOUT)
 end
 
 % Plotting
-PlotSimulation(TOUT, XOUT, UOUT, 1:6, ['m', '-']);
+%PlotSimulation(TOUT, XOUT, UOUT, 13:18, ['m', '-']);
 
 
 
