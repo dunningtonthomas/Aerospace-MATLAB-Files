@@ -117,7 +117,7 @@ for i=1:length(TOUT)
 end
 
 % Plotting
-%PlotSimulation(TOUT, XOUT, UOUT, 13:18, ['m', '-']);
+PlotSimulation(TOUT, XOUT, UOUT, 13:18, ['m', '-']);
 
 
 

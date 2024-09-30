@@ -26,7 +26,7 @@ control_gains.max_de        = 20*pi/180;
 
 %%%%%%%%
 % roll hold gains
-zeta_roll = 1; %%%<---------- STUDENT SELECT
+zeta_roll = 0.9; %%%<---------- STUDENT SELECT
 e_phi_max = control_gains.max_roll; % used by saturation method to select proportional gain, assume never give step commanded of greater than full roll limit
 
 
@@ -39,15 +39,17 @@ control_gains.Kp_roll = 3*(control_gains.max_da/e_phi_max)*sign(a_phi2);
 wn_roll = sqrt(abs(a_phi2*control_gains.Kp_roll));
 
 control_gains.Kd_roll = (2*zeta_roll*wn_roll - a_phi1)/a_phi2;
-control_gains.Ki_roll = 1; %%%<---------- STUDENT SELECT
+control_gains.Ki_roll = -0.5; %%%<---------- STUDENT SELECT
 
 den_phi2 = [1 a_phi1+a_phi2*control_gains.Kd_roll a_phi2*control_gains.Kp_roll a_phi2*control_gains.Ki_roll];
-%damp(roots(den_phi2));
+damp(roots(den_phi2))
+stepinfo(roots(den_phi2))
+
 
 %%%%%%%
 % course hold gains
 wn_chi = (1/1)*wn_roll; %%%<---------- STUDENT SELECT
-zeta_chi = 1; %%%<---------- STUDENT SELECT
+zeta_chi = 4; %%%<---------- STUDENT SELECT
 
 control_gains.Kp_course = 2*zeta_chi*wn_chi*Va/g;
 control_gains.Ki_course = wn_chi*wn_chi*Va/g;
@@ -108,8 +110,8 @@ alpha = trim_variables(1);
 de = trim_variables(2);
 dt = trim_variables(3);
 
-CLtrim = aircraft_parameters.CL0 + aircraft_parameters.CLalpha*alpha + aircraft_parameters.CLde*de
-CDtrim = aircraft_parameters.CDmin+aircraft_parameters.K*(CLtrim-aircraft_parameters.CLmin)^2
+CLtrim = aircraft_parameters.CL0 + aircraft_parameters.CLalpha*alpha + aircraft_parameters.CLde*de;
+CDtrim = aircraft_parameters.CDmin+aircraft_parameters.K*(CLtrim-aircraft_parameters.CLmin)^2;
 
 dCDdCL = 2*aircraft_parameters.K*(CLtrim-aircraft_parameters.CLmin);
 CDalpha = dCDdCL*aircraft_parameters.CLalpha;

@@ -11,7 +11,7 @@ close all;
 clear all;
 
 %%% Aircraft parameter file
-ttwistor
+ttwistor;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24,11 +24,8 @@ gamma_trim = 0;
 trim_definition = [V_trim; gamma_trim; h_trim];
 
 
-%%% STUDENTS REPLACE THESE TWO FUNCTIONS WITH YOUR VERSIONS FROM HW 3
-
-[trim_variables, fval] = CalculateTrimVariables(trim_definition, aircraft_parameters);
-[aircraft_state_trim, control_input_trim] = TrimConditionFromDefinitionAndVariables(trim_variables, trim_definition);
-
+%%% Calculate the trim state
+[aircraft_state_trim, control_input_trim, trim_variables] = TrimCalculator(trim_definition, aircraft_parameters);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -37,7 +34,7 @@ trim_definition = [V_trim; gamma_trim; h_trim];
 
 %%% STUDENTS MUST COMPLETE THIS FUNCTION. A SKELETON OF THE FUNCTION IS PROVIDED
 
-[control_gain_struct, linear_terms] = CalculateControlGainsSimpleSLC_Nondim_Ttwistor2(aircraft_parameters, trim_definition, trim_variables)
+[control_gain_struct, linear_terms] = CalculateControlGainsSimpleSLC_Nondim_Ttwistor(aircraft_parameters, trim_definition, trim_variables);
 control_gain_struct.u_trim = control_input_trim;
 
 
@@ -104,7 +101,7 @@ for i=1:n_ind
 
     wind_body = TransformFromInertialToBody(wind_inertial, aircraft_array(4:6,i));
     air_rel_vel_body = aircraft_array(7:9,i) - wind_body;
-    wind_angles(:,i) = WindAnglesFromVelocityBody(air_rel_vel_body);
+    wind_angles(:,i) = AirRelativeVelocityVectorToWindAngles(air_rel_vel_body);
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

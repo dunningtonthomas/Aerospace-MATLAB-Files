@@ -1,4 +1,4 @@
-function [trim_state,trim_control] = TrimCalculator(trim_definition, aircraft_parameters)
+function [trim_state, trim_control, trim_variables_final] = TrimCalculator(trim_definition, aircraft_parameters)
 % Uses fmincon to calculate the aircraft state and control surface
 % variables
 % Inputs: 
@@ -6,7 +6,8 @@ function [trim_state,trim_control] = TrimCalculator(trim_definition, aircraft_pa
 %   aircraft_parameters -> Aircraft parameters structure
 %   wind_inertial -> inertial wind velocity vector in the inertial frame
 % Output:
-%   cost -> Trim condition cost function
+%   trim_state -> Full aircraft state in trim
+%   trim_control -> Full aircraft control surfaces in trim
 % 
 % Author: Thomas Dunnington
 % Date Modified: 9/16/2024

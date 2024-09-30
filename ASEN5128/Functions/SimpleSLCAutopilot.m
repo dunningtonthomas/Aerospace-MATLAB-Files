@@ -46,7 +46,7 @@ function [control_input, x_command] = SimpleSLCAutopilot(time, aircraft_state, w
         flag  = 1;
     else
         flag = 0;
-    end;    
+    end 
   
     %----------------------------------------------------------
     % lateral autopilot
@@ -56,7 +56,7 @@ function [control_input, x_command] = SimpleSLCAutopilot(time, aircraft_state, w
     phi_c = course_hold(chi_c, flight_angles(2,1), omega_body(3,1), flag, control_gain_struct);
 
     %%% STUDENTS: UNCOMMENT TO JUST TEST ROLL HOLD CONTROLLER
-    %phi_c = 10*pi/180; 
+    phi_c = 10*pi/180; 
 
     delta_a = roll_hold(phi_c, euler_angles(1,1), omega_body(1,1), flag, control_gain_struct);
 
@@ -65,8 +65,8 @@ function [control_input, x_command] = SimpleSLCAutopilot(time, aircraft_state, w
     [delta_t, theta_c, alt_mode] = altitude_state_machine(h_c, h, Va_c, Va, flag, control_gain_struct);  
 
     %%% STUDENTS: UNCOMMENT TO JUST TEST PITCH HOLD CONTROLLER
-    %delta_t = control_gain_struct.u_trim(4);
-    %theta_c = 15*pi/180;
+    delta_t = control_gain_struct.u_trim(4);
+    theta_c = 15*pi/180;
     delta_e = pitch_hold(theta_c, theta, omega_body(2,1), flag, control_gain_struct);
     
     %----------------------------------------------------------
