@@ -59,7 +59,7 @@ Va_c        = V_trim;  % commanded airspeed (m/s)
 aircraft_state0 = aircraft_state_trim;
 
 aircraft_state0(3,1) = -1655; %<------- CLIMB mode starts when aircraft reaches h = 1675
-aircraft_state0(4,1) = 180*pi/180; %180*pi/180; %<------- WHEN CONFIDENT INITIALIZE UPSIDE DOWN!!
+aircraft_state0(4,1) = 0*pi/180; %180*pi/180; %<------- WHEN CONFIDENT INITIALIZE UPSIDE DOWN!!
 
 control_input0 = control_input_trim;
 
@@ -159,10 +159,10 @@ PlotSimulationWithCommands(time_iter,aircraft_array,control_array, wind_array, x
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Animate aircraft flight
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-DefineTTwistor;
-
-for aa = 1:length(time_iter)
-    DrawAircraft(time_iter(aa), aircraft_array(:,aa), pts);
-end
-AnimateSimulation(time_iter, aircraft_array')
+% DefineTTwistor;
+% 
+% for aa = 1:length(time_iter)
+%     DrawAircraft(time_iter(aa), aircraft_array(:,aa), pts);
+% end
+% AnimateSimulation(time_iter, aircraft_array')
 
