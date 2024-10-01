@@ -128,53 +128,53 @@ end
         subplot(9,2,1)
         hold on
         pn_handle = graph_y(time, aircraft_state_array(1,:),col,'p_n', []);
-        %graph_y(time, state_command_array(1,:),'g--','p_n', []);
+        %graph_y(time, state_command_array(1,:),'r--','p_n', []);
 
         subplot(9,2,2)
         hold on
         Va_handle = graph_y(time, Va ,col,  'V_a', []);
-        graph_y(time, state_command_array(4,:),'g--','V_a', []);
+        graph_y(time, state_command_array(4,:),'r--','V_a', []);
 
         subplot(9,2,3)
         hold on
         pe_handle = graph_y(time, aircraft_state_array(2,:),col, 'p_e', []);
-        %graph_y(time, state_command_array(2,:),'g--','p_e', []);
+        %graph_y(time, state_command_array(2,:),'r--','p_e', []);
 
         subplot(9,2,4)
         hold on
         alpha_handle = graph_y(time, alpha ,col, '\alpha', []);
-        graph_y(time, state_command_array(5,:)*180/pi,'g--','\alpha', []);
+        graph_y(time, state_command_array(5,:)*180/pi,'r--','\alpha', []);
 
         subplot(9,2,5)
         hold on
         h_handle = graph_y(time, -aircraft_state_array(3,:),col, 'h', []);
-        graph_y(time, state_command_array(3,:),'g--','h', []);
+        graph_y(time, state_command_array(3,:),'r--','h', []);
 
 
         subplot(9,2,6)
         hold on
         beta_handle = graph_y(time, beta ,col,  '\beta', []);
-        graph_y(time, state_command_array(6,:)*180/pi,'g--','\beta', []);
+        graph_y(time, state_command_array(6,:)*180/pi,'r--','\beta', []);
 
         subplot(9,2,7)
         hold on
         phi_handle = graph_y(time, aircraft_state_array(4,:)*180/pi,col,'\phi', []);
-        graph_y(time, state_command_array(7,:)*180/pi,'g--','\phi', []);
+        graph_y(time, state_command_array(7,:)*180/pi,'r--','\phi', []);
         
         subplot(9,2,8)
         hold on
         p_handle = graph_y(time, aircraft_state_array(10,:)*180/pi,col, 'p', []);
-        graph_y(time, state_command_array(10,:)*180/pi,'g--','p', []);
+        graph_y(time, state_command_array(10,:)*180/pi,'r--','p', []);
 
         subplot(9,2,9)
         hold on
         theta_handle = graph_y(time, aircraft_state_array(5,:)*180/pi,col,  '\theta', []);
-        graph_y(time, state_command_array(8,:)*180/pi,'g--','\theta', []);
+        graph_y(time, state_command_array(8,:)*180/pi,'r--','\theta', []);
 
         subplot(9,2,10)
         hold on
         q_handle = graph_y(time, aircraft_state_array(11,:)*180/pi,col, 'q', []);
-        graph_y(time, state_command_array(11,:)*180/pi,'g--','q', []);
+        graph_y(time, state_command_array(11,:)*180/pi,'r--','q', []);
 
         subplot(9,2,11)
         hold on
@@ -183,13 +183,13 @@ end
         subplot(9,2,12)
         hold on
         r_handle = graph_y(time, aircraft_state_array(12,:)*180/pi,col,  'r', []);
-        graph_y(time, state_command_array(12,:)*180/pi,'g--','r',[]);
+        graph_y(time, state_command_array(12,:)*180/pi,'r--','r',[]);
 
         
         subplot(9,2,13)
         hold on
         chi_handle = graph_y(time, chi ,col, '\chi', []);
-        graph_y(time, state_command_array(9,:)*180/pi,'g--','\chi', []);
+        graph_y(time, state_command_array(9,:)*180/pi,'r--','\chi', []);
 
         subplot(9,2,14)
         hold on
@@ -296,7 +296,7 @@ end
 function handle = graph_y(t, y, ind, lab, handle)
   
   if isempty(handle),
-    handle    = plot(t,y,ind);
+    handle    = plot(t,y,ind, 'LineWidth', 2);
     ylabel(lab)
     set(get(gca, 'YLabel'),'Rotation',0.0);
   else
