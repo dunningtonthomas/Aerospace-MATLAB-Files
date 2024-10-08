@@ -26,7 +26,7 @@ control_gains.max_de        = 20*pi/180;
 
 %%%%%%%%
 % roll hold gains
-zeta_roll = 1; %%%<---------- STUDENT SELECT
+zeta_roll = 1.2; %%%<---------- STUDENT SELECT
 e_phi_max = control_gains.max_roll; % used by saturation method to select proportional gain, assume never give step commanded of greater than full roll limit
 
 

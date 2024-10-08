@@ -216,6 +216,64 @@ end
         delta_t_handle = graph_y(time, control_input_array(4,:),col, 'dt' ,[]);
         
 
+
+% figure(10);
+% subplot(3,1,1);
+% plot(time, aircraft_state_array(4,:)*180/pi,col); hold on;
+% hold on
+% plot(time, state_command_array(7,:)*180/pi, '--r')
+% ylabel('roll [deg]');
+% subplot(3,1,2);
+% plot(time, aircraft_state_array(5,:)*180/pi,col); hold on;
+% ylabel('pitch [deg]');
+% subplot(3,1,3);
+% plot(time, aircraft_state_array(6,:)*180/pi,col); hold on;
+% ylabel('yaw [deg]');
+% 
+% figure(11);
+% plot(time, chi, 'linewidth', 2)
+% hold on;
+% plot(time, state_command_array(9,:)*180/pi,'r--', 'linewidth', 2)
+% xlabel('Time (s)')
+% ylabel('\chi (deg)')
+% title('Course Angle Control')
+% 
+% 
+% 
+% figure(12);
+% sgtitle('Sideslip Hold')
+% subplot(2,1,1)
+% plot(time, beta, 'linewidth', 2);
+% ylabel('\beta (deg)')
+% subplot(2,1,2)
+% plot(time, control_input_array(3,:)*180/pi, 'linewidth', 2);
+% xlabel('Time (s)')
+% ylabel('Rudder (deg)')
+% 
+% 
+% figure(12);
+% sgtitle('Pitch Hold')
+% subplot(2,1,1)
+% plot(time, aircraft_state_array(5,:)*180/pi, 'linewidth', 2);
+% hold on
+% plot(time, state_command_array(8,:)*180/pi,'r--', 'linewidth', 2)
+% ylabel('\theta (deg)')
+% subplot(2,1,2)
+% plot(time, control_input_array(1,:)*180/pi, 'linewidth', 2);
+% xlabel('Time (s)')
+% ylabel('elevator (deg)')
+% 
+% 
+% figure(13);
+% sgtitle('Altitude Hold')
+% plot(time, -aircraft_state_array(3,:), 'linewidth', 2);
+% hold on
+% plot(time, state_command_array(3,:),'r--', 'linewidth', 2)
+% ylabel('h (m)')
+
+
+
+
 % figure(10);clf;
 % 
 % %%% Position components
