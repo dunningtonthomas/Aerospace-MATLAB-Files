@@ -20,7 +20,7 @@ Vg = norm(inertial_vel_body);
 inertial_vel_inertial = TransformFromBodyToInertial(inertial_vel_body, euler_angles);
 
 % Calculate the course angle
-chi = acos(inertial_vel_inertial(1)/Vg);
+chi = atan2(inertial_vel_inertial(2), inertial_vel_inertial(1));
 
 % Calculate the flight path angle
 gamma = asin(-1*inertial_vel_inertial(3)/Vg);
