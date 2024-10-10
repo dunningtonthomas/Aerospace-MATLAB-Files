@@ -7,7 +7,7 @@
 %
 %
 
-close all;% <========= Comment out this line and you can run this file multiple times and plot results together
+%close all;% <========= Comment out this line and you can run this file multiple times and plot results together
 clear all; 
 
 
@@ -69,7 +69,7 @@ orbit_speed = 18;
 orbit_radius = 200;
 orbit_center = [1000;1000;-1805];
 orbit_flag=1;
-orbit_gains.kr = 5;
+orbit_gains.kr = 4;
 orbit_gains.kz = .001;
 
 
@@ -141,11 +141,17 @@ for i=1:n_ind
     control_objectives = OrbitGuidance(aircraft_array(:,i), orbit_speed, orbit_radius, orbit_center, orbit_flag, orbit_gains);
     %control_objectives = [1800; 0; 45*pi/180; 0; V_trim]; %<============== Comment out when OrbitGuidance is complete
 
+    % Feed Forward
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Autopilot
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if (CONTROL_FLAG==FEED)
+        orbit_radius = 200;
+        control_objectives = OrbitGuidance(aircraft_array(:,i), orbit_speed, orbit_radius, orbit_center, orbit_flag, orbit_gains);
+        control_gain_struct.Kp_course_rate = 0.4;
+        control_gain_struct.Kff_course_rate = 1;
         [control_out, x_c_out] = SLCWithFeedForwardAutopilot(Ts*(i-1), aircraft_array(:,i), wind_angles(:,i), control_objectives, control_gain_struct);
     else
         [control_out, x_c_out] = SimpleSLCAutopilot(Ts*(i-1), aircraft_array(:,i), wind_angles(:,i), control_objectives, control_gain_struct);
@@ -175,14 +181,24 @@ end
 %%% Plotting
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%PlotSimulation(time_iter,aircraft_array,control_array, wind_array,'b')
-PlotSimulationWithCommands(time_iter,aircraft_array,control_array, wind_array, x_command, 'b')
-
 for c = 0:1:360
     circ_orbit(:,c+1) = orbit_center + orbit_radius*[cosd(c); sind(c); 0];
 end
-figure(8);
-plot3(circ_orbit(1,:),circ_orbit(2,:),-circ_orbit(3,:),'k:');
+
+
+%PlotSimulation(time_iter,aircraft_array,control_array, wind_array,'b')
+if (CONTROL_FLAG == SLC)
+    PlotSimulationWithCommands(time_iter,aircraft_array,control_array, wind_array, x_command, 'b')
+
+    figure(8);
+    plot3(circ_orbit(1,:),circ_orbit(2,:),-circ_orbit(3,:),'k:');
+else
+    PlotSimulationWithCommands(time_iter,aircraft_array,control_array, wind_array, x_command, 'm')
+
+    figure(8);
+    plot3(circ_orbit(1,:),circ_orbit(2,:),-circ_orbit(3,:),'m:');
+end
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -198,3 +214,5 @@ if (ANIMATE_FLAG)
 
     AnimateSimulation(time_iter, aircraft_array')
 end
+
+

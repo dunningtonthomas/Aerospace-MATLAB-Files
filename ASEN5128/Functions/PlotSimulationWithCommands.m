@@ -122,7 +122,7 @@ for i=1:ind_f
     gamma(i) = 180/pi*flight_angles(3);
 end
 
- figure(9), clf
+ figure(9)
 
 
         subplot(9,2,1)
@@ -215,6 +215,14 @@ end
         hold on
         delta_t_handle = graph_y(time, control_input_array(4,:),col, 'dt' ,[]);
         
+
+
+
+figure(10);
+plot(aircraft_state_array(1,:),aircraft_state_array(2,:),col);hold on;
+plot(aircraft_state_array(1,1),aircraft_state_array(2,1),'ks','MarkerFaceColo','g');hold on;
+plot(aircraft_state_array(1,ind_f),aircraft_state_array(2,ind_f),'ko','MarkerFaceColo','r');hold on;
+
 
 
 % figure(10);

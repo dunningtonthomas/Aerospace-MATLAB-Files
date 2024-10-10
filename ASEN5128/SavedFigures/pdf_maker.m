@@ -2,11 +2,12 @@
 close all;
 
 % Change directory
-folderName = "Hw4_Problem2_1_Short";
+folderName = "Hw6_Problem3";
 cd(folderName)
 
 % List of the PNG files to be added to the PDF
-files = {'Figure_1.png', 'Figure_2.png', 'Figure_3.png', 'Figure_4.png', 'Figure_5.png', 'Figure_6.png'};
+%files = {'Figure_1.png', 'Figure_2.png', 'Figure_3.png', 'Figure_4.png', 'Figure_5.png', 'Figure_6.png'};
+files = {'Figure_3.png', 'Figure_4.png', 'Figure_5.png', 'Figure_6.png', 'Figure_7.png', 'Figure_9.png'};
 
 % Create a new figure with a larger size
 figure('Units', 'normalized', 'Position', [0, 0, 0.8, 1]);

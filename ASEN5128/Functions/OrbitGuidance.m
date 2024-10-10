@@ -21,9 +21,10 @@ aircraft_position = aircraft_state(1:3);
 phi = atan2(aircraft_position(2) - orbit_center(2), aircraft_position(1) - orbit_center(1));
 
 % Clamp to between 0 and 2pi
-if(phi < 0)
-    phi = phi + 2*pi;
-end
+% if(phi < 0)
+%     phi = phi + 2*pi;
+% end
+phi = mod(phi + 2*pi, 2*pi);
 
 % Desired height
 hc = -orbit_center(3);
@@ -34,15 +35,12 @@ Vac = orbit_speed;
 % Desired altitude rate
 hcdot = 0;
 
-% Get current course angle
-flight_angles = FlightPathAnglesFromState(aircraft_state);
-
 % Desired course angle
-d = norm(aircraft_position - orbit_center);
+d = norm(aircraft_position(1:2) - orbit_center(1:2));
 xc = phi + orbit_flag * (pi/2 + atan(orbit_gains.kr*(d - orbit_radius)/orbit_radius));
 
 % Desired course angle rate
-xcdot = 0;
+xcdot = orbit_flag*orbit_speed / orbit_radius;
 
 control_objectives = [hc, hcdot, xc, xcdot, Vac];
 end
