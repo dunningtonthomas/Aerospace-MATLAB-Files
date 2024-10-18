@@ -1,4 +1,6 @@
 %% Problem 1
+% Author: Thomas Dunnington
+% Modified: 10/10/2024
 close all; clear; clc;
 
 % Constants
@@ -54,12 +56,8 @@ for i = 1:length(thist)
     x_k(i+1, :) = (F - G*Kc)*x_k(i, :)';
 end
 
-% Calculate y for x0
-y0 = H*xbar_0;
-
 % Calculate error between the predicted and measured values
 error = Y - yk;
-
 
 % Plot the predicted and measured values
 figure();
@@ -81,3 +79,4 @@ grid on;
 xlabel('Time (s)');
 ylabel('Displacement Pertubation Error (m)')
 title('Predicted vs Measured Error')
+
