@@ -136,3 +136,14 @@ t_roll = -1 / real(roll);
 t_spiral = -1 / real(spiral);
 
 
+% Part 4
+roll_eigenval = real(vals_lat(2,2));
+roll_eigenvec = real(vec_lat(:,2));
+
+roll_init = roll_eigenvec .* (0.035/roll_eigenvec(4));
+
+
+% Part 5
+kff_roll = -1*Alat(2,2) / Blat(2,1);
+
+
