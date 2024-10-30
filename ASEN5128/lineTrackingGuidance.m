@@ -1,0 +1,38 @@
+function [chi_d, h_d] = lineTrackingGuidance(line, state, params)
+%LINETRACKINGGUIDANCE Calculates the desired chi and h to get the aircraft
+%to follow a line
+% Inputs:
+%   line: struct with fields line.q unit vector of line and line.r point
+%   state: [x; y; z; chi] position and heading angle
+%   params: parameters for gain values
+
+% Get state values
+x = state(1);
+y = state(2);
+z = state(3);
+chi = state(4);
+xy_pos = [x; y];
+
+% Project q and r into the north east plane
+r_xy = line.r;
+r_xy = r_xy(1:2);
+q_xy = line.q;
+q_xy = q_xy(1:2) ./ norm(q_xy(1:2));
+
+% Calculate chi_q
+chi_q = atan2(q_xy(1), q_xy(2));
+
+% Calculate lateral tracking error
+px = xy_pos - r_xy;
+px_proj = dot(px, q_xy) .* q_xy;
+epy = norm(px - px_proj);
+
+% Lateral tracking
+chi_inf = chi - chi_q;
+chi_d = -chi_inf * 2/pi * atan(params.k_path * epy);
+    
+
+
+
+end
+

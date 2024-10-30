@@ -48,11 +48,26 @@ load(gains_file)
 %%% Note, STUDENTS may need to change these while tuning the autopilot.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Course testing
+% h_c         = h_trim;  % commanded altitude (m)
+% h_dot_c     = 0;  % commanded altitude rate (m)
+% chi_c       = 40*pi/180;  % commanded course (rad)
+% chi_dot_ff  = 0;  % commanded course rate (rad)   
+% Va_c        = V_trim;  % commanded airspeed (m/s)
+
+% Height testing
+% h_c         = h_trim + 50;  % commanded altitude (m)
+% h_dot_c     = 0;  % commanded altitude rate (m)
+% chi_c       = 40*pi/180;  % commanded course (rad)
+% chi_dot_ff  = 0;  % commanded course rate (rad)   
+% Va_c        = V_trim;  % commanded airspeed (m/s)
+
+% Velocity testing
 h_c         = h_trim;  % commanded altitude (m)
 h_dot_c     = 0;  % commanded altitude rate (m)
-chi_c       = 40*pi/180;  % commanded course (rad)
+chi_c       = 0;  % commanded course (rad)
 chi_dot_ff  = 0;  % commanded course rate (rad)   
-Va_c        = V_trim;  % commanded airspeed (m/s)
+Va_c        = V_trim + 1;  % commanded airspeed (m/s)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -175,12 +190,14 @@ params.bx = params.bx * 90;
 params.bx_dot = params.bx_dot * 4;
 
 % Height hold
+wnh = sqrt(control_gain_struct.Kpitch_DC * V_trim * control_gain_struct.Ki_height);
+damph = control_gain_struct.Kpitch_DC * V_trim * control_gain_struct.Kp_height / (2*wnh);
 params.ah_dot = 1;
-params.bh_dot = 1;
-params.bh = 0.1;
+params.bh = wnh^2;
+params.bh_dot = 2*damph*wnh;
 
 % Airspeed hold
-params.bva = 1;
+params.bva = 0.2;
 
 
 %% Nonlinear guidance simulation
@@ -211,6 +228,17 @@ velFunc = @(t, x)velocityEOM(t, x, xc, params);
 vel_init = [V_trim];
 tspan = [0 Tfinal];
 [TOUT_vel, YOUT_vel] = ode45(velFunc, tspan, vel_init);
+
+
+% Overall Guidance model simulation
+wind_inertial = [0;0;0];
+xc = [chi_c; chi_dot_ff; h_c; h_dot_c; Va_c];
+guidFunc = @(t,x)guidanceEOM(t, x, xc, wind_inertial, params);
+
+% Simulate with ode
+guid_init = [0; 0; 0; 0; h_trim; 0; V_trim];
+tspan = [0 Tfinal];
+[TOUT_guid, YOUT_guid] = ode45(guidFunc, tspan, guid_init);
 
 
 %% Plot Course Angle
@@ -251,7 +279,7 @@ plot(TOUT_height,YOUT_height(:,1), 'linewidth', 2, 'color', 'b');
 yline(h_c, '--', 'color', 'g')
 
 xlabel('Time (s)');
-ylabel('h_c (deg)')
+ylabel('h_c (m)')
 title('Height Response')
 legend('Autopilot', 'Guidance Model')
 
@@ -264,7 +292,7 @@ plot(TOUT_vel,YOUT_vel(:,1), 'linewidth', 2, 'color', 'b');
 yline(Va_c, '--', 'color', 'g')
 
 xlabel('Time (s)');
-ylabel('h_c (deg)')
+ylabel('Va_c (m/s)')
 title('Velocity Response')
 legend('Autopilot', 'Guidance Model')
 
@@ -298,7 +326,7 @@ function dxdt = heightEOM(t, x, xc, params)
 end
 
 % Velocity EOM for guidance model
-function dvdt = velocityEOM(y, x, xc, params)
+function dvdt = velocityEOM(t, x, xc, params)
     % Current state
     Va = x(1);
 
@@ -308,3 +336,37 @@ function dvdt = velocityEOM(y, x, xc, params)
     % ROC
     dvdt = params.bva * (Va_c - Va);
 end
+
+% Full guidance model EOM
+function dxdt = guidanceEOM(t, x, xc, wind_inertial, params)
+    % Get the full state
+    Pn = x(1);
+    Pe = x(2);
+    chi = x(3);
+    chi_dot = x(4);
+    h = x(5);
+    h_dot = x(6);
+    Va = x(7);
+
+    % Desired states
+    chi_c = xc(1);
+    chi_c_dot = xc(2);
+    h_c = xc(3);
+    h_c_dot = xc(4);
+    Va_c = xc(5);
+
+    % Calculate psi
+    psi = chi - asin(1/Va * wind_inertial(1:2)' * [-sin(chi); cos(chi)]);
+
+    % ROC
+    dpndt = Va*cos(psi) + wind_inertial(1);
+    dpedt = Va*sin(psi) + wind_inertial(2);
+    dchidt = [chi_dot; params.bx_dot*(chi_c_dot - chi_dot) + params.bx*(chi_c - chi)];  
+    dhdt = [h_dot; -params.ah_dot * h_c_dot - params.bh_dot * h_dot + params.bh*(h_c - h)];   
+    dvdt = params.bva * (Va_c - Va);
+
+    % ROC of the state
+    dxdt = [dpndt; dpedt; dchidt; dhdt; dvdt];
+end
+
+
