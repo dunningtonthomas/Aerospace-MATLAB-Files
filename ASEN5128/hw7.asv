@@ -58,7 +58,7 @@ load(gains_file)
 % Height testing
 % h_c         = h_trim + 50;  % commanded altitude (m)
 % h_dot_c     = 0;  % commanded altitude rate (m)
-% chi_c       = 0;  % commanded course (rad)
+% chi_c       = 40*pi/180;  % commanded course (rad)
 % chi_dot_ff  = 0;  % commanded course rate (rad)   
 % Va_c        = V_trim;  % commanded airspeed (m/s)
 
@@ -244,18 +244,17 @@ tspan = [0 Tfinal];
 %% Guidance Algorithm
 % First order guidance algorithm simulation
 % Define line
-line_vec = [1;5;0.2];
-line.q = line_vec ./ norm(line_vec);
+line.q = [1;1;0] ./ norm([1;1;0]);
 line.r = [0; 0; h_trim];
 
 % Define guidance algorithm parameters
 algo_params.vel_d = V_trim;
-algo_params.lookahead = 100;
+algo_params.lookahead = 20;
 
 % Simulate with ode
 algoFunc = @(t, state)lineTrackingGuidance(t, state, line, algo_params);
-algo_init = [1500; 0; h_trim];
-tspan = [0 200];
+algo_init = [100; -100; h_trim];
+tspan = [0 Tfinal];
 [TOUT_alg, YOUT_alg] = ode45(algoFunc, tspan, algo_init);
 
 
@@ -316,52 +315,11 @@ legend('Autopilot', 'Guidance Model')
 
 
 % Guidance Algorithm first order plots
-% Create line plot
-line_length = 5000;
-point1 = line.r;
-point2 = line.r + line_length * line.q;
-
-% Plot the desired line and first order result
 figure();
 plot(YOUT_alg(:,1), YOUT_alg(:,2));
 hold on;
-plot([point1(1); point2(1)], [point1(2); point2(2)]);
-axis equal
 
-
-% Plot the desired line and first-order result
-figure();
-plot(YOUT_alg(:,1), YOUT_alg(:,2), 'b-', 'LineWidth', 1.5, 'DisplayName', 'First Order Result');
-hold on;
-plot([point1(1), point2(1)], [point1(2), point2(2)], 'r--', 'LineWidth', 1.5, 'DisplayName', 'Desired Line');
-
-xlabel('E (m)');
-ylabel('N (m)');
-title('Guidance Algorithm First Order Result');
-axis equal;
-grid on;
-legend('show', 'Location', 'best');
-
-
-% First order result in 3D
-figure();
-plot3(YOUT_alg(:,1), YOUT_alg(:,2), YOUT_alg(:,3), 'b-', 'LineWidth', 1.5, 'DisplayName', 'First Order Result');
-hold on;
-plot3([point1(1), point2(1)], [point1(2), point2(2)], [point1(3), point2(3)], ...
-      'r--', 'LineWidth', 1.5, 'DisplayName', 'Desired Line');
-
-xlabel('X-axis');
-ylabel('Y-axis');
-zlabel('Z-axis');
-title('3D Comparison of Desired Line and First Order Result');
-grid on;
-axis equal;
-legend('show', 'Location', 'best');
-view(3);
-
-
-
-
+plot([line.r; line.r + 1000.*line.q])
 
 %% EOM Functions
 % Course angle EOM of nonlinear guidance model
