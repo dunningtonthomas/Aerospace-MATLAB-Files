@@ -1,4 +1,4 @@
-function vel_vector = lineTrackingGuidance(t, state, line, params)
+function [vel_vector, next_waypoint] = lineTrackingGuidance(t, state, line, params)
 %LINETRACKINGGUIDANCE Calculates a desired velocity vector given a line
 %definition and a current position in 3D space
 % Inputs:
