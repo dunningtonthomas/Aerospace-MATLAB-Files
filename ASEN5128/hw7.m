@@ -79,6 +79,19 @@ wind_inertial = [0;0;0];
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% LINE FOLLOWING PARAMETERS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Define line
+line_vec = [1;1;1];
+line.q = line_vec ./ norm(line_vec);
+line.r = [0; 0; h_trim];
+
+% Define guidance algorithm parameters
+algo_params.vel_d = V_trim;
+algo_params.lookahead = 200;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Set simulation and control parameters
 %%%
 %%% Note, the simulation runs on two separate times scales. The variable Ts
@@ -124,10 +137,11 @@ for i=1:n_ind
     control_objectives(4) = chi_dot_ff;
     control_objectives(5) = Va_c;
 
-    % STUDENTS WRITE THIS FUNCTION
-    %control_objectives = OrbitGuidance(aircraft_array(:,i), orbit_speed, orbit_radius, orbit_center, orbit_flag, orbit_gains);
-    %control_objectives = [1800; 0; 45*pi/180; 0; V_trim]; %<============== Comment out when OrbitGuidance is complete
-
+    % Get desired velocity
+    line_guid_state = aircraft_array(1:3,i);
+    line_guid_state(3) = -line_guid_state(3);
+    vel_d = lineTrackingGuidance(Ts*(i-1), line_guid_state, line, algo_params);
+    control_objectives = getControlObjectives(vel_d, line_guid_state(3));
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Autopilot
@@ -243,15 +257,6 @@ tspan = [0 Tfinal];
 
 %% Guidance Algorithm
 % First order guidance algorithm simulation
-% Define line
-line_vec = [1;5;0.2];
-line.q = line_vec ./ norm(line_vec);
-line.r = [0; 0; h_trim];
-
-% Define guidance algorithm parameters
-algo_params.vel_d = V_trim;
-algo_params.lookahead = 100;
-
 % Simulate with ode
 algoFunc = @(t, state)lineTrackingGuidance(t, state, line, algo_params);
 algo_init = [1500; 0; h_trim];
@@ -259,7 +264,9 @@ tspan = [0 200];
 [TOUT_alg, YOUT_alg] = ode45(algoFunc, tspan, algo_init);
 
 
-%% Plot Course Angle
+% Test guidance algorithm with the kinematic guidance model
+
+%% Plot Guidance Model Variables
 ind_f = length(aircraft_array(1,:));
 
 %%% Replicate the plot from PlotStateVariables
@@ -315,20 +322,13 @@ title('Velocity Response')
 legend('Autopilot', 'Guidance Model')
 
 
-% Guidance Algorithm first order plots
+%% Plot Guidance Algorithm Results
 % Create line plot
 line_length = 5000;
 point1 = line.r;
 point2 = line.r + line_length * line.q;
 
 % Plot the desired line and first order result
-figure();
-plot(YOUT_alg(:,1), YOUT_alg(:,2));
-hold on;
-plot([point1(1); point2(1)], [point1(2); point2(2)]);
-axis equal
-
-
 % Plot the desired line and first-order result
 figure();
 plot(YOUT_alg(:,1), YOUT_alg(:,2), 'b-', 'LineWidth', 1.5, 'DisplayName', 'First Order Result');
@@ -358,6 +358,19 @@ grid on;
 axis equal;
 legend('show', 'Location', 'best');
 view(3);
+
+
+%% Plot Guidance Model with Guidance Algorithm
+
+
+
+%% Plot Autopilot with Guidance Algorithm
+figure();
+ind_f = length(aircraft_array(1,:));
+figure(8);
+plot3(aircraft_array(1,:),aircraft_array(2,:),-aircraft_array(3,:),col);hold on;
+plot3(aircraft_array(1,1),aircraft_array(2,1),-aircraft_array(3,1),'ks','MarkerFaceColo','g');hold on;
+plot3(aircraft_array(1,ind_f),aircraft_array(2,ind_f),-aircraft_array(3,ind_f),'ko','MarkerFaceColo','r');hold on;
 
 
 

@@ -45,7 +45,7 @@ q_proj = dot(pr, q) / dot(q, q) .* q;
 nearest_point = r + q_proj;
 
 % Determine next waypoint to track
-next_waypoint = nearest_point + params.lookahead;
+next_waypoint = nearest_point + (params.lookahead .* q);
     
 % Get vector from current position to new lookahead position
 dir_vector = (next_waypoint - p) ./ norm(next_waypoint - p);
