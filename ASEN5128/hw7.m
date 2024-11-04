@@ -83,8 +83,8 @@ wind_inertial = [0;0;0];
 % LINE FOLLOWING PARAMETERS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Define line
-%line_vec = [1;1;0.3];
-line_vec = [-1;-1;0.3];
+line_vec = [1;1;0.05];
+%line_vec = [-1;-1;0.3];
 line.q = line_vec ./ norm(line_vec);
 line.r = [0; 0; h_trim];
 

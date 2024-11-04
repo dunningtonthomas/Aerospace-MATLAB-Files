@@ -310,7 +310,7 @@ boundColor = [0.2, 0.2, 0.2]; % light gray for bounds
 
 % XI plot
 subplot(3,1,1)
-plot(0:30, xhat_vec(1,:), 'LineWidth', 2, 'Color', estimateColor{1})
+plot(1:30, xhat_vec(1,2:end), 'LineWidth', 2, 'Color', estimateColor{1})
 hold on
 plot(1:30, sigma2_p(1,:), 'LineWidth', 1.5, 'Color', boundColor, 'LineStyle', '--')
 plot(1:30, sigma2_m(1,:), 'LineWidth', 1.5, 'Color', boundColor, 'LineStyle', '--')
@@ -321,7 +321,7 @@ grid on
 
 % ETA plot
 subplot(3,1,2)
-plot(0:30, xhat_vec(2,:), 'LineWidth', 2, 'Color', estimateColor{2})
+plot(1:30, xhat_vec(2,2:end), 'LineWidth', 2, 'Color', estimateColor{2})
 hold on
 plot(1:30, sigma2_p(2,:), 'LineWidth', 1.5, 'Color', boundColor, 'LineStyle', '--')
 plot(1:30, sigma2_m(2,:), 'LineWidth', 1.5, 'Color', boundColor, 'LineStyle', '--')
@@ -332,7 +332,7 @@ grid on
 
 % Z plot
 subplot(3,1,3)
-plot(0:30, xhat_vec(3,:), 'LineWidth', 2, 'Color', estimateColor{3})
+plot(1:30, xhat_vec(3,2:end), 'LineWidth', 2, 'Color', estimateColor{3})
 hold on
 plot(1:30, sigma2_p(3,:), 'LineWidth', 1.5, 'Color', boundColor, 'LineStyle', '--')
 plot(1:30, sigma2_m(3,:), 'LineWidth', 1.5, 'Color', boundColor, 'LineStyle', '--')
