@@ -180,14 +180,12 @@ for i = 1:length(times)
     time = times(i);
     mu_rc = marg*(Fa^i * mua_0 - Fb^i * mub_0);
     Prc = marg*(Fa^i * Pa_0 * (Fa^i)' + Fb^i * Pb_0 * (Fb^i)')*marg';
-    collision_prob(i) = mvncdf(xl, xu, mu_rc, Prc);
+    collision_prob(i) = mvncdf(xl, xu, )
 end
 
 
 
-% Plotting 
-figure();
-plot(times, collision_prob)
+
 
 
 
