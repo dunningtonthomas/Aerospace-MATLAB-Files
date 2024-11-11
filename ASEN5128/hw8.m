@@ -157,7 +157,10 @@ hold on
 plot_indices = 1:250:length(lat);
 wind_vec_x = 0.0001 * wind_matrix(:,1);
 wind_vec_y = 0.0001 * wind_matrix(:,2);
-quiver(lon(plot_indices), lat(plot_indices), wind_vec_y(plot_indices), wind_vec_x(plot_indices), 0, 'b', 'MaxHeadSize', 0.1, 'LineWidth', 0.5);
+vex = 0.0001* aircraft_velocity_e_e(:,1);
+vey = 0.0001*aircraft_velocity_e_e(:,2);
+quiver(lon(plot_indices), lat(plot_indices), wind_vec_x(plot_indices), wind_vec_y(plot_indices), 0, 'b', 'MaxHeadSize', 0.1, 'LineWidth', 0.5);
+%quiver(lon(plot_indices), lat(plot_indices), vex(plot_indices), vey(plot_indices), 0, 'b', 'MaxHeadSize', 0.1, 'LineWidth', 0.5);
 
 
 % Customize the color bar and labels
@@ -171,6 +174,7 @@ title('Inertial Wind Velocity on Aircraft Path');
 axis equal
 grid on
 grid minor
+
 
 function inertial_wind = CalculateInertialWind(Ve, euler_angles, Va, beta, alpha)
 % Calculates the inertial wind vector in inertial coordinates

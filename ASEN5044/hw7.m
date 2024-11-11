@@ -29,7 +29,6 @@ end
 time_vec = iterations .* 0.5;
 
 
-%% Plotting 
 %%%% +- 2sigma values
 figure();
 
@@ -169,25 +168,32 @@ Fb = [1, sin(sigma_b*dt)/sigma_b, 0, -(1-cos(sigma_b*dt))/sigma_b;
 
 
 % Time vector for simulation
-times = 1:dt:150;
+times = 0:dt:150;
 
 % Marginalize matrix
 marg = [1, 0, 0, 0; 0, 0, 1, 0];
 
 % Simulate
 collision_prob = zeros(length(times), 1);
-for i = 1:length(times)
-    time = times(i);
+for i = 0:length(times)-1
+    time = times(i+1);
     mu_rc = marg*(Fa^i * mua_0 - Fb^i * mub_0);
     Prc = marg*(Fa^i * Pa_0 * (Fa^i)' + Fb^i * Pb_0 * (Fb^i)')*marg';
-    collision_prob(i) = mvncdf(xl, xu, mu_rc, Prc);
+    collision_prob(i+1) = mvncdf(xl, xu, mu_rc, Prc);
 end
 
 
 
 % Plotting 
 figure();
-plot(times, collision_prob)
+plot(times, collision_prob, 'linewidth', 2, 'color', 'r')
+
+grid on 
+grid minor
+
+xlabel('Time (s)')
+ylabel('Probability of Collision')
+title('Aircraft Collision Probability')
 
 
 
