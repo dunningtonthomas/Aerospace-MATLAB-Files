@@ -80,7 +80,7 @@ I = eye(8);
 for i = 1:num_measurements
     Rk = [RA(i), zeros(2,2); zeros(2,2), RD];
     Kk = Pk*H' * inv(H * Pk * H' + Rk);
-    xhat0_k = xhat0_k + Kk*(yaugHist(:,i) - H * F^i * xhat0_k);
+    xhat0_k = xhat0_k + Kk*(yaugHist(:,i) - H*F*xhat0_k);
     Pk = (I - Kk*H)*Pk*(I - Kk*H)' + Kk*Rk*Kk';
 end
 
