@@ -260,6 +260,6 @@ psi = xh(7);
 
 y = [pn; pe; Vg; chi; Va*cos(psi) + wn - Vg*cos(chi); Va*sin(psi) + we - Vg*sin(chi)];% <======================STUDENT COMPLETE
 
-H = [1, 0, 0, 0, 0, 0, 0; ];% <======================STUDENT COMPLETE
+H = [];% <======================STUDENT COMPLETE
 
 end
