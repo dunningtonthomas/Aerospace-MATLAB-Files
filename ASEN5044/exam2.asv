@@ -67,7 +67,7 @@ F = [Fa, zeros(4,4); zeros(4,4), Fb];
 RD = [8000, 500; 500, 8000];
 
 % Initialization
-P0 = 1000000000 .* eye(8);
+P0 = 100000 .* eye(8);
 x0 = zeros(8,1);
 
 % Number of measurements
@@ -76,13 +76,49 @@ num_measurements = length(yaugHist(1,:));
 % Recursive LLS
 Pk = P0;
 xhat0_k = x0;
+unc_vec = sqrt(diag(Pk));
 I = eye(8);
 for i = 1:num_measurements
     Rk = [RA(i), zeros(2,2); zeros(2,2), RD];
-    Kk = Pk*H' * inv(H * Pk * H' + Rk);
-    xhat0_k = xhat0_k + Kk*(yaugHist(:,i) - H*F*xhat0_k);
-    Pk = (I - Kk*H)*Pk*(I - Kk*H)' + Kk*Rk*Kk';
+    Kk = Pk* (F^i)' * H' * inv(H * F^i * Pk * (F^i)' * H' + Rk);
+    xhat0_k(:,i+1) = xhat0_k(:,i) + Kk*(yaugHist(:,i) - H * F^i * xhat0_k(:,i));
+    Pk = (I - Kk*H*F^i)*Pk*(I - Kk*H*F^i)' + Kk*Rk*Kk';
+    unc_vec(:,i+1) = sqrt(diag(Pk));
 end
+
+% Output the final measurement
+disp()
+
+% Plotting
+set(groot, 'DefaultAxesFontSize', 16); % Set default font size for axes
+set(groot, 'DefaultTextFontSize', 16); % Set default font size for text
+
+time_step_vec = 1:num_measurements;
+figure();
+sgtitle('Initial Estimate of Aircraft A', 'Fontsize', 20)
+subplot(4,1,1)
+plot(time_step_vec, xhat0_k(1,2:end), 'linewidth', 2)
+yline(xhat0_k(1,end), 'label', 'Final Estimate', 'LineStyle','--', 'linewidth', 2, 'color', 'g')
+xlabel('Time Step (k)')
+ylabel('$\hat{\xi}_{A}(0)$ (m)', 'Interpreter','latex')
+
+subplot(4,1,2)
+plot(time_step_vec, xhat0_k(2,2:end), 'linewidth', 2)
+yline(xhat0_k(2,end), 'label', 'Final Estimate', 'LineStyle','--', 'linewidth', 2, 'color', 'g', 'LabelVerticalAlignment','bottom')
+xlabel('Time Step (k)')
+ylabel('$\hat{\eta}_{A}(0)$ (m/s)', 'Interpreter','latex')
+
+subplot(4,1,3)
+plot(time_step_vec, xhat0_k(3,2:end), 'linewidth', 2)
+yline(xhat0_k(3,end), 'label', 'Final Estimate', 'LineStyle','--', 'linewidth', 2, 'color', 'g', 'LabelVerticalAlignment','bottom')
+xlabel('Time Step (k)')
+ylabel('$\hat{\dot{\xi}}_{A}(0)$ (m)', 'Interpreter','latex')
+
+subplot(4,1,4)
+plot(time_step_vec, xhat0_k(4,2:end), 'linewidth', 2)
+yline(xhat0_k(4,end), 'label', 'Final Estimate', 'LineStyle','--', 'linewidth', 2, 'color', 'g')
+xlabel('Time Step (k)')
+ylabel('$\hat{\dot{\eta}}_{A}(0)$ (m/s)', 'Interpreter','latex')
 
 
 
