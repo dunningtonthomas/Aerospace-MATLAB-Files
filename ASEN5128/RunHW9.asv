@@ -22,7 +22,7 @@ SMOOTH = 2;
 %%% Set flags
 ANIMATE_FLAG = 0; % <========= Set to 1 to show animation after simulation
 CONTROL_FLAG = SLC; % <========= Set to control law to use (SLC or FEED)
-ESTIM_FLAG = SMOOTH; % <========= Set to estimator to use (SIMPLE or SMOOTH)
+ESTIM_FLAG = SIMPLE; % <========= Set to estimator to use (SIMPLE or SMOOTH)
 ESTIM_CONTROL_FLAG = 0;% <========= Set to 1 to control from estimated state (not true state)
 
 %%% Aircraft parameters
@@ -280,7 +280,7 @@ subplot(312)
 plot(time_iter, estimator_error(5,:)* 180/pi); hold on;
 ylabel('\theta [deg]')
 subplot(313)
-plot(time_iter, estimator_error(6,:)* 180/pi); hold on;
+plot(time_iter, mod(estimator_error(6,:)* 180/pi, 3); hold on;
 ylabel('\psi [deg]')
 xlabel('Time [sec]')
 
@@ -298,19 +298,6 @@ plot(time_iter, estimator_error(9,:)); hold on;
 ylabel('w [m/s]')
 xlabel('Time [sec]')
 
-% Angular Velocity errors
-figure(15);
-subplot(311)
-plot(time_iter, estimator_error(10,:),'b'); hold on;
-title('Estimator Angular Velocity Error')
-ylabel('p [rad/s]')
-subplot(312)
-plot(time_iter, estimator_error(11,:)); hold on;
-ylabel('q [rad/s]')
-subplot(313)
-plot(time_iter, estimator_error(12,:)); hold on;
-ylabel('r [rad/s]')
-xlabel('Time [sec]')
 
 
 

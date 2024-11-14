@@ -166,8 +166,12 @@ wind_body_est = TransformFromInertialToBody([xhat_gps(5);xhat_gps(6);0] , [phi_h
 air_rel_est = [Va*cos(theta_hat); 0; Va*sin(theta_hat)];
 vel_body_est = air_rel_est + wind_body_est;
 
-aircraft_state_est = [];% <======================STUDENT COMPLETE
-wind_inertial_est = TransformFromBodyToInertial(wind_body_est, [phi_hat; theta_hat; xhat_gps(7)]);% <======================STUDENT COMPLETE
+aircraft_state_est =  [xhat_gps(1); xhat_gps(2); -hhat; 
+                        phi_hat; theta_hat; xhat_gps(7);
+                        vel_body_est;
+                        phat; qhat; rhat];
+
+wind_inertial_est = [xhat_gps(5);xhat_gps(6);0];
 
 end %function
 
@@ -220,31 +224,40 @@ end
 
 % xh = [pn, pe, Vg, chi, wn, we, psi]
 function [xdot, A] = GPSSmoothingUpdate(xh, Va, q, r, roll, pitch, g)
-
-psidot = q*sin(roll)/cos(pitch) + r*cos(roll)/cos(pitch);
-Vg_dot = ((Va*sin(xh(7))+xh(6))*(Va*psidot*cos(xh(7)))-(Va*cos(xh(7))+xh(5))*(Va*psidot*sin(xh(7))))/xh(3);
+% GPS estimate values
 Vg = xh(3);
 chi = xh(4);
 psi = xh(7);
 wn = xh(5);
 we = xh(6);
+
+% Angles
+phi = roll;
+theta = pitch;
+
+% ROC
+psidot = q*sin(roll)/cos(pitch) + r*cos(roll)/cos(pitch);
+Vg_dot = ((Va*sin(xh(7))+xh(6))*(Va*psidot*cos(xh(7)))-(Va*cos(xh(7))+xh(5))*(Va*psidot*sin(xh(7))))/xh(3);
+
 dVgdpsi = -psidot*Va*(wn*cos(psi) + we*sin(psi)) / Vg;
 dchiDotdVg = -g/Vg^2 * tan(phi)*cos(chi - psi);
 dchiDotdchi = -g/Vg * tan(phi) * sin(chi - psi);
 dchiDotdpsi = g/Vg * tan(phi) *sin(chi - psi);
 
+% State dot
 xdot = [Vg*cos(chi);
     Vg*sin(chi);
     ((Va*cos(psi) + wn)*(-Va*psidot*sin(psi)) + (Va*sin(psi) + we)*(Va*psidot*cos(psi))) / Vg;
     g/Vg * tan(phi)*cos(chi - psi);
     0; 0;
-    q*sin(phi)/cos(theta) + r*cos(phi)/cos(theta)];% <======================STUDENT COMPLETE
+    q*sin(phi)/cos(theta) + r*cos(phi)/cos(theta)];
     
+% Jacobian
 A = [0, 0, cos(chi), -Vg*sin(chi), 0, 0, 0;
     0, 0, sin(chi), Vg*cos(chi), 0, 0, 0;
     0, 0, -Vg_dot/Vg, 0, -psidot*Va*sin(psi)/Vg, psidot*Va*cos(psi)/Vg, dVgdpsi;
     0, 0, dchiDotdVg, dchiDotdchi, 0, 0, dchiDotdpsi;
-    zeros(3, 7)];% <======================STUDENT COMPLETE
+    zeros(3, 7)];
 
 end
 
@@ -258,8 +271,12 @@ wn = xh(5);
 we = xh(6);
 psi = xh(7);
 
-y = [pn; pe; Vg; chi; Va*cos(psi) + wn - Vg*cos(chi); Va*sin(psi) + we - Vg*sin(chi)];% <======================STUDENT COMPLETE
+y = [pn; pe; Vg; chi; Va*cos(psi) + wn - Vg*cos(chi); Va*sin(psi) + we - Vg*sin(chi)];
 
-H = [1, 0, 0, 0, 0, 0, 0; ];% <======================STUDENT COMPLETE
-
+H = [1, 0, 0, 0, 0, 0, 0;
+    0, 1, 0, 0, 0, 0, 0;
+    0, 0, 1, 0, 0, 0, 0;
+    0, 0, 0, 1, 0, 0, 0;
+    0, 0, -cos(chi), Vg*sin(chi), 1, 0, -Va*sin(psi);
+    0, 0, -sin(chi), -Vg*cos(chi), 0, 1, Va*cos(psi)];
 end
