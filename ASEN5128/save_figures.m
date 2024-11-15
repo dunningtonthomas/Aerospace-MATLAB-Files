@@ -10,7 +10,7 @@ end
 cd(folderName)
 
 % Specify the subfolder
-subfolder = 'Hw8_Problem2';
+subfolder = 'Hw9_Problem2_2';
 if ~exist(subfolder, 'dir')
     mkdir(subfolder);  % Create the folder if it does not exist
 end

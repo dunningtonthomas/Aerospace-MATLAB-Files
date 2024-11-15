@@ -56,7 +56,7 @@ end
 %%% height
 %%%%%%%%%%%%%%%
 
-a_h = 20;% <======================STUDENT COMPLETE, SAME AS SIMPLE ESTIMATOR
+a_h = 1000;% <======================STUDENT COMPLETE, SAME AS SIMPLE ESTIMATOR
 alpha_h = exp(-a_h*Ts_imu);
 
 if(isempty(press_stat))

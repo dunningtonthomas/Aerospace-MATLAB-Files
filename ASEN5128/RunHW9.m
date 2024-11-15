@@ -7,7 +7,7 @@
 %
 %
 
-close all;% <========= Comment out this line and you can run this file multiple times and plot results together
+%close all;% <========= Comment out this line and you can run this file multiple times and plot results together
 clear all; 
 clc;
 
@@ -23,7 +23,7 @@ SMOOTH = 2;
 ANIMATE_FLAG = 0; % <========= Set to 1 to show animation after simulation
 CONTROL_FLAG = SLC; % <========= Set to control law to use (SLC or FEED)
 ESTIM_FLAG = SMOOTH; % <========= Set to estimator to use (SIMPLE or SMOOTH)
-ESTIM_CONTROL_FLAG = 0;% <========= Set to 1 to control from estimated state (not true state)
+ESTIM_CONTROL_FLAG = 1;% <========= Set to 1 to control from estimated state (not true state)
 
 %%% Aircraft parameters
 ttwistor
@@ -114,6 +114,7 @@ Ts = sensor_params.Ts_imu; % which should be 0.1 sec;
 
 
 Tfinal = 1000;
+%Tfinal = 200;
 control_gain_struct.Ts=Ts;
 
 %%% iterate at control sample time
@@ -199,7 +200,7 @@ for i=1:n_ind
     else
         [control_out, x_c_out] = SimpleSLCAutopilot(Ts*(i-1), aircraft_state_con(:,i), wind_angles_con(:,i), control_objectives, control_gain_struct);
     end
-
+    
     control_array(:,i) = control_out;
     x_command(:,i) = x_c_out;
     x_command(5,i) = trim_variables(1);
@@ -208,7 +209,7 @@ for i=1:n_ind
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%% Aircraft dynamics
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    [TOUT2,YOUT2] = ode45(@(t,y) AircraftEOM(t,y,control_array(:,i),wind_inertial,aircraft_parameters),TSPAN,aircraft_array(:,i),[]);
+    [TOUT2,YOUT2] = ode45(@(t,y) AircraftEOM(t,y,control_array(:,i),wind_inertial,aircraft_parameters),TSPAN, aircraft_array(:,i),[]);
 
 
     aircraft_array(:,i+1) = YOUT2(end,:)';
@@ -229,9 +230,21 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %PlotSimulation(time_iter,aircraft_array,control_array, wind_array,'b')
-PlotSimulationWithCommands(time_iter,aircraft_array,control_array, wind_array, x_command, 'b')
+% PlotSimulationWithCommands(time_iter,aircraft_array,control_array, wind_array, x_command, 'b')
+% if ESTIM_CONTROL_FLAG == 1
+%     PlotSimulationWithCommands(time_iter,aircraft_state_est,control_array, wind_inertial_est, x_command, 'm--')
+% else
+%     PlotSimulationWithCommands(time_iter,aircraft_state_est,control_array, wind_inertial_est, x_command, 'r--')
+% end
 
-PlotSimulationWithCommands(time_iter,aircraft_state_est,control_array, wind_inertial_est, x_command, 'r--')
+% Actual states
+if ESTIM_CONTROL_FLAG == 1
+    PlotSimulationWithCommands(time_iter,aircraft_array,control_array, wind_array, x_command, 'r--')
+else
+    PlotSimulationWithCommands(time_iter,aircraft_array,control_array, wind_array, x_command, 'b')
+end
+
+
 
 for c = 0:1:360;
     circ_orbit(:,c+1) = gvf_center + gvf_radius*[cosd(c); sind(c); 0];
@@ -239,6 +252,11 @@ end
 figure(8);
 plot3(circ_orbit(1,:),circ_orbit(2,:),-circ_orbit(3,:),'k:');
 
+if ESTIM_CONTROL_FLAG == 1
+    color = 'm';
+else
+    color = 'r';
+end
 
 figure(11);
 subplot(311)
@@ -247,11 +265,11 @@ plot(time_iter([1, end]), [wind_inertial(1) wind_inertial(1)], 'g--')
 title('Wind Velocity vs. Time')
 ylabel('wn [m/s]')
 subplot(312)
-plot(time_iter, wind_inertial_est(2,:)); hold on;
+plot(time_iter, wind_inertial_est(2,:),'b'); hold on;
 plot(time_iter([1, end]), [wind_inertial(2) wind_inertial(2)], 'g--')
 ylabel('we [m/s]')
 subplot(313)
-plot(time_iter, wind_inertial_est(3,:)); hold on;
+plot(time_iter, wind_inertial_est(3,:),'b'); hold on;
 plot(time_iter([1, end]), [wind_inertial(3) wind_inertial(3)], 'g--')
 ylabel('wd [m/s]')
 xlabel('Time [sec]')
@@ -259,56 +277,56 @@ xlabel('Time [sec]')
 estimator_error = aircraft_state_est - aircraft_array;
 figure(12);
 subplot(311)
-plot(time_iter, estimator_error(1,:),'b'); hold on;
+plot(time_iter, estimator_error(1,:), 'color', color); hold on;
 title('Estimator Position Error')
 ylabel('X Pos [m]')
 subplot(312)
-plot(time_iter, estimator_error(2,:)); hold on;
+plot(time_iter, estimator_error(2,:), 'color', color); hold on;
 ylabel('Y Pos [m]')
 subplot(313)
-plot(time_iter, estimator_error(3,:)); hold on;
+plot(time_iter, estimator_error(3,:), 'color', color); hold on;
 ylabel('Z Pos [m]')
 xlabel('Time [sec]')
 
 % Euler angles errors
 figure(13);
 subplot(311)
-plot(time_iter, estimator_error(4,:) * 180/pi,'b'); hold on;
+plot(time_iter, estimator_error(4,:) * 180/pi, 'color', color); hold on;
 title('Estimator Euler Angles Error')
 ylabel('\phi [deg]')
 subplot(312)
-plot(time_iter, estimator_error(5,:)* 180/pi); hold on;
+plot(time_iter, estimator_error(5,:)* 180/pi, 'color', color); hold on;
 ylabel('\theta [deg]')
 subplot(313)
-plot(time_iter, estimator_error(6,:)* 180/pi); hold on;
+plot(time_iter, estimator_error(6,:)* 180/pi, 'color', color); hold on;
 ylabel('\psi [deg]')
 xlabel('Time [sec]')
 
 % Velocity errors
 figure(14);
 subplot(311)
-plot(time_iter, estimator_error(7,:),'b'); hold on;
+plot(time_iter, estimator_error(7,:), 'color', color); hold on;
 title('Estimator Velocity Error')
 ylabel('u [m/s]')
 subplot(312)
-plot(time_iter, estimator_error(8,:)); hold on;
+plot(time_iter, estimator_error(8,:), 'color', color); hold on;
 ylabel('v [m/s]')
 subplot(313)
-plot(time_iter, estimator_error(9,:)); hold on;
+plot(time_iter, estimator_error(9,:), 'color', color); hold on;
 ylabel('w [m/s]')
 xlabel('Time [sec]')
 
 % Angular Velocity errors
 figure(15);
 subplot(311)
-plot(time_iter, estimator_error(10,:),'b'); hold on;
+plot(time_iter, estimator_error(10,:), 'color', color); hold on;
 title('Estimator Angular Velocity Error')
 ylabel('p [rad/s]')
 subplot(312)
-plot(time_iter, estimator_error(11,:)); hold on;
+plot(time_iter, estimator_error(11,:), 'color', color); hold on;
 ylabel('q [rad/s]')
 subplot(313)
-plot(time_iter, estimator_error(12,:)); hold on;
+plot(time_iter, estimator_error(12,:), 'color', color); hold on;
 ylabel('r [rad/s]')
 xlabel('Time [sec]')
 
