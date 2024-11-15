@@ -253,9 +253,9 @@ figure(8);
 plot3(circ_orbit(1,:),circ_orbit(2,:),-circ_orbit(3,:),'k:');
 
 if ESTIM_CONTROL_FLAG == 1
-    color = 'm';
-else
     color = 'r';
+else
+    color = 'b';
 end
 
 figure(11);
