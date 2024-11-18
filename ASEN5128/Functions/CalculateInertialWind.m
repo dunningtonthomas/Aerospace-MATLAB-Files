@@ -1,7 +1,7 @@
 function inertial_wind = CalculateInertialWind(Ve, euler_angles, Va, beta, alpha)
 % Calculates the inertial wind vector in inertial coordinates
 % Inputs: (n is the number of measurements)
-%   Ve = inertial velocity
+%   Ve = inertial velocity in inertial coordinates
 %   euler_angles = vector of euler angles
 %   Va = airspeed
 %   beta = sideslip
