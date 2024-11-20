@@ -23,8 +23,6 @@ xlabel('w_e (East Wind Velocity m/s)')
 ylabel('w_n (North Wind Velocity m/s)')
 title('Possible Wind Velocity Vectors')
 legend('First Measurement', 'Second Measurement', 'Possible Wind Velocity Vector', 'location', 'best')
-%legend('First Measurement', 'Second Measurement', 'location', 'best')
-% legend('Second Measurement', 'location', 'best')
 axis equal
 
 
