@@ -6,7 +6,7 @@ close all; clear; clc;
 
 vee = [14; 15; -1];
 euler_angles = [2; 10; 45] .* pi/180;
-wind_angles = [23; 8*pi/180; 2*pi/180];
+wind_angles = [23; 2*pi/180; 8*pi/180];
 
 R1 = [1,0,0; 0, cos(euler_angles(1)), sin(euler_angles(1)); 0, -sin(euler_angles(1)), cos(euler_angles(1))];
 R2 = [cos(euler_angles(2)), 0, -sin(euler_angles(2)); 0, 1, 0; sin(euler_angles(2)), 0, cos(euler_angles(2))];

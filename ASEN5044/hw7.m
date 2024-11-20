@@ -136,7 +136,7 @@ set(gcf, 'Position', [100, 100, 600, 800]);  % Adjust figure size
 
 
 %% Problem 3
-close all; clear; clc;
+%close all; clear; clc;
 
 % Initial conditions
 mua_0 = [0; 85*cos(pi/4); 0; -85*sin(pi/4)];
