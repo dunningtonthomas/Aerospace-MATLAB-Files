@@ -46,7 +46,7 @@ nom_speed = norm(nominal_wind);
 nom_direction = atan2(nominal_wind(2), nominal_wind(1));
 
 % Sensitivity analysis
-del_anlge = 0.001 * pi/180;
+del_anlge = 0.1 * pi/180;
 del_phi = del_anlge;
 del_theta = del_anlge;
 del_psi = del_anlge;
