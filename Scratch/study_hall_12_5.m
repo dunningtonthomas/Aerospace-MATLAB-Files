@@ -49,14 +49,58 @@ title('Satellite Orbit Around Earth');
 grid on;
 
 
+
+% Plot Earth as a textured sphere
+figure;
+earth_radius = 6371; % Earth's radius in km
+[X, Y, Z] = sphere(50); % Generate sphere coordinates
+surf(earth_radius * X, earth_radius * Y, earth_radius * Z, 'EdgeColor', 'none'); 
+colormap('winter'); % Earth-like colormap
+hold on;
+
+% Add lighting for realism
+lightangle(-45, 30);
+lighting gouraud;
+material dull;
+
+% Plot satellite orbit
+plot3(YOUT(:,1), YOUT(:,2), YOUT(:,3), 'r', 'LineWidth', 2, 'DisplayName', 'Satellite Orbit');
+
+% Highlight satellite position at intervals
+scatter3(YOUT(1:50:end,1), YOUT(1:50:end,2), YOUT(1:50:end,3), 50, 'k', 'filled', 'DisplayName', 'Satellite Positions');
+
+% Set plot settings
+axis equal;
+xlabel('X (km)');
+ylabel('Y (km)');
+zlabel('Z (km)');
+title('Satellite Orbit Around Earth');
+grid on;
+legend('Location', 'best');
+view(3); % Set 3D view angle
+
+% Adjust axis limits for better framing
+max_range = max(max(abs([YOUT(:,1), YOUT(:,2), YOUT(:,3)])));
+xlim([-max_range max_range]);
+ylim([-max_range max_range]);
+zlim([-max_range max_range]);
+
+% Add axis labels and a title
+xlabel('X (km)', 'FontSize', 12, 'FontWeight', 'bold');
+ylabel('Y (km)', 'FontSize', 12, 'FontWeight', 'bold');
+zlabel('Z (km)', 'FontSize', 12, 'FontWeight', 'bold');
+title('Satellite Orbit Around Earth', 'FontSize', 14, 'FontWeight', 'bold');
+
+
+
 %% Function
 function xdot = satelliteEOM(t, x, mu)
     % Get position and velocity
     r = x(1:3);
-    v = x(4:6);
+    rdot = x(4:6);
     
     % Derivatives
-    drdt = v;
+    drdt = rdot;
     dvdt = -mu / norm(r)^3 * r;
     
     % Return derivative vector

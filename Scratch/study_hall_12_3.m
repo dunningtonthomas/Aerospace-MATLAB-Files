@@ -11,7 +11,7 @@ params.m = 5;
 % Integrate EOM
 eomFunc = @(t, x)springEOM(t, x, params);
 tspan = [0 10];
-x_init = [0.5; 0];
+x_init = [0; -0.5];
 [tout, yout] = ode45(eomFunc, tspan, x_init);
 
 % Plot results
