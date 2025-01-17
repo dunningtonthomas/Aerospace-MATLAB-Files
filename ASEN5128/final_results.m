@@ -8,6 +8,92 @@ spline_data = load("splinePath.mat");
 kino_data = load("DubinsPath.mat");
 
 
+%% Compute the final time and the path length of each path
+% Compute the differences between consecutive points
+differences = diff(rrt_data.aircraft_array(1:3,:)');  % This gives a (N-1)x3 matrix of differences
+segment_lengths = sqrt(sum(differences.^2, 2));  % Sum along the 2nd dimension
+total_path_length = sum(segment_lengths);
+disp(['RRT Path Length: ', num2str(total_path_length)]);
+
+differences = diff(spline_data.aircraft_array(1:3,:)');  % This gives a (N-1)x3 matrix of differences
+segment_lengths = sqrt(sum(differences.^2, 2));  % Sum along the 2nd dimension
+total_path_length = sum(segment_lengths);
+disp(['Spline Path Length: ', num2str(total_path_length)]);
+
+differences = diff(kino_data.aircraft_array(1:3,:)');  % This gives a (N-1)x3 matrix of differences
+segment_lengths = sqrt(sum(differences.^2, 2));  % Sum along the 2nd dimension
+total_path_length = sum(segment_lengths);
+disp(['Dubins Path Length: ', num2str(total_path_length)]);
+
+
+%% Load in the desired paths and compare the actual path
+rrt_waypoints = getWaypoints("Data/waypoints_1", 100);
+x_spline = linspace(min(rrt_waypoints(:,1)), max(rrt_waypoints(:,1)), length(spline_data.aircraft_array(1,:)));
+y_spline = spline(rrt_waypoints(:,1), rrt_waypoints(:,2), x_spline);
+spline_waypoints = [x_spline', y_spline', ones(length(x_spline), 1) .* 100];
+
+% Linearly interpolate
+total_points = 1696;
+t_original = linspace(1, 9, size(rrt_waypoints, 1));
+t_interpolated = linspace(1, 9, total_points);
+interpolated_x = interp1(t_original, rrt_waypoints(:, 1), t_interpolated, 'linear');
+interpolated_y = interp1(t_original, rrt_waypoints(:, 2), t_interpolated, 'linear');
+interpolated_z = interp1(t_original, rrt_waypoints(:, 3), t_interpolated, 'linear');
+rrt_interp_waypoints = [interpolated_x', interpolated_y', interpolated_z'];
+
+% Load in the Dubins path waypoints
+dubin_waypoints = getWaypoints("Data/waypoints_kino_2", 100);
+
+% Linearly interpolate
+total_points = 1483;
+t_original = linspace(1, 9, size(dubin_waypoints, 1));
+t_interpolated = linspace(1, 9, total_points);
+interpolated_x = interp1(t_original, dubin_waypoints(:, 1), t_interpolated, 'linear');
+interpolated_y = interp1(t_original, dubin_waypoints(:, 2), t_interpolated, 'linear');
+interpolated_z = interp1(t_original, dubin_waypoints(:, 3), t_interpolated, 'linear');
+dubin_interp_waypoints = [interpolated_x', interpolated_y', interpolated_z'];
+
+
+% Calculate the cross track error for each guidance algorithm
+% RRT waypoints
+for i = 1:length(rrt_data.aircraft_array(1,:))
+    current_pos = rrt_data.aircraft_array(1:3, i);
+    current_pos(3) = current_pos(3) * -1;
+    distances = sqrt(sum((rrt_interp_waypoints' - current_pos).^2, 1));
+    cte(i) = min(distances);  % Minimum distance to desired path
+end
+
+% Calculate the RMS of the cte
+rms_cte_rrt = sqrt(mean(cte.^2));
+disp(['RRT Cross-Track Error: ', num2str(rms_cte_rrt)]);
+
+
+% Spline waypoints
+for i = 1:length(spline_data.aircraft_array(1,:))
+    current_pos = spline_data.aircraft_array(1:3, i);
+    current_pos(3) = current_pos(3) * -1;
+    distances = sqrt(sum((spline_waypoints' - current_pos).^2, 1));
+    cte_spline(i) = min(distances);  % Minimum distance to desired path
+end
+
+% Calculate the RMS of the cte
+spline_cte_rrt = sqrt(mean(cte_spline.^2));
+disp(['Spline Cross-Track Error: ', num2str(spline_cte_rrt)]);
+
+
+% Dubins waypoints
+for i = 1:length(kino_data.aircraft_array(1,:))
+    current_pos = kino_data.aircraft_array(1:3, i);
+    current_pos(3) = current_pos(3) * -1;
+    distances = sqrt(sum((dubin_interp_waypoints' - current_pos).^2, 1));
+    cte_dubin(i) = min(distances);  % Minimum distance to desired path
+end
+
+% Calculate the RMS of the cte
+dubin_cte_rrt = sqrt(mean(cte_dubin.^2));
+disp(['Dubin Cross-Track Error: ', num2str(dubin_cte_rrt)]);
+
+
 %% Plot all paths
 fig_num = plot_obstacles("Data/obstacles.txt");
 figure(fig_num);
@@ -136,3 +222,44 @@ sgtitle('Dubins Path Following: Aircraft Control Surfaces', 'FontSize', titleFon
 
 % Improve subplot spacing
 set(gcf, 'Position', [100, 100, 800, 600]); % Set figure size
+
+
+%% Plot the height of the aircraft states over time
+
+figure();
+subplot(3,1,1)
+plot(rrt_data.time_iter, -1.*rrt_data.aircraft_array(3,:), 'linewidth', 2, 'Color', color_rrt)
+grid on
+grid minor; % Add minor grid lines
+set(gca, 'GridColor', [0.8 0.8 0.8], 'MinorGridColor', [0.9 0.9 0.9], 'GridAlpha', 0.6, 'MinorGridAlpha', 0.4);
+set(gca, 'FontSize', 11, 'LineWidth', 1, 'Box', 'on');
+ylim([55 110])
+xlim([0 220])
+title('RRT Waypoints')
+
+subplot(3,1,2)
+plot(spline_data.time_iter, -1.*spline_data.aircraft_array(3,:), 'linewidth', 2, 'color', color_spline)
+grid on
+grid minor; % Add minor grid lines
+set(gca, 'GridColor', [0.8 0.8 0.8], 'MinorGridColor', [0.9 0.9 0.9], 'GridAlpha', 0.6, 'MinorGridAlpha', 0.4);
+set(gca, 'FontSize', 11, 'LineWidth', 1, 'Box', 'on');
+ylim([55 110])
+xlim([0 220])
+title('Spline Path Following')
+ylabel('Altitude (m)')
+
+subplot(3,1,3)
+plot(kino_data.time_iter, -1.*kino_data.aircraft_array(3,:), 'linewidth', 2, 'color', color_kino)
+grid on
+grid minor; % Add minor grid lines
+set(gca, 'GridColor', [0.8 0.8 0.8], 'MinorGridColor', [0.9 0.9 0.9], 'GridAlpha', 0.6, 'MinorGridAlpha', 0.4);
+set(gca, 'FontSize', 11, 'LineWidth', 1, 'Box', 'on');
+
+ylim([55 110])
+xlim([0 220])
+title('Dubins Path Following')
+
+xlabel('Time (s)')
+sgtitle('Guidance Algorithm Altitude Comparison')
+
+
