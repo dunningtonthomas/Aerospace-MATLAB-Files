@@ -3,7 +3,8 @@ close all; clear; clc;
 
 %% Problem 1
 a = 10;
-xdotFunc = @(x)([-x(2) + a*x(1)*(x(1)^2 + x(2)^2); x(1) + a*x(2)*(x(1)^2 + x(2)^2)]);
+%xdotFunc = @(x)([-x(2) + a*x(1)*(x(1)^2 + x(2)^2); x(1) + a*x(2)*(x(1)^2 + x(2)^2)]);
+xdotFunc = @(x)([x(1) + x(2); x(2)]);
 
 % Create the meshgrid
 x_vals = linspace(-1, 1, 20);
