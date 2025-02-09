@@ -1,7 +1,7 @@
 %% Clean
 close all; clear; clc;
 
-%% Constants
+%% Problem 1
 Rm = 19.2;                  % ohm
 Lm = 1.9 / 1000;            % H
 Kt = 40.1 / 1000;           % Nm/A
@@ -42,11 +42,28 @@ xPlot = linspace(-pi, pi, 100);
 yPlot = polyval(coeff, xPlot);
 Ks = coeff(1);
 
-%% Transfer function thetaL Vp
+%% Problem 2
 num_thetaVp = [-1];
-den_thetaVP = [Jeq*Lm / (Kt*N), Jeq*Rm / (Kt*N), Kb*N, 0];
+den_thetaVp = [Jeq*Lm / (Kt*N), Jeq*Rm / (Kt*N), Kb*N, 0];
+output_prob2 = sim('theta_vp.slx');
+t = output_prob2.t;
+u = output_prob2.u;
+y = output_prob2.y;
 
-%% Transfer function theta R and theta L
+figure();
+plot(t, u, 'linewidth', 2, 'color', 'b');
+hold on
+grid on
+plot(t, y, 'linewidth', 2, 'color', 'r');
+
+xlabel('Time (s)')
+ylabel('Amplitude (V)');
+title('Power Amp and Sensor Voltage')
+legend('Power Amp (Vp)', 'Sensor (Vs)', 'location', 'best')
+
+
+%% Problem 5/6
+% Transfer function theta R and theta L
 Gp = -10;
 Gd = -0.1;
 
@@ -58,18 +75,18 @@ thetaL = output.thetaL;
 Vp = output.Vp;
 
 
+% Potentiometer voltage
+figure();
+plot(xPlot, yPlot, 'linewidth', 2);
+hold on;
+scatter(dataKs(:,1), dataKs(:,2), 'filled')
+grid on
+xlabel('Angle (rad)')
+ylabel('Voltage (V)')
+title('Potentiometer Voltage vs Angle')
+legend('Linear Regression', 'Data Points')
 
-%% Plotting
-% figure();
-% plot(xPlot, yPlot, 'linewidth', 2);
-% hold on;
-% scatter(dataKs(:,1), dataKs(:,2), 'filled')
-% grid on
-% xlabel('Angle (rad)')
-% ylabel('Voltage (V)')
-% title('Potentiometer Voltage vs Angle')
-% legend('Linear Regression', 'Data Points')
-
+% System Response
 figure();
 plot(t, thetaR, 'b-', 'LineWidth', 2); % Blue solid line, thicker
 hold on;
