@@ -122,8 +122,8 @@ grid on
 colorbar;
 clim([1 100]); % Set limits to actual gain range
 ylabel(colorbar, 'Gain Value');
-% xlim([-65 65])
-% ylim([-65 65])
+xlim([-65 65])
+ylim([-65 65])
 
 
 
@@ -155,8 +155,8 @@ grid on
 colorbar;
 clim([-1 0]); % Set limits to actual gain range
 ylabel(colorbar, 'Gain Value');
-% xlim([-65 65])
-% ylim([-65 65])
+xlim([-65 65])
+ylim([-65 65])
 
 
 %% Problem 6

@@ -1,0 +1,20 @@
+%% Muscle Sensor Testing
+% Collect data from the muscle sensor and plot
+% Author: Thomas Dunnington
+% Modified: 2/28/2025
+close all; clear; clc;
+
+%% Read Data
+% Connect to Arduino
+a = arduino('COM6');
+
+% Read voltage in loop
+while true
+    data = a.readVoltage('A0');
+
+    fprintf("Voltage: %f\n", data);
+
+    % Live plot of voltage da
+end
+
+
